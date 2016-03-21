@@ -69,6 +69,7 @@ Copy	/home/team03/pintos/src/tests/Algorithm/Diff.pm	/^sub Copy$/;"	s
 DATA_REG	/home/team03/pintos/src/devices/kbd.c	11;"	d	file:
 DATA_SIZE	/home/team03/pintos/src/tests/vm/page-merge-seq.c	16;"	d	file:
 DATA_SIZE	/home/team03/pintos/src/tests/vm/parallel-merge.c	15;"	d	file:
+DEPENDS	/home/team03/pintos/src/threads/build/Makefile	/^DEPENDS = $(patsubst %.o,%.d,$(OBJECTS))$/;"	m
 DEVICES_DISK_H	/home/team03/pintos/src/devices/disk.h	2;"	d
 DEVICES_INPUT_H	/home/team03/pintos/src/devices/input.h	2;"	d
 DEVICES_INTQ_H	/home/team03/pintos/src/devices/intq.h	2;"	d
@@ -201,6 +202,7 @@ NO_RETURN	/home/team03/pintos/src/lib/debug.h	8;"	d
 NO_RETURN	/home/team03/pintos/src/userprog/process.c	/^static thread_func start_process NO_RETURN;$/;"	v	file:
 NULL	/home/team03/pintos/src/lib/stddef.h	4;"	d
 Next	/home/team03/pintos/src/tests/Algorithm/Diff.pm	/^sub Next {$/;"	s
+OBJECTS	/home/team03/pintos/src/threads/build/Makefile	/^OBJECTS = $(patsubst %.c,%.o,$(patsubst %.S,%.o,$(SOURCES)))$/;"	m
 Options	/home/team03/pintos/src/utils/pintos-mkdisk	/^Options:$/;"	l
 PAL_ASSERT	/home/team03/pintos/src/threads/palloc.h	/^    PAL_ASSERT = 001,           \/* Panic on failure. *\/$/;"	e	enum:palloc_flags
 PAL_USER	/home/team03/pintos/src/threads/palloc.h	/^    PAL_USER = 004              \/* User page. *\/$/;"	e	enum:palloc_flags
@@ -236,9 +238,9 @@ PRIX64	/home/team03/pintos/src/lib/inttypes.h	32;"	d
 PRIX8	/home/team03/pintos/src/lib/inttypes.h	11;"	d
 PRIXMAX	/home/team03/pintos/src/lib/inttypes.h	39;"	d
 PRIXPTR	/home/team03/pintos/src/lib/inttypes.h	46;"	d
-PRI_DEFAULT	/home/team03/pintos/src/threads/thread.h	24;"	d
-PRI_MAX	/home/team03/pintos/src/threads/thread.h	25;"	d
-PRI_MIN	/home/team03/pintos/src/threads/thread.h	23;"	d
+PRI_DEFAULT	/home/team03/pintos/src/threads/thread.h	25;"	d
+PRI_MAX	/home/team03/pintos/src/threads/thread.h	26;"	d
+PRI_MIN	/home/team03/pintos/src/threads/thread.h	24;"	d
 PRId16	/home/team03/pintos/src/lib/inttypes.h	13;"	d
 PRId32	/home/team03/pintos/src/lib/inttypes.h	20;"	d
 PRId64	/home/team03/pintos/src/lib/inttypes.h	27;"	d
@@ -326,8 +328,10 @@ SIZE	/home/team03/pintos/src/tests/vm/page-shuffle.c	10;"	d	file:
 SIZET	/home/team03/pintos/src/lib/stdio.c	/^        SIZET = 8               \/* z *\/$/;"	e	enum:printf_conversion::__anon4	file:
 SIZE_MAX	/home/team03/pintos/src/lib/stdint.h	49;"	d
 SORT_SIZE	/home/team03/pintos/src/examples/bubsort.c	12;"	d	file:
+SOURCES	/home/team03/pintos/src/threads/build/Makefile	/^SOURCES = $(foreach dir,$(KERNEL_SUBDIRS),$($(dir)_SRC))$/;"	m
 SPACE	/home/team03/pintos/src/lib/stdio.c	/^        SPACE = 1 << 2,         \/* ' ' *\/$/;"	e	enum:printf_conversion::__anon3	file:
 SRCDIR	/home/team03/pintos/src/examples/Makefile	/^SRCDIR = ..$/;"	m
+SRCDIR	/home/team03/pintos/src/threads/build/Makefile	/^SRCDIR = ..\/..$/;"	m
 STA_BSY	/home/team03/pintos/src/devices/disk.c	32;"	d	file:
 STA_DRDY	/home/team03/pintos/src/devices/disk.c	33;"	d	file:
 STA_DRQ	/home/team03/pintos/src/devices/disk.c	34;"	d	file:
@@ -407,10 +411,11 @@ THREAD_DYING	/home/team03/pintos/src/threads/thread.h	/^    THREAD_DYING        
 THREAD_MAGIC	/home/team03/pintos/src/threads/thread.c	21;"	d	file:
 THREAD_READY	/home/team03/pintos/src/threads/thread.h	/^    THREAD_READY,       \/* Not running but ready to run. *\/$/;"	e	enum:thread_status
 THREAD_RUNNING	/home/team03/pintos/src/threads/thread.h	/^    THREAD_RUNNING,     \/* Running thread. *\/$/;"	e	enum:thread_status
+THREAD_SLEEP	/home/team03/pintos/src/threads/thread.h	/^    THREAD_SLEEP,       \/* Sleeping *\/$/;"	e	enum:thread_status
 THR_REG	/home/team03/pintos/src/devices/serial.c	22;"	d	file:
-TID_ERROR	/home/team03/pintos/src/threads/thread.h	20;"	d
+TID_ERROR	/home/team03/pintos/src/threads/thread.h	21;"	d
 TIMER_FREQ	/home/team03/pintos/src/devices/timer.h	8;"	d
-TIME_SLICE	/home/team03/pintos/src/threads/thread.c	54;"	d	file:
+TIME_SLICE	/home/team03/pintos/src/threads/thread.c	58;"	d	file:
 UCHAR_MAX	/home/team03/pintos/src/lib/limits.h	8;"	d
 UINT16_MAX	/home/team03/pintos/src/lib/stdint.h	24;"	d
 UINT32_MAX	/home/team03/pintos/src/lib/stdint.h	27;"	d
@@ -472,13 +477,18 @@ __printf	/home/team03/pintos/src/lib/stdio.c	/^__printf (const char *format,$/;"
 __udivdi3	/home/team03/pintos/src/lib/arithmetic.c	/^__udivdi3 (unsigned long long n, unsigned long long d) $/;"	f
 __umoddi3	/home/team03/pintos/src/lib/arithmetic.c	/^__umoddi3 (unsigned long long n, unsigned long long d) $/;"	f
 __vprintf	/home/team03/pintos/src/lib/stdio.c	/^__vprintf (const char *format, va_list args,$/;"	f
+_end	/home/team03/pintos/src/threads/build/threads/kernel.lds.s	/^  _end = .;$/;"	d
 _end	/home/team03/pintos/src/threads/kernel.lds.S	/^  _end = .;$/;"	d
+_end_bss	/home/team03/pintos/src/threads/build/threads/kernel.lds.s	/^  _end_bss = .;$/;"	d
 _end_bss	/home/team03/pintos/src/threads/kernel.lds.S	/^  _end_bss = .;$/;"	d
+_end_kernel_text	/home/team03/pintos/src/threads/build/threads/kernel.lds.s	/^       _end_kernel_text = .; }$/;"	d
 _end_kernel_text	/home/team03/pintos/src/threads/kernel.lds.S	/^	      _end_kernel_text = .; }$/;"	d
 _longestCommonSubsequence	/home/team03/pintos/src/tests/Algorithm/Diff.pm	/^sub _longestCommonSubsequence$/;"	s
 _replaceNextLargerWith	/home/team03/pintos/src/tests/Algorithm/Diff.pm	/^sub _replaceNextLargerWith$/;"	s
 _start	/home/team03/pintos/src/lib/user/entry.c	/^_start (int argc, char *argv[]) $/;"	f
+_start	/home/team03/pintos/src/threads/build/threads/kernel.lds.s	/^  _start = .;$/;"	d
 _start	/home/team03/pintos/src/threads/kernel.lds.S	/^  _start = .;$/;"	d
+_start_bss	/home/team03/pintos/src/threads/build/threads/kernel.lds.s	/^  _start_bss = .;$/;"	d
 _start_bss	/home/team03/pintos/src/threads/kernel.lds.S	/^  _start_bss = .;$/;"	d
 _withPositionsOfInInterval	/home/team03/pintos/src/tests/Algorithm/Diff.pm	/^sub _withPositionsOfInInterval$/;"	s
 a	/home/team03/pintos/src/tests/threads/priority-donate-nest.c	/^    struct lock *a;$/;"	m	struct:locks	typeref:struct:locks::lock	file:
@@ -714,6 +724,7 @@ desc_cnt	/home/team03/pintos/src/threads/malloc.c	/^static size_t desc_cnt;     
 descs	/home/team03/pintos/src/threads/malloc.c	/^static struct desc descs[10];   \/* Descriptors. *\/$/;"	v	typeref:struct:desc	file:
 dev_no	/home/team03/pintos/src/devices/disk.c	/^    int dev_no;                 \/* Device 0 or 1 for master or slave. *\/$/;"	m	struct:disk	file:
 devices	/home/team03/pintos/src/devices/disk.c	/^    struct disk devices[2];     \/* The devices on this channel. *\/$/;"	m	struct:channel	typeref:struct:channel::disk	file:
+devices_SRC	/home/team03/pintos/src/threads/build/Makefile	/^devices_SRC  = devices\/timer.c		# Timer device.$/;"	m
 diff	/home/team03/pintos/src/tests/Algorithm/Diff.pm	/^sub diff$/;"	s
 digits	/home/team03/pintos/src/lib/stdio.c	/^    const char *digits;         \/* Collection of digits. *\/$/;"	m	struct:integer_base	file:
 dir	/home/team03/pintos/src/filesys/directory.c	/^struct dir $/;"	s	file:
@@ -845,6 +856,7 @@ file_tell	/home/team03/pintos/src/filesys/file.c	/^file_tell (struct file *file)
 file_write	/home/team03/pintos/src/filesys/file.c	/^file_write (struct file *file, const void *buffer, off_t size) $/;"	f
 file_write_at	/home/team03/pintos/src/filesys/file.c	/^file_write_at (struct file *file, const void *buffer, off_t size,$/;"	f
 filesize	/home/team03/pintos/src/lib/user/syscall.c	/^filesize (int fd) $/;"	f
+filesys_SRC	/home/team03/pintos/src/threads/build/Makefile	/^filesys_SRC  = filesys\/filesys.c	# Filesystem core.$/;"	m
 filesys_create	/home/team03/pintos/src/filesys/filesys.c	/^filesys_create (const char *name, off_t initial_size) $/;"	f
 filesys_disk	/home/team03/pintos/src/filesys/filesys.c	/^struct disk *filesys_disk;$/;"	v	typeref:struct:disk
 filesys_done	/home/team03/pintos/src/filesys/filesys.c	/^filesys_done (void) $/;"	f
@@ -1080,6 +1092,7 @@ iterations	/home/team03/pintos/src/tests/threads/priority-fifo.c	/^    int itera
 j	/home/team03/pintos/src/tests/arc4.h	/^    uint8_t i, j;$/;"	m	struct:arc4
 kbd_init	/home/team03/pintos/src/devices/kbd.c	/^kbd_init (void) $/;"	f
 kbd_print_stats	/home/team03/pintos/src/devices/kbd.c	/^kbd_print_stats (void) $/;"	f
+kernel_SRC	/home/team03/pintos/src/threads/build/Makefile	/^lib\/kernel_SRC  = lib\/kernel\/debug.c	# Debug helpers.$/;"	m
 kernel_pool	/home/team03/pintos/src/threads/palloc.c	/^struct pool kernel_pool, user_pool;$/;"	v	typeref:struct:pool
 kernel_thread	/home/team03/pintos/src/threads/thread.c	/^kernel_thread (thread_func *function, void *aux) $/;"	f	file:
 kernel_thread_frame	/home/team03/pintos/src/threads/thread.c	/^struct kernel_thread_frame $/;"	s	file:
@@ -1099,6 +1112,7 @@ left_shift	/home/team03/pintos/src/devices/kbd.c	/^static bool left_shift, right
 length	/home/team03/pintos/src/filesys/inode.c	/^    off_t length;                       \/* File size in bytes. *\/$/;"	m	struct:inode_disk	file:
 length	/home/team03/pintos/src/lib/stdio.c	/^    int length;         \/* Length of output string. *\/$/;"	m	struct:vsnprintf_aux	file:
 less	/home/team03/pintos/src/lib/kernel/hash.h	/^    hash_less_func *less;       \/* Comparison function. *\/$/;"	m	struct:hash
+lib_SRC	/home/team03/pintos/src/threads/build/Makefile	/^lib_SRC  = lib\/debug.c			# Debug helpers.$/;"	m
 lineup_SRC	/home/team03/pintos/src/examples/Makefile	/^lineup_SRC = lineup.c$/;"	m
 list	/home/team03/pintos/src/lib/kernel/list.h	/^struct list $/;"	s
 list_back	/home/team03/pintos/src/lib/kernel/list.c	/^list_back (struct list *list)$/;"	f
@@ -1518,6 +1532,7 @@ simple_thread_func	/home/team03/pintos/src/tests/threads/priority-fifo.c	/^stati
 simple_thread_func	/home/team03/pintos/src/tests/threads/priority-preempt.c	/^simple_thread_func (void *aux UNUSED) $/;"	f	file:
 simple_thread_func	/home/team03/pintos/src/tests/threads/priority-preempt.c	/^static thread_func simple_thread_func;$/;"	v	file:
 size_t	/home/team03/pintos/src/lib/stddef.h	/^typedef __SIZE_TYPE__ size_t;$/;"	t
+sleep_list	/home/team03/pintos/src/threads/thread.c	/^static struct list sleep_list;$/;"	v	typeref:struct:list	file:
 sleep_test	/home/team03/pintos/src/tests/threads/alarm-simultaneous.c	/^struct sleep_test $/;"	s	file:
 sleep_test	/home/team03/pintos/src/tests/threads/alarm-wait.c	/^struct sleep_test $/;"	s	file:
 sleep_thread	/home/team03/pintos/src/tests/threads/alarm-wait.c	/^struct sleep_thread $/;"	s	file:
@@ -1771,6 +1786,7 @@ thread_ticks	/home/team03/pintos/src/threads/thread.c	/^static unsigned thread_t
 thread_tid	/home/team03/pintos/src/threads/thread.c	/^thread_tid (void) $/;"	f
 thread_unblock	/home/team03/pintos/src/threads/thread.c	/^thread_unblock (struct thread *t) $/;"	f
 thread_yield	/home/team03/pintos/src/threads/thread.c	/^thread_yield (void) $/;"	f
+threads_SRC	/home/team03/pintos/src/threads/build/Makefile	/^threads_SRC  = threads\/init.c		# Main program.$/;"	m
 tick_count	/home/team03/pintos/src/tests/threads/mlfqs-fair.c	/^    int tick_count;$/;"	m	struct:thread_info	file:
 ticks	/home/team03/pintos/src/devices/timer.c	/^static int64_t ticks;$/;"	v	file:
 tid	/home/team03/pintos/src/threads/thread.h	/^    tid_t tid;                          \/* Thread identifier. *\/$/;"	m	struct:thread
@@ -1825,6 +1841,7 @@ used_map	/home/team03/pintos/src/threads/palloc.c	/^    struct bitmap *used_map;
 user_page_limit	/home/team03/pintos/src/threads/palloc.c	/^size_t user_page_limit = SIZE_MAX;$/;"	v
 user_pool	/home/team03/pintos/src/threads/palloc.c	/^struct pool kernel_pool, user_pool;$/;"	v	typeref:struct:
 user_ticks	/home/team03/pintos/src/threads/thread.c	/^static long long user_ticks;    \/* # of timer ticks in user programs. *\/$/;"	v	file:
+userprog_SRC	/home/team03/pintos/src/threads/build/Makefile	/^userprog_SRC  = userprog\/process.c	# Process loading.$/;"	m
 va_arg	/home/team03/pintos/src/lib/stdarg.h	11;"	d
 va_copy	/home/team03/pintos/src/lib/stdarg.h	12;"	d
 va_end	/home/team03/pintos/src/lib/stdarg.h	10;"	d
@@ -1864,6 +1881,7 @@ wait_while_busy	/home/team03/pintos/src/devices/disk.c	/^wait_while_busy (const 
 waiters	/home/team03/pintos/src/threads/synch.h	/^    struct list waiters;        \/* List of waiting threads. *\/$/;"	m	struct:condition	typeref:struct:condition::list
 waiters	/home/team03/pintos/src/threads/synch.h	/^    struct list waiters;        \/* List of waiting threads. *\/$/;"	m	struct:semaphore	typeref:struct:semaphore::list
 wake_time	/home/team03/pintos/src/tests/threads/alarm-priority.c	/^static int64_t wake_time;$/;"	v	file:
+wakeup_tick	/home/team03/pintos/src/threads/thread.h	/^    int64_t wakeup_tick;                \/* Timer tick to wake up. *\/$/;"	m	struct:thread
 width	/home/team03/pintos/src/lib/stdio.c	/^    int width;$/;"	m	struct:printf_conversion	file:
 wrap_open	/home/team03/pintos/src/tests/filesys/extended/dir-rm-cwd.c	/^wrap_open (const char *name) $/;"	f	file:
 write	/home/team03/pintos/src/lib/user/syscall.c	/^write (int fd, const void *buffer, unsigned size)$/;"	f
