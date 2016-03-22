@@ -29,9 +29,8 @@
    that are ready to run but not actually running. */
 static struct list ready_list;
 
-/* List of processes in THREAD_SLEEP state, that is, processes
- * that are waiting for timer alarms. */
-static struct list sleep_list;
+/* List of processes that are sleeping. */
+static struct list waiting_list;
 
 /* Idle thread. */
 static struct thread *idle_thread;
@@ -70,7 +69,6 @@ static void idle (void *aux UNUSED);
 static struct thread *running_thread (void);
 static struct thread *next_thread_to_run (void);
 static void init_thread (struct thread *, const char *name, int priority);
-static void wake_threads (void);
 static bool less_wake_tick (const struct list_elem *a,
                             const struct list_elem *b,
                             void *aux UNUSED); 
@@ -100,8 +98,7 @@ thread_init (void)
 
   lock_init (&tid_lock);
   list_init (&ready_list);
-  list_init (&sleep_list);
-
+  list_init (&waiting_list);
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
   init_thread (initial_thread, "main", PRI_DEFAULT);
@@ -311,9 +308,9 @@ thread_sleep (int64_t wakeup_tick)
   enum intr_level old_level;
   ASSERT (!intr_context ());
   old_level = intr_disable ();
-  curr->status = THREAD_SLEEP;
   curr->wakeup_tick = wakeup_tick;
-  list_insert_ordered (&sleep_list, &curr->elem, less_wake_tick, NULL);
+  list_insert_ordered (&waiting_list, &curr->elem, less_wake_tick, NULL);
+  thread_block();
   intr_set_level (old_level);
 }
 
@@ -443,18 +440,21 @@ running_thread (void)
   return pg_round_down (esp);
 }
 
-static void
-wake_threads (void)
+/* Wakes threads with wakeup_tick less or equal to the current_tick
+ * in the waiting_list. */
+void
+wake_threads (int64_t current_tick)
 {
-  int64_t current_tick = timer_ticks ();
   struct list_elem *e, *f;
-  for (e = list_begin (&sleep_list); e != list_end (&sleep_list); )
+  for (e = list_begin (&waiting_list); e != list_end (&waiting_list); )
   {
-    const struct thread *thr = list_entry (e, struct thread, elem);
+    struct thread *thr = list_entry (e, struct thread, elem);
+    ASSERT (is_thread (thr));
     if (thr->wakeup_tick > current_tick)
       break;
+    ASSERT (thr->status == THREAD_BLOCKED);
     f = list_remove(e);
-    list_push_back (&ready_list, f);
+    thread_unblock (thr);
     e = f;
   }
 }
@@ -583,8 +583,6 @@ schedule (void)
   ASSERT (intr_get_level () == INTR_OFF);
   ASSERT (curr->status != THREAD_RUNNING);
   ASSERT (is_thread (next));
-
-  wake_threads ();
 
   if (curr != next)
     prev = switch_threads (curr, next);

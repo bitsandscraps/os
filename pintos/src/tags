@@ -402,20 +402,20 @@ THREADS_SWITCH_H	/home/team03/pintos/src/threads/switch.h	2;"	d
 THREADS_SYNCH_H	/home/team03/pintos/src/threads/synch.h	2;"	d
 THREADS_THREAD_H	/home/team03/pintos/src/threads/thread.h	2;"	d
 THREADS_VADDR_H	/home/team03/pintos/src/threads/vaddr.h	2;"	d
-THREAD_BASIC	/home/team03/pintos/src/threads/thread.c	25;"	d	file:
+THREAD_BASIC	/home/team03/pintos/src/threads/thread.c	26;"	d	file:
 THREAD_BLOCKED	/home/team03/pintos/src/threads/thread.h	/^    THREAD_BLOCKED,     \/* Waiting for an event to trigger. *\/$/;"	e	enum:thread_status
 THREAD_CNT	/home/team03/pintos/src/tests/threads/mlfqs-load-60.c	112;"	d	file:
 THREAD_CNT	/home/team03/pintos/src/tests/threads/mlfqs-load-avg.c	123;"	d	file:
 THREAD_CNT	/home/team03/pintos/src/tests/threads/priority-fifo.c	26;"	d	file:
 THREAD_DYING	/home/team03/pintos/src/threads/thread.h	/^    THREAD_DYING        \/* About to be destroyed. *\/$/;"	e	enum:thread_status
-THREAD_MAGIC	/home/team03/pintos/src/threads/thread.c	21;"	d	file:
+THREAD_MAGIC	/home/team03/pintos/src/threads/thread.c	22;"	d	file:
 THREAD_READY	/home/team03/pintos/src/threads/thread.h	/^    THREAD_READY,       \/* Not running but ready to run. *\/$/;"	e	enum:thread_status
 THREAD_RUNNING	/home/team03/pintos/src/threads/thread.h	/^    THREAD_RUNNING,     \/* Running thread. *\/$/;"	e	enum:thread_status
-THREAD_SLEEP	/home/team03/pintos/src/threads/thread.h	/^    THREAD_SLEEP,       \/* Sleeping *\/$/;"	e	enum:thread_status
+THREAD_WAITING	/home/team03/pintos/src/threads/thread.h	/^    THREAD_WAITING,       \/* Waiting to be waked. *\/$/;"	e	enum:thread_status
 THR_REG	/home/team03/pintos/src/devices/serial.c	22;"	d	file:
 TID_ERROR	/home/team03/pintos/src/threads/thread.h	21;"	d
 TIMER_FREQ	/home/team03/pintos/src/devices/timer.h	8;"	d
-TIME_SLICE	/home/team03/pintos/src/threads/thread.c	58;"	d	file:
+TIME_SLICE	/home/team03/pintos/src/threads/thread.c	59;"	d	file:
 UCHAR_MAX	/home/team03/pintos/src/lib/limits.h	8;"	d
 UINT16_MAX	/home/team03/pintos/src/lib/stdint.h	24;"	d
 UINT32_MAX	/home/team03/pintos/src/lib/stdint.h	27;"	d
@@ -1112,6 +1112,7 @@ left_shift	/home/team03/pintos/src/devices/kbd.c	/^static bool left_shift, right
 length	/home/team03/pintos/src/filesys/inode.c	/^    off_t length;                       \/* File size in bytes. *\/$/;"	m	struct:inode_disk	file:
 length	/home/team03/pintos/src/lib/stdio.c	/^    int length;         \/* Length of output string. *\/$/;"	m	struct:vsnprintf_aux	file:
 less	/home/team03/pintos/src/lib/kernel/hash.h	/^    hash_less_func *less;       \/* Comparison function. *\/$/;"	m	struct:hash
+less_wake_tick	/home/team03/pintos/src/threads/thread.c	/^less_wake_tick (const struct list_elem *a,$/;"	f	file:
 lib_SRC	/home/team03/pintos/src/threads/build/Makefile	/^lib_SRC  = lib\/debug.c			# Debug helpers.$/;"	m
 lineup_SRC	/home/team03/pintos/src/examples/Makefile	/^lineup_SRC = lineup.c$/;"	m
 list	/home/team03/pintos/src/lib/kernel/list.h	/^struct list $/;"	s
@@ -1532,7 +1533,6 @@ simple_thread_func	/home/team03/pintos/src/tests/threads/priority-fifo.c	/^stati
 simple_thread_func	/home/team03/pintos/src/tests/threads/priority-preempt.c	/^simple_thread_func (void *aux UNUSED) $/;"	f	file:
 simple_thread_func	/home/team03/pintos/src/tests/threads/priority-preempt.c	/^static thread_func simple_thread_func;$/;"	v	file:
 size_t	/home/team03/pintos/src/lib/stddef.h	/^typedef __SIZE_TYPE__ size_t;$/;"	t
-sleep_list	/home/team03/pintos/src/threads/thread.c	/^static struct list sleep_list;$/;"	v	typeref:struct:list	file:
 sleep_test	/home/team03/pintos/src/tests/threads/alarm-simultaneous.c	/^struct sleep_test $/;"	s	file:
 sleep_test	/home/team03/pintos/src/tests/threads/alarm-wait.c	/^struct sleep_test $/;"	s	file:
 sleep_thread	/home/team03/pintos/src/tests/threads/alarm-wait.c	/^struct sleep_thread $/;"	s	file:
@@ -1778,6 +1778,7 @@ thread_name	/home/team03/pintos/src/threads/thread.c	/^thread_name (void) $/;"	f
 thread_print_stats	/home/team03/pintos/src/threads/thread.c	/^thread_print_stats (void) $/;"	f
 thread_set_nice	/home/team03/pintos/src/threads/thread.c	/^thread_set_nice (int nice UNUSED) $/;"	f
 thread_set_priority	/home/team03/pintos/src/threads/thread.c	/^thread_set_priority (int new_priority) $/;"	f
+thread_sleep	/home/team03/pintos/src/threads/thread.c	/^thread_sleep (int64_t wakeup_tick)$/;"	f
 thread_stack_ofs	/home/team03/pintos/src/threads/thread.c	/^uint32_t thread_stack_ofs = offsetof (struct thread, stack);$/;"	v
 thread_start	/home/team03/pintos/src/threads/thread.c	/^thread_start (void) $/;"	f
 thread_status	/home/team03/pintos/src/threads/thread.h	/^enum thread_status$/;"	g
@@ -1880,6 +1881,8 @@ wait_until_idle	/home/team03/pintos/src/devices/disk.c	/^wait_until_idle (const 
 wait_while_busy	/home/team03/pintos/src/devices/disk.c	/^wait_while_busy (const struct disk *d) $/;"	f	file:
 waiters	/home/team03/pintos/src/threads/synch.h	/^    struct list waiters;        \/* List of waiting threads. *\/$/;"	m	struct:condition	typeref:struct:condition::list
 waiters	/home/team03/pintos/src/threads/synch.h	/^    struct list waiters;        \/* List of waiting threads. *\/$/;"	m	struct:semaphore	typeref:struct:semaphore::list
+waiting_list	/home/team03/pintos/src/threads/thread.c	/^static struct list waiting_list;$/;"	v	typeref:struct:list	file:
+wake_threads	/home/team03/pintos/src/threads/thread.c	/^wake_threads (void)$/;"	f	file:
 wake_time	/home/team03/pintos/src/tests/threads/alarm-priority.c	/^static int64_t wake_time;$/;"	v	file:
 wakeup_tick	/home/team03/pintos/src/threads/thread.h	/^    int64_t wakeup_tick;                \/* Timer tick to wake up. *\/$/;"	m	struct:thread
 width	/home/team03/pintos/src/lib/stdio.c	/^    int width;$/;"	m	struct:printf_conversion	file:
