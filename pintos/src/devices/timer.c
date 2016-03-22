@@ -96,11 +96,21 @@ timer_elapsed (int64_t then)
 void
 timer_sleep (int64_t ticks) 
 {
+	int64_t start = timer_ticks();
+	enum intr_level old_level;
+	old_level=intr_disable();
+	struct thread *cur=thread_current();
+	cur->status=THREAD_WAITING;
+	cur->ticks_wake=start+ticks;
+	list_insert_ordered(&waiting_list, &cur->elem, NULL);
+	thread_block();
+/*
   int64_t start = timer_ticks ();
 
   ASSERT (intr_get_level () == INTR_ON);
   while (timer_elapsed (start) < ticks) 
     thread_yield ();
+*/
 }
 
 /* Suspends execution for approximately MS milliseconds. */
