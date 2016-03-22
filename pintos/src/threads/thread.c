@@ -4,6 +4,7 @@
 #include <random.h>
 #include <stdio.h>
 #include <string.h>
+#include "devices/timer.h"
 #include "threads/flags.h"
 #include "threads/interrupt.h"
 #include "threads/intr-stubs.h"
@@ -69,6 +70,10 @@ static void idle (void *aux UNUSED);
 static struct thread *running_thread (void);
 static struct thread *next_thread_to_run (void);
 static void init_thread (struct thread *, const char *name, int priority);
+static void wake_threads (void);
+static bool less_wake_tick (const struct list_elem *a,
+                            const struct list_elem *b,
+                            void *aux UNUSED); 
 static bool is_thread (struct thread *) UNUSED;
 static void *alloc_frame (struct thread *, size_t size);
 static void schedule (void);
@@ -297,6 +302,21 @@ thread_exit (void)
   NOT_REACHED ();
 }
 
+/* Puts the current thread to sleep.  It will not be scheduled
+ * again until the given timer tick. */
+void
+thread_sleep (int64_t wakeup_tick)
+{
+  struct thread *curr = thread_current ();
+  enum intr_level old_level;
+  ASSERT (!intr_context ());
+  old_level = intr_disable ();
+  curr->status = THREAD_SLEEP;
+  curr->wakeup_tick = wakeup_tick;
+  list_insert_ordered (&sleep_list, &curr->elem, less_wake_tick, NULL);
+  intr_set_level (old_level);
+}
+
 /* Yields the CPU.  The current thread is not put to sleep and
    may be scheduled again immediately at the scheduler's whim. */
 void
@@ -423,6 +443,32 @@ running_thread (void)
   return pg_round_down (esp);
 }
 
+static void
+wake_threads (void)
+{
+  int64_t current_tick = timer_ticks ();
+  struct list_elem *e, *f;
+  for (e = list_begin (&sleep_list); e != list_end (&sleep_list); )
+  {
+    const struct thread *thr = list_entry (e, struct thread, elem);
+    if (thr->wakeup_tick > current_tick)
+      break;
+    f = list_remove(e);
+    list_push_back (&ready_list, f);
+    e = f;
+  }
+}
+
+/* Returns true if wake_tick of a is less than wake_tick of b. */
+static bool
+less_wake_tick (const struct list_elem *a,
+                const struct list_elem *b, void *aux UNUSED)
+{
+  const struct thread *a_thr = list_entry (a, struct thread, elem);
+  const struct thread *b_thr = list_entry (b, struct thread, elem);
+  return a_thr->wakeup_tick < b_thr->wakeup_tick;
+}
+
 /* Returns true if T appears to point to a valid thread. */
 static bool
 is_thread (struct thread *t)
@@ -537,6 +583,8 @@ schedule (void)
   ASSERT (intr_get_level () == INTR_OFF);
   ASSERT (curr->status != THREAD_RUNNING);
   ASSERT (is_thread (next));
+
+  wake_threads ();
 
   if (curr != next)
     prev = switch_threads (curr, next);

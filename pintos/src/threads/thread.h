@@ -125,6 +125,7 @@ tid_t thread_tid (void);
 const char *thread_name (void);
 
 void thread_exit (void) NO_RETURN;
+void thread_sleep (int64_t wakeup_tick);
 void thread_yield (void);
 
 int thread_get_priority (void);
