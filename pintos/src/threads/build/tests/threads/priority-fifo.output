@@ -1,0 +1,24 @@
+Writing command line to /tmp/FEHFYezQBU.dsk...
+warning: can't find squish-pty, so terminal input will fail
+bochs -q
+Kernel command line: -q run priority-fifo
+Pintos booting with 4,096 kB RAM...
+374 pages available in kernel pool.
+374 pages available in user pool.
+Calibrating timer...  102,400 loops/s.
+Boot complete.
+Executing 'priority-fifo':
+(priority-fifo) begin
+(priority-fifo) 16 threads will iterate 16 times in the same order each time.
+(priority-fifo) If the order varies then there is a bug.
+(priority-fifo) end
+Kernel PANIC at ../../threads/synch.c:196 in lock_acquire(): assertion `lock != NULL' failed.
+Call stack: 0xc0107568 0xc0102984 0xc010ad05 0xc0100d5c.
+The `backtrace' program can make call stacks useful.
+Read "Backtraces" in the "Debugging Tools" chapter
+of the Pintos documentation for more information.
+Timer: 101 ticks
+Thread: 0 idle ticks, 101 kernel ticks, 0 user ticks
+Console: 781 characters output
+Keyboard: 0 keys pressed
+Powering off...

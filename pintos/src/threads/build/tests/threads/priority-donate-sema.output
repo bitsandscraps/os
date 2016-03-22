@@ -1,0 +1,20 @@
+Writing command line to /tmp/xdxeh9TG5D.dsk...
+warning: can't find squish-pty, so terminal input will fail
+bochs -q
+Kernel command line: -q run priority-donate-sema
+Pintos booting with 4,096 kB RAM...
+374 pages available in kernel pool.
+374 pages available in user pool.
+Calibrating timer...  102,400 loops/s.
+Boot complete.
+Executing 'priority-donate-sema':
+(priority-donate-sema) begin
+(priority-donate-sema) Thread L acquired lock.
+(priority-donate-sema) Main thread finished.
+(priority-donate-sema) end
+Execution of 'priority-donate-sema' complete.
+Timer: 70 ticks
+Thread: 0 idle ticks, 72 kernel ticks, 0 user ticks
+Console: 505 characters output
+Keyboard: 0 keys pressed
+Powering off...
