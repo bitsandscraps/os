@@ -62,9 +62,9 @@ static unsigned thread_ticks;   /* # of timer ticks since last yield. */
    If true, use multi-level feedback queue scheduler.
    Controlled by kernel command-line option "-o mlfqs". */
 bool thread_mlfqs;
-
+void push_priority_list(int [8], int, int *);
 static void kernel_thread (thread_func *, void *aux);
-
+void priority_donate(struct thread *, struct thread *);
 static void idle (void *aux UNUSED);
 static struct thread *running_thread (void);
 static struct thread *next_thread_to_run (void);
@@ -147,7 +147,16 @@ thread_tick (void)
   if (++thread_ticks >= TIME_SLICE)
     intr_yield_on_return ();
 }
-
+void
+priority_donate(struct thread * cur, struct thread * thr)
+{
+  push_priority_list(thr->priority_list, thr->priority, thr->priority_num);
+  thr->priority=cur->priority;
+}
+void push_priority_list(int list[8], int a, int *num) {
+  list[*num]=a;       //default priority_num is 0 and priority_list is NULL
+  (*num)+=1;
+}
 /* Prints thread statistics. */
 void
 thread_print_stats (void) 
@@ -506,6 +515,8 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->magic = THREAD_MAGIC;
+  t->priority_num=0;
+ 
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
