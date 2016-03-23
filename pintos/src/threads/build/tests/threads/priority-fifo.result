@@ -1,8 +1,11 @@
 FAIL
-Kernel panic in run: PANIC at ../../threads/synch.c:196 in lock_acquire(): assertion `lock != NULL' failed.
-Call stack: 0xc0107568 0xc0102984 0xc010ad05 0xc0100d5c
+Kernel panic in run: PANIC at ../../lib/kernel/list.c:259 in list_remove(): assertion `is_interior (elem)' failed.
+Call stack: 0xc0107628 0xc0107b8a 0xc0107bb5 0xc010287c 0xc0102bed 0xc010addc 0xc0100da7
 Translation of call stack:
-0xc0107568: debug_panic (.../../lib/kernel/debug.c:34)
-0xc0102984: lock_acquire (...../../threads/synch.c:197)
-0xc010ad05: simple_thread_func (...hreads/priority-fifo.c:95)
-0xc0100d5c: kernel_thread (..../../threads/thread.c:431)
+0xc0107628: debug_panic (.../../lib/kernel/debug.c:34)
+0xc0107b8a: list_remove (.../../lib/kernel/list.c:260)
+0xc0107bb5: list_pop_front (.../../lib/kernel/list.c:273)
+0xc010287c: sema_up (...../../threads/synch.c:126)
+0xc0102bed: lock_release (...../../threads/synch.c:250)
+0xc010addc: simple_thread_func (...hreads/priority-fifo.c:97)
+0xc0100da7: kernel_thread (..../../threads/thread.c:443)

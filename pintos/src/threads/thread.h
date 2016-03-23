@@ -94,9 +94,16 @@ struct thread
     enum thread_status status;          /* Thread state. */
     char name[16];                      /* Name (for debugging purposes). */
     uint8_t *stack;                     /* Saved stack pointer. */
+<<<<<<< HEAD:pintos/src/threads/thread.h
     int priority;                       /* Priority. */
     struct priority_history pri_his;    /* Priority history stack. */
     int64_t wakeup_tick;                /* Timer tick to wake up. */
+=======
+    int priority;                        /* Priority. */
+    int priority_list[8];
+    int priority_num;
+    int64_t wakeup_tick; /* Timer tick to wake up. */
+>>>>>>> master:pintos/src/threads/thread.h
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
@@ -115,6 +122,7 @@ struct thread
    Controlled by kernel command-line option "-o mlfqs". */
 extern bool thread_mlfqs;
 
+static bool high_priority(const struct list_elem *, const struct list_elem *, void *);
 void thread_init (void);
 void thread_start (void);
 
