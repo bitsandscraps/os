@@ -238,9 +238,9 @@ PRIX64	/home/team03/pintos/src/lib/inttypes.h	32;"	d
 PRIX8	/home/team03/pintos/src/lib/inttypes.h	11;"	d
 PRIXMAX	/home/team03/pintos/src/lib/inttypes.h	39;"	d
 PRIXPTR	/home/team03/pintos/src/lib/inttypes.h	46;"	d
-PRI_DEFAULT	/home/team03/pintos/src/threads/thread.h	25;"	d
-PRI_MAX	/home/team03/pintos/src/threads/thread.h	26;"	d
-PRI_MIN	/home/team03/pintos/src/threads/thread.h	24;"	d
+PRI_DEFAULT	/home/team03/pintos/src/threads/thread.h	24;"	d
+PRI_MAX	/home/team03/pintos/src/threads/thread.h	25;"	d
+PRI_MIN	/home/team03/pintos/src/threads/thread.h	23;"	d
 PRId16	/home/team03/pintos/src/lib/inttypes.h	13;"	d
 PRId32	/home/team03/pintos/src/lib/inttypes.h	20;"	d
 PRId64	/home/team03/pintos/src/lib/inttypes.h	27;"	d
@@ -411,11 +411,10 @@ THREAD_DYING	/home/team03/pintos/src/threads/thread.h	/^    THREAD_DYING        
 THREAD_MAGIC	/home/team03/pintos/src/threads/thread.c	22;"	d	file:
 THREAD_READY	/home/team03/pintos/src/threads/thread.h	/^    THREAD_READY,       \/* Not running but ready to run. *\/$/;"	e	enum:thread_status
 THREAD_RUNNING	/home/team03/pintos/src/threads/thread.h	/^    THREAD_RUNNING,     \/* Running thread. *\/$/;"	e	enum:thread_status
-THREAD_WAITING	/home/team03/pintos/src/threads/thread.h	/^    THREAD_WAITING,       \/* Waiting to be waked. *\/$/;"	e	enum:thread_status
 THR_REG	/home/team03/pintos/src/devices/serial.c	22;"	d	file:
-TID_ERROR	/home/team03/pintos/src/threads/thread.h	21;"	d
+TID_ERROR	/home/team03/pintos/src/threads/thread.h	20;"	d
 TIMER_FREQ	/home/team03/pintos/src/devices/timer.h	8;"	d
-TIME_SLICE	/home/team03/pintos/src/threads/thread.c	59;"	d	file:
+TIME_SLICE	/home/team03/pintos/src/threads/thread.c	58;"	d	file:
 UCHAR_MAX	/home/team03/pintos/src/lib/limits.h	8;"	d
 UINT16_MAX	/home/team03/pintos/src/lib/stdint.h	24;"	d
 UINT32_MAX	/home/team03/pintos/src/lib/stdint.h	27;"	d
@@ -957,6 +956,7 @@ heapify	/home/team03/pintos/src/lib/stdlib.c	/^heapify (unsigned char *array, si
 hex-dump_SRC	/home/team03/pintos/src/examples/Makefile	/^hex-dump_SRC = hex-dump.c$/;"	m
 hex_dump	/home/team03/pintos/src/lib/stdio.c	/^hex_dump (uintptr_t ofs, const void *buf_, size_t size, bool ascii)$/;"	f
 hex_dump	/home/team03/pintos/src/tests/tests.pm	/^sub hex_dump {$/;"	s
+high_priority	/home/team03/pintos/src/threads/thread.c	/^high_priority (const struct list_elem *a,$/;"	f	file:
 high_thread_func	/home/team03/pintos/src/tests/threads/priority-donate-nest.c	/^high_thread_func (void *lock_) $/;"	f	file:
 high_thread_func	/home/team03/pintos/src/tests/threads/priority-donate-nest.c	/^static thread_func high_thread_func;$/;"	v	file:
 histogram	/home/team03/pintos/src/tests/vm/child-sort.c	/^size_t histogram[256];$/;"	v
@@ -1882,7 +1882,7 @@ wait_while_busy	/home/team03/pintos/src/devices/disk.c	/^wait_while_busy (const 
 waiters	/home/team03/pintos/src/threads/synch.h	/^    struct list waiters;        \/* List of waiting threads. *\/$/;"	m	struct:condition	typeref:struct:condition::list
 waiters	/home/team03/pintos/src/threads/synch.h	/^    struct list waiters;        \/* List of waiting threads. *\/$/;"	m	struct:semaphore	typeref:struct:semaphore::list
 waiting_list	/home/team03/pintos/src/threads/thread.c	/^static struct list waiting_list;$/;"	v	typeref:struct:list	file:
-wake_threads	/home/team03/pintos/src/threads/thread.c	/^wake_threads (void)$/;"	f	file:
+wake_threads	/home/team03/pintos/src/threads/thread.c	/^wake_threads (int64_t current_tick)$/;"	f
 wake_time	/home/team03/pintos/src/tests/threads/alarm-priority.c	/^static int64_t wake_time;$/;"	v	file:
 wakeup_tick	/home/team03/pintos/src/threads/thread.h	/^    int64_t wakeup_tick;                \/* Timer tick to wake up. *\/$/;"	m	struct:thread
 width	/home/team03/pintos/src/lib/stdio.c	/^    int width;$/;"	m	struct:printf_conversion	file:
