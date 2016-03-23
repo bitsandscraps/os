@@ -20,6 +20,14 @@ Seongsu Cho  <csp00141@kaist.ac.kr>
 >> preparing your submission, other than the Pintos documentation, course
 >> text, lecture notes, and course staff.
 
+At first we did not know that even the first assignment will require us
+to make new data structures and functions. We tried to find a way to
+manage it without creating new things, which we failed, and googled for
+a solution. We found the following blog:
+http://maplejune.tistory.com/entry/Pintos-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-1-Alarm-Clock
+After finishing the first part by the help from the blog, we realized
+that we should never be afraid of creating new things.
+
 			     ALARM CLOCK
 			     ===========
 
@@ -29,21 +37,46 @@ Seongsu Cho  <csp00141@kaist.ac.kr>
 >> `struct' member, global or static variable, `typedef', or
 >> enumeration.  Identify the purpose of each in 25 words or less.
 
+waiting_list is a list of processes that are sleeping.
+
+static struct list waiting_list;
+
+Added to struct thread:
+
+    int64_t wakeup_tick;                /* Timer tick to wake up. */
+
 ---- ALGORITHMS ----
 
 >> A2: Briefly describe what happens in a call to timer_sleep(),
 >> including the effects of the timer interrupt handler.
 
+When timer_sleep is called, the timer tick that it should wake up
+is calculated. Storing that wakeup_tick information, the thread is
+moved to the waiting_list. Then, thread_block() is called.
+
+The timer interrupt handler searches for threads that should be
+awakened and unblocks those threads using thread_unblock().
+
 >> A3: What steps are taken to minimize the amount of time spent in
 >> the timer interrupt handler?
+
+The waiting_list is always sorted in the order of wakeup_tick.
+If the interrupt handler finds out that the current element on the
+list should not yet be awakened, it may just end traversing the list.
 
 ---- SYNCHRONIZATION ----
 
 >> A4: How are race conditions avoided when multiple threads call
 >> timer_sleep() simultaneously?
 
+We just disabled the interrupt. The kernel does not context switch
+during the call to timer_sleep().
+
 >> A5: How are race conditions avoided when a timer interrupt occurs
 >> during a call to timer_sleep()?
+
+We just disabled the interrupt. Timer interrupt cannot happen during
+the call to timer_sleep().
 
 ---- RATIONALE ----
 
