@@ -41,6 +41,15 @@
 
    - up or "V": increment the value (and wake up one waiting
      thread, if any). */
+static bool
+high_priority (const struct list_elem *a,
+               const struct list_elem *b, void *aux UNUSED)
+{
+   const struct thread *a_thr = list_entry(a, struct thread, elem);
+   const struct thread *b_thr = list_entry(b, struct thread, elem);
+   return a_thr->priority>b_thr->priority;
+}
+
 void
 sema_init (struct semaphore *sema, unsigned value) 
 {
@@ -62,14 +71,13 @@ void
 sema_down (struct semaphore *sema) 
 {
   enum intr_level old_level;
-
   ASSERT (sema != NULL);
   ASSERT (!intr_context ());
-
   old_level = intr_disable ();
+  
   while (sema->value == 0) 
     {
-      list_push_back (&sema->waiters, &thread_current ()->elem);
+      list_push_back(&sema->waiters, &thread_current()->elem);
       thread_block ();
     }
   sema->value--;
@@ -196,7 +204,13 @@ lock_acquire (struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
-
+  enum intr_level old_level;
+  old_level=intr_disable();
+  if(lock->holder!=NULL && 
+     thread_current()->priority>lock->holder->priority+1
+     )
+    priority_donate(thread_current(), lock->holder);
+  intr_set_level(old_level);
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();
 }
