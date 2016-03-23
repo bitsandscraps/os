@@ -206,7 +206,7 @@ lock_acquire (struct lock *lock)
   ASSERT (!lock_held_by_current_thread (lock));
   enum intr_level old_level;
   old_level=intr_disable();
-  if(lock->holder!=NULL && 
+  while(lock->holder!=NULL && 
      thread_current()->priority>lock->holder->priority+1
      )
     priority_donate(thread_current(), lock->holder);

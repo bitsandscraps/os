@@ -5,12 +5,12 @@
 #include <stdbool.h>
 
 /* A counting semaphore. */
+static bool high_priority(const struct list_elem *, const struct list_elem *, void *);
 struct semaphore 
   {
     unsigned value;             /* Current value. */
     struct list waiters;        /* List of waiting threads. */
   };
-
 void sema_init (struct semaphore *, unsigned value);
 void sema_down (struct semaphore *);
 bool sema_try_down (struct semaphore *);
