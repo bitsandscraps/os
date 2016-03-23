@@ -62,9 +62,7 @@ static unsigned thread_ticks;   /* # of timer ticks since last yield. */
    If true, use multi-level feedback queue scheduler.
    Controlled by kernel command-line option "-o mlfqs". */
 bool thread_mlfqs;
-void push_priority_list(int [8], int, int *);
 static void kernel_thread (thread_func *, void *aux);
-void priority_donate(struct thread *, struct thread *);
 static void idle (void *aux UNUSED);
 static struct thread *running_thread (void);
 static struct thread *next_thread_to_run (void);
@@ -147,16 +145,39 @@ thread_tick (void)
   if (++thread_ticks >= TIME_SLICE)
     intr_yield_on_return ();
 }
+
+/* Donate priority of donor to donee. */
 void
-priority_donate(struct thread * cur, struct thread * thr)
+priority_donate (struct thread * donor, struct thread * donee)
 {
-  push_priority_list(thr->priority_list, thr->priority, thr->priority_num);
-  thr->priority=cur->priority;
+  ASSERT (is_thread (donor) && is_thread (donee));
+  ASSERT (donee->priority < donor->priority);
+  append_priority_history (&donee->pri_his, donee->priority);
+  donee->priority = donor->priority;
 }
-void push_priority_list(int list[8], int a, int *num) {
-  list[*num]=a;       //default priority_num is 0 and priority_list is NULL
-  (*num)+=1;
+
+/* Recovers original priority of thr and
+ * returns the original priority. */
+int
+priority_recover (struct thread * thr)
+{
+  ASSERT (is_thread (thr));
+  struct priority_history * pri_his = &thr->pri_his;
+  if (pri_his->top <= 0)
+    return;
+  thr->priority = pri_his->stack[0];
+  pri_his->top = 0;
+  return thr->priority;
 }
+
+/* Append an element to the priority history stack. */
+void append_priority_history (struct priority_history * pri_his, int elem) {
+  ASSERT (pri_his->top >= 0 && pri_his->top <= PRI_DONATION_LIMIT);
+  if (pri_his->top >= PRI_DONATION_LIMIT)
+    return;
+  pri_his->stack[pri_his->top++] = elem;
+}
+
 /* Prints thread statistics. */
 void
 thread_print_stats (void) 
@@ -514,8 +535,8 @@ init_thread (struct thread *t, const char *name, int priority)
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
+  t->pri_his.top = 0;
   t->magic = THREAD_MAGIC;
-  t->priority_num=0;
  
 }
 

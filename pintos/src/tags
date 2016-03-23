@@ -239,6 +239,7 @@ PRIX8	/home/team03/pintos/src/lib/inttypes.h	11;"	d
 PRIXMAX	/home/team03/pintos/src/lib/inttypes.h	39;"	d
 PRIXPTR	/home/team03/pintos/src/lib/inttypes.h	46;"	d
 PRI_DEFAULT	/home/team03/pintos/src/threads/thread.h	24;"	d
+PRI_DONATION_LIMIT	/home/team03/pintos/src/threads/thread.h	26;"	d
 PRI_MAX	/home/team03/pintos/src/threads/thread.h	25;"	d
 PRI_MIN	/home/team03/pintos/src/threads/thread.h	23;"	d
 PRId16	/home/team03/pintos/src/lib/inttypes.h	13;"	d
@@ -523,6 +524,7 @@ alloc_frame	/home/team03/pintos/src/threads/thread.c	/^alloc_frame (struct threa
 allocate_tid	/home/team03/pintos/src/threads/thread.c	/^allocate_tid (void) $/;"	f	file:
 animal	/home/team03/pintos/src/examples/insult.c	/^char *animal[] =$/;"	v
 animalLoc	/home/team03/pintos/src/examples/insult.c	/^char animalLoc[] = { 10, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };$/;"	v
+append_priority_history	/home/team03/pintos/src/threads/thread.c	/^void append_priority_history (struct priority_history * pri_his, int elem) {$/;"	f
 arc4	/home/team03/pintos/src/tests/arc4.h	/^struct arc4$/;"	s
 arc4_crypt	/home/team03/pintos/src/tests/arc4.c	/^arc4_crypt (struct arc4 *arc4, void *buf_, size_t size)$/;"	f
 arc4_crypt	/home/team03/pintos/src/tests/arc4.pm	/^sub arc4_crypt {$/;"	s
@@ -956,6 +958,7 @@ heapify	/home/team03/pintos/src/lib/stdlib.c	/^heapify (unsigned char *array, si
 hex-dump_SRC	/home/team03/pintos/src/examples/Makefile	/^hex-dump_SRC = hex-dump.c$/;"	m
 hex_dump	/home/team03/pintos/src/lib/stdio.c	/^hex_dump (uintptr_t ofs, const void *buf_, size_t size, bool ascii)$/;"	f
 hex_dump	/home/team03/pintos/src/tests/tests.pm	/^sub hex_dump {$/;"	s
+high_priority	/home/team03/pintos/src/threads/synch.c	/^high_priority (const struct list_elem *a,$/;"	f	file:
 high_priority	/home/team03/pintos/src/threads/thread.c	/^high_priority (const struct list_elem *a,$/;"	f	file:
 high_thread_func	/home/team03/pintos/src/tests/threads/priority-donate-nest.c	/^high_thread_func (void *lock_) $/;"	f	file:
 high_thread_func	/home/team03/pintos/src/tests/threads/priority-donate-nest.c	/^static thread_func high_thread_func;$/;"	v	file:
@@ -1376,6 +1379,7 @@ prepare_arguments	/home/team03/pintos/src/utils/pintos	/^sub prepare_arguments {
 prepare_scratch_disk	/home/team03/pintos/src/utils/pintos	/^sub prepare_scratch_disk {$/;"	s
 prepend	/home/team03/pintos/src/examples/pwd.c	/^prepend (const char *prefix,$/;"	f	file:
 prev	/home/team03/pintos/src/lib/kernel/list.h	/^    struct list_elem *prev;     \/* Previous list element. *\/$/;"	m	struct:list_elem	typeref:struct:list_elem::list_elem
+pri_his	/home/team03/pintos/src/threads/thread.h	/^    struct priority_history pri_his;    \/* Priority history stack. *\/$/;"	m	struct:thread	typeref:struct:thread::priority_history
 print_ata_string	/home/team03/pintos/src/devices/disk.c	/^print_ata_string (char *string, size_t size) $/;"	f	file:
 print_bochs_disk_line	/home/team03/pintos/src/utils/pintos	/^sub print_bochs_disk_line {$/;"	s
 print_fs	/home/team03/pintos/src/tests/tests.pm	/^sub print_fs {$/;"	s
@@ -1385,6 +1389,9 @@ printf_conversion	/home/team03/pintos/src/lib/stdio.c	/^struct printf_conversion
 priority	/home/team03/pintos/src/threads/thread.h	/^    int priority;                       \/* Priority. *\/$/;"	m	struct:thread
 priority_condvar_thread	/home/team03/pintos/src/tests/threads/priority-condvar.c	/^priority_condvar_thread (void *aux UNUSED) $/;"	f	file:
 priority_condvar_thread	/home/team03/pintos/src/tests/threads/priority-condvar.c	/^static thread_func priority_condvar_thread;$/;"	v	file:
+priority_donate	/home/team03/pintos/src/threads/thread.c	/^priority_donate (struct thread * donor, struct thread * donee)$/;"	f
+priority_history	/home/team03/pintos/src/threads/thread.h	/^struct priority_history$/;"	s
+priority_recover	/home/team03/pintos/src/threads/thread.c	/^priority_recover (struct thread * thr)$/;"	f
 priority_sema_thread	/home/team03/pintos/src/tests/threads/priority-sema.c	/^priority_sema_thread (void *aux UNUSED) $/;"	f	file:
 priority_sema_thread	/home/team03/pintos/src/tests/threads/priority-sema.c	/^static thread_func priority_sema_thread;$/;"	v	file:
 process_activate	/home/team03/pintos/src/userprog/process.c	/^process_activate (void)$/;"	f
@@ -1550,6 +1557,7 @@ ss	/home/team03/pintos/src/userprog/tss.c	/^    uint16_t ss, :16;$/;"	m	struct:t
 ss0	/home/team03/pintos/src/userprog/tss.c	/^    uint16_t ss0, :16;                  \/* Ring 0 stack segment selector. *\/$/;"	m	struct:tss	file:
 ss1	/home/team03/pintos/src/userprog/tss.c	/^    uint16_t ss1, :16;$/;"	m	struct:tss	file:
 ss2	/home/team03/pintos/src/userprog/tss.c	/^    uint16_t ss2, :16;$/;"	m	struct:tss	file:
+stack	/home/team03/pintos/src/threads/thread.h	/^    int stack[PRI_DONATION_LIMIT];$/;"	m	struct:priority_history
 stack	/home/team03/pintos/src/threads/thread.h	/^    uint8_t *stack;                     \/* Saved stack pointer. *\/$/;"	m	struct:thread
 start	/home/team03/pintos/src/examples/insult.c	/^char *start[] =$/;"	v
 start	/home/team03/pintos/src/filesys/inode.c	/^    disk_sector_t start;                \/* First data sector. *\/$/;"	m	struct:inode_disk	file:
@@ -1807,6 +1815,7 @@ timer_ticks	/home/team03/pintos/src/devices/timer.c	/^timer_ticks (void) $/;"	f
 timer_usleep	/home/team03/pintos/src/devices/timer.c	/^timer_usleep (int64_t us) $/;"	f
 tolower	/home/team03/pintos/src/lib/ctype.h	/^static inline int tolower (int c) { return isupper (c) ? c - 'A' + 'a' : c; }$/;"	f
 too_many_loops	/home/team03/pintos/src/devices/timer.c	/^too_many_loops (unsigned loops) $/;"	f	file:
+top	/home/team03/pintos/src/threads/thread.h	/^    int top;$/;"	m	struct:priority_history
 toupper	/home/team03/pintos/src/lib/ctype.h	/^static inline int toupper (int c) { return islower (c) ? c - 'a' + 'A' : c; }$/;"	f
 trace	/home/team03/pintos/src/userprog/tss.c	/^    uint16_t trace, bitmap;$/;"	m	struct:tss	file:
 traverse_balanced	/home/team03/pintos/src/tests/Algorithm/Diff.pm	/^sub traverse_balanced$/;"	s

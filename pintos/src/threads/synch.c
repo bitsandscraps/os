@@ -32,6 +32,15 @@
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 
+static bool
+high_priority (const struct list_elem *a,
+               const struct list_elem *b, void *aux UNUSED)
+{
+  const struct thread *a_thr = list_entry (a, struct thread, elem);
+  const struct thread *b_thr = list_entry (b, struct thread, elem);
+  return a_thr->priority > b_thr->priority;
+}
+
 /* Initializes semaphore SEMA to VALUE.  A semaphore is a
    nonnegative integer along with two atomic operators for
    manipulating it:
@@ -41,15 +50,6 @@
 
    - up or "V": increment the value (and wake up one waiting
      thread, if any). */
-static bool
-high_priority (const struct list_elem *a,
-               const struct list_elem *b, void *aux UNUSED)
-{
-   const struct thread *a_thr = list_entry(a, struct thread, elem);
-   const struct thread *b_thr = list_entry(b, struct thread, elem);
-   return a_thr->priority>b_thr->priority;
-}
-
 void
 sema_init (struct semaphore *sema, unsigned value) 
 {
@@ -206,10 +206,11 @@ lock_acquire (struct lock *lock)
   ASSERT (!lock_held_by_current_thread (lock));
   enum intr_level old_level;
   old_level=intr_disable();
-  if(lock->holder!=NULL && 
-     thread_current()->priority>lock->holder->priority+1
-     )
-    priority_donate(thread_current(), lock->holder);
+  struct thread * cur = thread_current ();
+  struct thread * holder = lock->holder;
+  if (holder != NULL)
+    if (cur->priority > holder->priority)
+      priority_donate(cur, holder);
   intr_set_level(old_level);
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();
