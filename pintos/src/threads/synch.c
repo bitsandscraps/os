@@ -32,6 +32,15 @@
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 
+static bool
+high_priority (const struct list_elem *a,
+               const struct list_elem *b, void *aux UNUSED)
+{
+  const struct thread *a_thr = list_entry (a, struct thread, elem);
+  const struct thread *b_thr = list_entry (b, struct thread, elem);
+  return a_thr->priority > b_thr->priority;
+}
+
 /* Initializes semaphore SEMA to VALUE.  A semaphore is a
    nonnegative integer along with two atomic operators for
    manipulating it:
@@ -41,15 +50,6 @@
 
    - up or "V": increment the value (and wake up one waiting
      thread, if any). */
-static bool
-high_priority (const struct list_elem *a,
-               const struct list_elem *b, void *aux UNUSED)
-{
-   const struct thread *a_thr = list_entry(a, struct thread, elem);
-   const struct thread *b_thr = list_entry(b, struct thread, elem);
-   return a_thr->priority>b_thr->priority;
-}
-
 void
 sema_init (struct semaphore *sema, unsigned value) 
 {

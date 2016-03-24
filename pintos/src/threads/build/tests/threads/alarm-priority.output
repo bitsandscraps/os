@@ -1,4 +1,8 @@
+<<<<<<< HEAD:pintos/src/threads/build/tests/threads/alarm-priority.output
+Writing command line to /tmp/jNKh2iQI6Q.dsk...
+=======
 Writing command line to /tmp/mbwD9OF4RO.dsk...
+>>>>>>> master:pintos/src/threads/build/tests/threads/alarm-priority.output
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q run alarm-priority

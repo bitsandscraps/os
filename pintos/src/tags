@@ -238,9 +238,10 @@ PRIX64	/home/team03/pintos/src/lib/inttypes.h	32;"	d
 PRIX8	/home/team03/pintos/src/lib/inttypes.h	11;"	d
 PRIXMAX	/home/team03/pintos/src/lib/inttypes.h	39;"	d
 PRIXPTR	/home/team03/pintos/src/lib/inttypes.h	46;"	d
-PRI_DEFAULT	/home/team03/pintos/src/threads/thread.h	25;"	d
-PRI_MAX	/home/team03/pintos/src/threads/thread.h	26;"	d
-PRI_MIN	/home/team03/pintos/src/threads/thread.h	24;"	d
+PRI_DEFAULT	/home/team03/pintos/src/threads/thread.h	24;"	d
+PRI_DONATION_LIMIT	/home/team03/pintos/src/threads/thread.h	26;"	d
+PRI_MAX	/home/team03/pintos/src/threads/thread.h	25;"	d
+PRI_MIN	/home/team03/pintos/src/threads/thread.h	23;"	d
 PRId16	/home/team03/pintos/src/lib/inttypes.h	13;"	d
 PRId32	/home/team03/pintos/src/lib/inttypes.h	20;"	d
 PRId64	/home/team03/pintos/src/lib/inttypes.h	27;"	d
@@ -411,11 +412,10 @@ THREAD_DYING	/home/team03/pintos/src/threads/thread.h	/^    THREAD_DYING        
 THREAD_MAGIC	/home/team03/pintos/src/threads/thread.c	22;"	d	file:
 THREAD_READY	/home/team03/pintos/src/threads/thread.h	/^    THREAD_READY,       \/* Not running but ready to run. *\/$/;"	e	enum:thread_status
 THREAD_RUNNING	/home/team03/pintos/src/threads/thread.h	/^    THREAD_RUNNING,     \/* Running thread. *\/$/;"	e	enum:thread_status
-THREAD_WAITING	/home/team03/pintos/src/threads/thread.h	/^    THREAD_WAITING,       \/* Waiting to be waked. *\/$/;"	e	enum:thread_status
 THR_REG	/home/team03/pintos/src/devices/serial.c	22;"	d	file:
-TID_ERROR	/home/team03/pintos/src/threads/thread.h	21;"	d
+TID_ERROR	/home/team03/pintos/src/threads/thread.h	20;"	d
 TIMER_FREQ	/home/team03/pintos/src/devices/timer.h	8;"	d
-TIME_SLICE	/home/team03/pintos/src/threads/thread.c	59;"	d	file:
+TIME_SLICE	/home/team03/pintos/src/threads/thread.c	58;"	d	file:
 UCHAR_MAX	/home/team03/pintos/src/lib/limits.h	8;"	d
 UINT16_MAX	/home/team03/pintos/src/lib/stdint.h	24;"	d
 UINT32_MAX	/home/team03/pintos/src/lib/stdint.h	27;"	d
@@ -524,6 +524,7 @@ alloc_frame	/home/team03/pintos/src/threads/thread.c	/^alloc_frame (struct threa
 allocate_tid	/home/team03/pintos/src/threads/thread.c	/^allocate_tid (void) $/;"	f	file:
 animal	/home/team03/pintos/src/examples/insult.c	/^char *animal[] =$/;"	v
 animalLoc	/home/team03/pintos/src/examples/insult.c	/^char animalLoc[] = { 10, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };$/;"	v
+append_priority_history	/home/team03/pintos/src/threads/thread.c	/^void append_priority_history (struct priority_history * pri_his, int elem) {$/;"	f
 arc4	/home/team03/pintos/src/tests/arc4.h	/^struct arc4$/;"	s
 arc4_crypt	/home/team03/pintos/src/tests/arc4.c	/^arc4_crypt (struct arc4 *arc4, void *buf_, size_t size)$/;"	f
 arc4_crypt	/home/team03/pintos/src/tests/arc4.pm	/^sub arc4_crypt {$/;"	s
@@ -803,7 +804,6 @@ elem	/home/team03/pintos/src/filesys/inode.c	/^    struct list_elem elem;       
 elem	/home/team03/pintos/src/lib/kernel/hash.h	/^    struct hash_elem *elem;     \/* Current hash element in current bucket. *\/$/;"	m	struct:hash_iterator	typeref:struct:hash_iterator::hash_elem
 elem	/home/team03/pintos/src/tests/internal/list.c	/^    struct list_elem elem;      \/* List element. *\/$/;"	m	struct:value	typeref:struct:value::list_elem	file:
 elem	/home/team03/pintos/src/threads/synch.c	/^    struct list_elem elem;              \/* List element. *\/$/;"	m	struct:semaphore_elem	typeref:struct:semaphore_elem::list_elem	file:
-elem	/home/team03/pintos/src/threads/thread.h	/^    struct list_elem elem;              \/* List element. *\/$/;"	m	struct:thread	typeref:struct:thread::list_elem
 elem_cnt	/home/team03/pintos/src/lib/kernel/bitmap.c	/^elem_cnt (size_t bit_cnt)$/;"	f	file:
 elem_cnt	/home/team03/pintos/src/lib/kernel/hash.h	/^    size_t elem_cnt;            \/* Number of elements in table. *\/$/;"	m	struct:hash
 elem_idx	/home/team03/pintos/src/lib/kernel/bitmap.c	/^elem_idx (size_t bit_idx) $/;"	f	file:
@@ -957,6 +957,8 @@ heapify	/home/team03/pintos/src/lib/stdlib.c	/^heapify (unsigned char *array, si
 hex-dump_SRC	/home/team03/pintos/src/examples/Makefile	/^hex-dump_SRC = hex-dump.c$/;"	m
 hex_dump	/home/team03/pintos/src/lib/stdio.c	/^hex_dump (uintptr_t ofs, const void *buf_, size_t size, bool ascii)$/;"	f
 hex_dump	/home/team03/pintos/src/tests/tests.pm	/^sub hex_dump {$/;"	s
+high_priority	/home/team03/pintos/src/threads/synch.c	/^high_priority (const struct list_elem *a,$/;"	f	file:
+high_priority	/home/team03/pintos/src/threads/thread.c	/^high_priority (const struct list_elem *a,$/;"	f	file:
 high_thread_func	/home/team03/pintos/src/tests/threads/priority-donate-nest.c	/^high_thread_func (void *lock_) $/;"	f	file:
 high_thread_func	/home/team03/pintos/src/tests/threads/priority-donate-nest.c	/^static thread_func high_thread_func;$/;"	v	file:
 histogram	/home/team03/pintos/src/tests/vm/child-sort.c	/^size_t histogram[256];$/;"	v
@@ -1236,6 +1238,7 @@ malloc	/home/team03/pintos/src/threads/malloc.c	/^malloc (size_t size) $/;"	f
 malloc_init	/home/team03/pintos/src/threads/malloc.c	/^malloc_init (void) $/;"	f
 map_key	/home/team03/pintos/src/devices/kbd.c	/^map_key (const struct keymap k[], unsigned scancode, uint8_t *c) $/;"	f	file:
 mapid_t	/home/team03/pintos/src/lib/user/syscall.h	/^typedef int mapid_t;$/;"	t
+master	/home/team03/pintos/src/threads/thread.h	/^>>>>>>> master:pintos\/src\/threads\/thread.h$/;"	m	struct:thread
 matmult_SRC	/home/team03/pintos/src/examples/Makefile	/^matmult_SRC = matmult.c$/;"	m
 max_length	/home/team03/pintos/src/lib/stdio.c	/^    int max_length;     \/* Max length of output string. *\/$/;"	m	struct:vsnprintf_aux	file:
 mcat_SRC	/home/team03/pintos/src/examples/Makefile	/^mcat_SRC = mcat.c$/;"	m
@@ -1382,9 +1385,11 @@ print_fs	/home/team03/pintos/src/tests/tests.pm	/^sub print_fs {$/;"	s
 print_stats	/home/team03/pintos/src/threads/init.c	/^print_stats (void) $/;"	f	file:
 printf	/home/team03/pintos/src/lib/stdio.c	/^printf (const char *format, ...) $/;"	f
 printf_conversion	/home/team03/pintos/src/lib/stdio.c	/^struct printf_conversion $/;"	s	file:
-priority	/home/team03/pintos/src/threads/thread.h	/^    int priority;                       \/* Priority. *\/$/;"	m	struct:thread
 priority_condvar_thread	/home/team03/pintos/src/tests/threads/priority-condvar.c	/^priority_condvar_thread (void *aux UNUSED) $/;"	f	file:
 priority_condvar_thread	/home/team03/pintos/src/tests/threads/priority-condvar.c	/^static thread_func priority_condvar_thread;$/;"	v	file:
+priority_donate	/home/team03/pintos/src/threads/thread.c	/^priority_donate (struct thread * donor, struct thread * donee)$/;"	f
+priority_history	/home/team03/pintos/src/threads/thread.h	/^struct priority_history$/;"	s
+priority_recover	/home/team03/pintos/src/threads/thread.c	/^priority_recover (struct thread * thr)$/;"	f
 priority_sema_thread	/home/team03/pintos/src/tests/threads/priority-sema.c	/^priority_sema_thread (void *aux UNUSED) $/;"	f	file:
 priority_sema_thread	/home/team03/pintos/src/tests/threads/priority-sema.c	/^static thread_func priority_sema_thread;$/;"	v	file:
 process_activate	/home/team03/pintos/src/userprog/process.c	/^process_activate (void)$/;"	f
@@ -1550,6 +1555,7 @@ ss	/home/team03/pintos/src/userprog/tss.c	/^    uint16_t ss, :16;$/;"	m	struct:t
 ss0	/home/team03/pintos/src/userprog/tss.c	/^    uint16_t ss0, :16;                  \/* Ring 0 stack segment selector. *\/$/;"	m	struct:tss	file:
 ss1	/home/team03/pintos/src/userprog/tss.c	/^    uint16_t ss1, :16;$/;"	m	struct:tss	file:
 ss2	/home/team03/pintos/src/userprog/tss.c	/^    uint16_t ss2, :16;$/;"	m	struct:tss	file:
+stack	/home/team03/pintos/src/threads/thread.h	/^    int stack[PRI_DONATION_LIMIT];$/;"	m	struct:priority_history
 stack	/home/team03/pintos/src/threads/thread.h	/^    uint8_t *stack;                     \/* Saved stack pointer. *\/$/;"	m	struct:thread
 start	/home/team03/pintos/src/examples/insult.c	/^char *start[] =$/;"	v
 start	/home/team03/pintos/src/filesys/inode.c	/^    disk_sector_t start;                \/* First data sector. *\/$/;"	m	struct:inode_disk	file:
@@ -1807,6 +1813,7 @@ timer_ticks	/home/team03/pintos/src/devices/timer.c	/^timer_ticks (void) $/;"	f
 timer_usleep	/home/team03/pintos/src/devices/timer.c	/^timer_usleep (int64_t us) $/;"	f
 tolower	/home/team03/pintos/src/lib/ctype.h	/^static inline int tolower (int c) { return isupper (c) ? c - 'A' + 'a' : c; }$/;"	f
 too_many_loops	/home/team03/pintos/src/devices/timer.c	/^too_many_loops (unsigned loops) $/;"	f	file:
+top	/home/team03/pintos/src/threads/thread.h	/^    int top;$/;"	m	struct:priority_history
 toupper	/home/team03/pintos/src/lib/ctype.h	/^static inline int toupper (int c) { return islower (c) ? c - 'a' + 'A' : c; }$/;"	f
 trace	/home/team03/pintos/src/userprog/tss.c	/^    uint16_t trace, bitmap;$/;"	m	struct:tss	file:
 traverse_balanced	/home/team03/pintos/src/tests/Algorithm/Diff.pm	/^sub traverse_balanced$/;"	s
@@ -1882,9 +1889,8 @@ wait_while_busy	/home/team03/pintos/src/devices/disk.c	/^wait_while_busy (const 
 waiters	/home/team03/pintos/src/threads/synch.h	/^    struct list waiters;        \/* List of waiting threads. *\/$/;"	m	struct:condition	typeref:struct:condition::list
 waiters	/home/team03/pintos/src/threads/synch.h	/^    struct list waiters;        \/* List of waiting threads. *\/$/;"	m	struct:semaphore	typeref:struct:semaphore::list
 waiting_list	/home/team03/pintos/src/threads/thread.c	/^static struct list waiting_list;$/;"	v	typeref:struct:list	file:
-wake_threads	/home/team03/pintos/src/threads/thread.c	/^wake_threads (void)$/;"	f	file:
+wake_threads	/home/team03/pintos/src/threads/thread.c	/^wake_threads (int64_t current_tick)$/;"	f
 wake_time	/home/team03/pintos/src/tests/threads/alarm-priority.c	/^static int64_t wake_time;$/;"	v	file:
-wakeup_tick	/home/team03/pintos/src/threads/thread.h	/^    int64_t wakeup_tick;                \/* Timer tick to wake up. *\/$/;"	m	struct:thread
 width	/home/team03/pintos/src/lib/stdio.c	/^    int width;$/;"	m	struct:printf_conversion	file:
 wrap_open	/home/team03/pintos/src/tests/filesys/extended/dir-rm-cwd.c	/^wrap_open (const char *name) $/;"	f	file:
 write	/home/team03/pintos/src/lib/user/syscall.c	/^write (int fd, const void *buffer, unsigned size)$/;"	f
