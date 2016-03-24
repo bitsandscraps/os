@@ -74,11 +74,12 @@ sema_down (struct semaphore *sema)
   ASSERT (sema != NULL);
   ASSERT (!intr_context ());
   old_level = intr_disable ();
-  
+  struct thread * holder=lock_entry(sema, struct lock, semaphore)->holder;
   while (sema->value == 0) 
     {
       list_push_back(&sema->waiters, &thread_current()->elem);
-      priority_donate(thread_current(), lock_entry(sema, struct lock, semaphore)->holder);
+      if(thread_current()->priority>holder->priority)
+          priority_donate(thread_current(), holder);
       thread_block ();
     }
   sema->value--;
