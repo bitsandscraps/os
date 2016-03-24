@@ -1166,6 +1166,7 @@ lock	/home/team03/seongsu/os/pintos/src/threads/palloc.c	/^    struct lock lock;
 lock	/home/team03/seongsu/os/pintos/src/threads/synch.h	/^struct lock $/;"	s
 lock_acquire	/home/team03/seongsu/os/pintos/src/threads/synch.c	/^lock_acquire (struct lock *lock)$/;"	f
 lock_and_sema	/home/team03/seongsu/os/pintos/src/tests/threads/priority-donate-sema.c	/^struct lock_and_sema $/;"	s	file:
+lock_entry	/home/team03/seongsu/os/pintos/src/lib/kernel/list.h	112;"	d
 lock_held_by_current_thread	/home/team03/seongsu/os/pintos/src/threads/synch.c	/^lock_held_by_current_thread (const struct lock *lock) $/;"	f
 lock_init	/home/team03/seongsu/os/pintos/src/threads/synch.c	/^lock_init (struct lock *lock)$/;"	f
 lock_pair	/home/team03/seongsu/os/pintos/src/tests/threads/priority-donate-chain.c	/^struct lock_pair$/;"	s	file:
