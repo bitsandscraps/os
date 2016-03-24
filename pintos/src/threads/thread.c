@@ -156,6 +156,22 @@ priority_donate (struct thread * donor, struct thread * donee)
   donee->priority = donor->priority;
 }
 
+/* Removes priority of level base from history and modify the
+ * priority to an appropriate one. */
+void
+priority_check (struct thread * thr, int base)
+{
+  ASSERT (is_thread (thr));
+  struct priority_history * pri_his = &thr->pri_his;
+  int last = pri_his->top - 1;
+  ASSERT (last >= 0);
+  if (last <= 0) return;    /* Did not get donated. */
+  if (thr->priority == base) {
+    pri_his->top = last;
+    thr->priority = pri_his->stack[last - 1];
+  }
+}
+
 /* Recovers original priority of thr and
  * returns the original priority. */
 int
@@ -166,7 +182,7 @@ priority_recover (struct thread * thr)
   if (pri_his->top <= 0)
     return;
   thr->priority = pri_his->stack[0];
-  pri_his->top = 0;
+  pri_his->top = 1;
   return thr->priority;
 }
 
@@ -535,7 +551,8 @@ init_thread (struct thread *t, const char *name, int priority)
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
-  t->pri_his.top = 0;
+  t->pri_his.stack[0] = priority;
+  t->pri_his.top = 1;
   t->magic = THREAD_MAGIC;
  
 }
