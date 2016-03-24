@@ -151,9 +151,11 @@ void
 priority_donate (struct thread * donor, struct thread * donee)
 {
   ASSERT (is_thread (donor) && is_thread (donee));
-  ASSERT (donee->priority < donor->priority);
-  append_priority_history (&donee->pri_his, donee->priority);
-  donee->priority = donor->priority;
+  if (donee->priority < donor->priority)
+  {
+    append_priority_history (&donee->pri_his, donee->priority);
+    donee->priority = donor->priority;
+  }
 }
 
 /* Removes priority of level base from history and modify the
@@ -179,10 +181,11 @@ priority_recover (struct thread * thr)
 {
   ASSERT (is_thread (thr));
   struct priority_history * pri_his = &thr->pri_his;
-  if (pri_his->top <= 0)
-    return;
-  thr->priority = pri_his->stack[0];
-  pri_his->top = 1;
+  if (pri_his->top > 0)
+  {
+    thr->priority = pri_his->stack[0];
+    pri_his->top = 1;
+  }
   return thr->priority;
 }
 
@@ -387,7 +390,11 @@ thread_yield (void)
 void
 thread_set_priority (int new_priority) 
 {
-  thread_current ()->priority = new_priority;
+  struct thread * curr = thread_current ();
+  int old_priority = curr->priority;
+  curr->priority = new_priority;
+  if (old_priority > new_priority)
+    thread_yield();
 }
 
 /* Returns the current thread's priority. */

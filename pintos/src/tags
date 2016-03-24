@@ -804,6 +804,7 @@ elem	/home/team03/pintos/src/filesys/inode.c	/^    struct list_elem elem;       
 elem	/home/team03/pintos/src/lib/kernel/hash.h	/^    struct hash_elem *elem;     \/* Current hash element in current bucket. *\/$/;"	m	struct:hash_iterator	typeref:struct:hash_iterator::hash_elem
 elem	/home/team03/pintos/src/tests/internal/list.c	/^    struct list_elem elem;      \/* List element. *\/$/;"	m	struct:value	typeref:struct:value::list_elem	file:
 elem	/home/team03/pintos/src/threads/synch.c	/^    struct list_elem elem;              \/* List element. *\/$/;"	m	struct:semaphore_elem	typeref:struct:semaphore_elem::list_elem	file:
+elem	/home/team03/pintos/src/threads/thread.h	/^    struct list_elem elem;              \/* List element. *\/$/;"	m	struct:thread	typeref:struct:thread::list_elem
 elem_cnt	/home/team03/pintos/src/lib/kernel/bitmap.c	/^elem_cnt (size_t bit_cnt)$/;"	f	file:
 elem_cnt	/home/team03/pintos/src/lib/kernel/hash.h	/^    size_t elem_cnt;            \/* Number of elements in table. *\/$/;"	m	struct:hash
 elem_idx	/home/team03/pintos/src/lib/kernel/bitmap.c	/^elem_idx (size_t bit_idx) $/;"	f	file:
@@ -1238,7 +1239,6 @@ malloc	/home/team03/pintos/src/threads/malloc.c	/^malloc (size_t size) $/;"	f
 malloc_init	/home/team03/pintos/src/threads/malloc.c	/^malloc_init (void) $/;"	f
 map_key	/home/team03/pintos/src/devices/kbd.c	/^map_key (const struct keymap k[], unsigned scancode, uint8_t *c) $/;"	f	file:
 mapid_t	/home/team03/pintos/src/lib/user/syscall.h	/^typedef int mapid_t;$/;"	t
-master	/home/team03/pintos/src/threads/thread.h	/^>>>>>>> master:pintos\/src\/threads\/thread.h$/;"	m	struct:thread
 matmult_SRC	/home/team03/pintos/src/examples/Makefile	/^matmult_SRC = matmult.c$/;"	m
 max_length	/home/team03/pintos/src/lib/stdio.c	/^    int max_length;     \/* Max length of output string. *\/$/;"	m	struct:vsnprintf_aux	file:
 mcat_SRC	/home/team03/pintos/src/examples/Makefile	/^mcat_SRC = mcat.c$/;"	m
@@ -1386,6 +1386,8 @@ print_fs	/home/team03/pintos/src/tests/tests.pm	/^sub print_fs {$/;"	s
 print_stats	/home/team03/pintos/src/threads/init.c	/^print_stats (void) $/;"	f	file:
 printf	/home/team03/pintos/src/lib/stdio.c	/^printf (const char *format, ...) $/;"	f
 printf_conversion	/home/team03/pintos/src/lib/stdio.c	/^struct printf_conversion $/;"	s	file:
+priority	/home/team03/pintos/src/threads/thread.h	/^    int priority;                       \/* Priority. *\/$/;"	m	struct:thread
+priority_check	/home/team03/pintos/src/threads/thread.c	/^priority_check (struct thread * thr, int base)$/;"	f
 priority_condvar_thread	/home/team03/pintos/src/tests/threads/priority-condvar.c	/^priority_condvar_thread (void *aux UNUSED) $/;"	f	file:
 priority_condvar_thread	/home/team03/pintos/src/tests/threads/priority-condvar.c	/^static thread_func priority_condvar_thread;$/;"	v	file:
 priority_donate	/home/team03/pintos/src/threads/thread.c	/^priority_donate (struct thread * donor, struct thread * donee)$/;"	f
@@ -1892,6 +1894,7 @@ waiters	/home/team03/pintos/src/threads/synch.h	/^    struct list waiters;      
 waiting_list	/home/team03/pintos/src/threads/thread.c	/^static struct list waiting_list;$/;"	v	typeref:struct:list	file:
 wake_threads	/home/team03/pintos/src/threads/thread.c	/^wake_threads (int64_t current_tick)$/;"	f
 wake_time	/home/team03/pintos/src/tests/threads/alarm-priority.c	/^static int64_t wake_time;$/;"	v	file:
+wakeup_tick	/home/team03/pintos/src/threads/thread.h	/^    int64_t wakeup_tick;                \/* Timer tick to wake up. *\/$/;"	m	struct:thread
 width	/home/team03/pintos/src/lib/stdio.c	/^    int width;$/;"	m	struct:printf_conversion	file:
 wrap_open	/home/team03/pintos/src/tests/filesys/extended/dir-rm-cwd.c	/^wrap_open (const char *name) $/;"	f	file:
 write	/home/team03/pintos/src/lib/user/syscall.c	/^write (int fd, const void *buffer, unsigned size)$/;"	f

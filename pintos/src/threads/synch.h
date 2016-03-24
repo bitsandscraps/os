@@ -5,7 +5,6 @@
 #include <stdbool.h>
 
 /* A counting semaphore. */
-static bool high_priority(const struct list_elem *, const struct list_elem *, void *);
 struct semaphore 
   {
     unsigned value;             /* Current value. */
