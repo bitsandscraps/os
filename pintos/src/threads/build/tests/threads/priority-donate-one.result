@@ -14,8 +14,7 @@ Acceptable output:
   (priority-donate-one) end
 Differences in `diff -u' format:
   (priority-donate-one) begin
-- (priority-donate-one) This thread should have priority 32.  Actual priority: 32.
-+ (priority-donate-one) This thread should have priority 32.  Actual priority: 31.
+  (priority-donate-one) This thread should have priority 32.  Actual priority: 32.
   (priority-donate-one) This thread should have priority 33.  Actual priority: 33.
 - (priority-donate-one) acquire2: got the lock
 - (priority-donate-one) acquire2: done

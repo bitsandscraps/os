@@ -1,4 +1,4 @@
-Writing command line to /tmp/oXKn9Ssi40.dsk...
+Writing command line to /tmp/1zNNo9UTWz.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q -mlfqs run mlfqs-recent-1
@@ -102,7 +102,7 @@ Executing 'mlfqs-recent-1':
 (mlfqs-recent-1) After 180 seconds, recent_cpu is 0.00, load_avg is 0.00.
 (mlfqs-recent-1) end
 Execution of 'mlfqs-recent-1' complete.
-Timer: 19019 ticks
+Timer: 19020 ticks
 Thread: 956 idle ticks, 18067 kernel ticks, 0 user ticks
 Console: 7087 characters output
 Keyboard: 0 keys pressed
