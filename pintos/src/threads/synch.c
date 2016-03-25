@@ -33,11 +33,13 @@
 #include "threads/thread.h"
 
 static bool
-high_orig_priority (const struct list_elem *a,
-                    const struct list_elem *b, void *aux UNUSED)
+higher_priority (const struct list_elem *a,
+                 const struct list_elem *b, void *aux UNUSED)
 {
   const struct thread *a_thr = list_entry (a, struct thread, elem);
   const struct thread *b_thr = list_entry (b, struct thread, elem);
+  if (a_thr->priority > b_thr->priority)
+    return true;
   return a_thr->pri_his.stack[0] > b_thr->pri_his.stack[0];
 }
 
@@ -78,7 +80,7 @@ sema_down (struct semaphore *sema)
   while (sema->value == 0) 
     {
       list_insert_ordered (&sema->waiters, &curr->elem,
-                           high_orig_priority, NULL);
+                           higher_priority, NULL);
       thread_block ();
     }
   sema->value--;
@@ -206,17 +208,23 @@ lock_acquire (struct lock *lock)
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
   enum intr_level old_level = intr_disable ();
-  struct list * sema_wait_list = &lock->semaphore.waiters;
+  struct list * waiters = &lock->semaphore.waiters;
   struct list_elem *e;
   struct thread * curr = thread_current ();
   if (lock->holder != NULL)
-    priority_donate(curr, lock->holder);
-  for (e = list_begin (sema_wait_list); e != list_end (sema_wait_list);
-       e = list_next (e))
+  {
+    if (curr->priority > lock->holder->priority)
     {
-      struct thread *thr = list_entry (e, struct thread, elem);
-      priority_donate(curr, thr);
+      for (e = list_begin (waiters); e != list_end (waiters);
+           e = list_next (e))
+        {
+          struct thread *thr = list_entry (e, struct thread, elem);
+          if (thr->priority == lock->holder->priority)
+            donate_priority(curr, thr);
+        }
+      donate_priority(curr, lock->holder);
     }
+  }
   intr_set_level (old_level);
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();
@@ -254,15 +262,15 @@ lock_release (struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
   enum intr_level old_level = intr_disable ();
-  struct list * sema_wait_list = &lock->semaphore.waiters;
+  struct list * waiters = &lock->semaphore.waiters;
   struct list_elem *e;
-  int cur_pri = priority_recover (lock->holder);
-    for (e = list_begin (sema_wait_list); e != list_end (sema_wait_list);
-         e = list_next (e))
-      {
-        struct thread *thr = list_entry (e, struct thread, elem);
-        priority_check (thr, cur_pri);
-      }
+  int cur_pri = recover_priority (lock->holder);
+  for (e = list_begin (waiters); e != list_end (waiters);
+       e = list_next (e))
+    {
+      struct thread *thr = list_entry (e, struct thread, elem);
+      check_priority (thr, cur_pri);
+    }
   intr_set_level (old_level);
   lock->holder = NULL;
   sema_up (&lock->semaphore);

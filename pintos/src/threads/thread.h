@@ -25,10 +25,11 @@ typedef int tid_t;
 #define PRI_MAX 63              /* Highest priority. */
 #define PRI_DONATION_LIMIT 8    /* Limit of nested priority donation depth. */
 
+/* Data structure to store the history of a thread's priority level. */
 struct priority_history
   {
-    int stack[PRI_DONATION_LIMIT];
-    int top;
+    int stack[PRI_DONATION_LIMIT];    /* Main stack. */
+    int top;                          /* The index to the first vacant node. */
   };
 
 /* A kernel thread or user process.
@@ -136,10 +137,9 @@ void thread_exit (void) NO_RETURN;
 void thread_sleep (int64_t wakeup_tick);
 void thread_yield (void);
 
-void priority_donate (struct thread * donor, struct thread * donee);
-void priority_check (struct thread * thr, int base);
-int priority_recover (struct thread * thr);
-void append_priority_history (struct priority_history * pri_his, int elem);
+void donate_priority (struct thread * donor, struct thread * donee);
+void check_priority (struct thread * thr, int base);
+int recover_priority (struct thread * thr);
 
 int thread_get_priority (void);
 void thread_set_priority (int);

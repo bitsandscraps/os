@@ -67,12 +67,14 @@ static void idle (void *aux UNUSED);
 static struct thread *running_thread (void);
 static struct thread *next_thread_to_run (void);
 static void init_thread (struct thread *, const char *name, int priority);
-static bool high_priority(const struct list_elem *a,
-                          const struct list_elem *b,
-                           void *aux UNUSED);
-static bool less_wake_tick (const struct list_elem *a,
+static bool higher_priority(const struct list_elem *a,
                             const struct list_elem *b,
-                            void *aux UNUSED); 
+                            void *aux UNUSED);
+static bool lesser_wakeup_tick (const struct list_elem *a,
+                                const struct list_elem *b,
+                                void *aux UNUSED); 
+static bool append_priority_history (struct priority_history * pri_his,
+                                     int elem);
 static bool is_thread (struct thread *) UNUSED;
 static void *alloc_frame (struct thread *, size_t size);
 static void schedule (void);
@@ -148,20 +150,18 @@ thread_tick (void)
 
 /* Donate priority of donor to donee. */
 void
-priority_donate (struct thread * donor, struct thread * donee)
+donate_priority (struct thread * donor, struct thread * donee)
 {
   ASSERT (is_thread (donor) && is_thread (donee));
-  if (donee->priority < donor->priority)
-  {
-    append_priority_history (&donee->pri_his, donee->priority);
+  ASSERT (donee->priority < donor->priority);
+  if (append_priority_history (&donee->pri_his, donee->priority))
     donee->priority = donor->priority;
-  }
 }
 
 /* Removes priority of level base from history and modify the
  * priority to an appropriate one. */
 void
-priority_check (struct thread * thr, int base)
+check_priority (struct thread * thr, int base)
 {
   ASSERT (is_thread (thr));
   struct priority_history * pri_his = &thr->pri_his;
@@ -177,7 +177,7 @@ priority_check (struct thread * thr, int base)
 /* Recovers original priority of thr and
  * returns the original priority. */
 int
-priority_recover (struct thread * thr)
+recover_priority (struct thread * thr)
 {
   ASSERT (is_thread (thr));
   struct priority_history * pri_his = &thr->pri_his;
@@ -190,11 +190,14 @@ priority_recover (struct thread * thr)
 }
 
 /* Append an element to the priority history stack. */
-void append_priority_history (struct priority_history * pri_his, int elem) {
+static bool append_priority_history (struct priority_history * pri_his, int elem) {
   ASSERT (pri_his->top >= 0 && pri_his->top <= PRI_DONATION_LIMIT);
-  if (pri_his->top >= PRI_DONATION_LIMIT)
-    return;
+  if (pri_his->top >= PRI_DONATION_LIMIT)   /* Stack is full. */
+    return false;
+  if (pri_his->stack[0] == elem)
+    return true;
   pri_his->stack[pri_his->top++] = elem;
+  return true;
 }
 
 /* Prints thread statistics. */
@@ -296,7 +299,7 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  list_insert_ordered(&ready_list, &t->elem, high_priority, NULL);
+  list_insert_ordered(&ready_list, &t->elem, higher_priority, NULL);
   t->status = THREAD_READY;
   intr_set_level (old_level);
 }
@@ -363,7 +366,7 @@ thread_sleep (int64_t wakeup_tick)
   ASSERT (!intr_context ());
   old_level = intr_disable ();
   curr->wakeup_tick = wakeup_tick;
-  list_insert_ordered (&waiting_list, &curr->elem, less_wake_tick, NULL);
+  list_insert_ordered (&waiting_list, &curr->elem, lesser_wakeup_tick, NULL);
   thread_block();
   intr_set_level (old_level);
 }
@@ -380,7 +383,7 @@ thread_yield (void)
 
   old_level = intr_disable ();
   if (curr != idle_thread) 
-    list_insert_ordered(&ready_list, &curr->elem, high_priority, NULL);
+    list_insert_ordered(&ready_list, &curr->elem, higher_priority, NULL);
   curr->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
@@ -517,9 +520,9 @@ wake_threads (int64_t current_tick)
   }
 }
 
-/* Returns true if wake_tick of a is less than wake_tick of b. */
+/* Returns true if wakeup_tick of a is less than wake_tick of b. */
 static bool
-less_wake_tick (const struct list_elem *a,
+lesser_wakeup_tick (const struct list_elem *a,
                 const struct list_elem *b, void *aux UNUSED)
 {
   const struct thread *a_thr = list_entry (a, struct thread, elem);
@@ -529,7 +532,7 @@ less_wake_tick (const struct list_elem *a,
 
 /* Returns true if priority of a is higher than priority of b. */
 static bool
-high_priority (const struct list_elem *a,
+higher_priority (const struct list_elem *a,
                const struct list_elem *b, void *aux UNUSED)
 {
   const struct thread *a_thr = list_entry (a, struct thread, elem);

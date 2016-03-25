@@ -524,7 +524,7 @@ alloc_frame	/home/team03/pintos/src/threads/thread.c	/^alloc_frame (struct threa
 allocate_tid	/home/team03/pintos/src/threads/thread.c	/^allocate_tid (void) $/;"	f	file:
 animal	/home/team03/pintos/src/examples/insult.c	/^char *animal[] =$/;"	v
 animalLoc	/home/team03/pintos/src/examples/insult.c	/^char animalLoc[] = { 10, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };$/;"	v
-append_priority_history	/home/team03/pintos/src/threads/thread.c	/^void append_priority_history (struct priority_history * pri_his, int elem) {$/;"	f
+append_priority_history	/home/team03/pintos/src/threads/thread.c	/^static bool append_priority_history (struct priority_history * pri_his, int elem) {$/;"	f	file:
 arc4	/home/team03/pintos/src/tests/arc4.h	/^struct arc4$/;"	s
 arc4_crypt	/home/team03/pintos/src/tests/arc4.c	/^arc4_crypt (struct arc4 *arc4, void *buf_, size_t size)$/;"	f
 arc4_crypt	/home/team03/pintos/src/tests/arc4.pm	/^sub arc4_crypt {$/;"	s
@@ -551,7 +551,7 @@ bad_action	/home/team03/pintos/src/examples/insult.c	/^char *bad_action[] =$/;"	
 bad_actionLoc	/home/team03/pintos/src/examples/insult.c	/^char bad_actionLoc[] =$/;"	v
 bad_place	/home/team03/pintos/src/examples/insult.c	/^char *bad_place[] =$/;"	v
 bad_placeLoc	/home/team03/pintos/src/examples/insult.c	/^char bad_placeLoc[] = { 6, 0, 2, 3, 5, 7, 8, 9 };$/;"	v
-barrier	/home/team03/pintos/src/threads/synch.h	49;"	d
+barrier	/home/team03/pintos/src/threads/synch.h	48;"	d
 base	/home/team03/pintos/src/lib/stdio.c	/^    int base;                   \/* Base. *\/$/;"	m	struct:integer_base	file:
 base	/home/team03/pintos/src/threads/palloc.c	/^    uint8_t *base;                      \/* Base of pool. *\/$/;"	m	struct:pool	file:
 base_X	/home/team03/pintos/src/lib/stdio.c	/^static const struct integer_base base_X = {16, "0123456789ABCDEF", 'X', 4};$/;"	v	typeref:struct:integer_base	file:
@@ -661,6 +661,7 @@ check_for_keyword	/home/team03/pintos/src/tests/tests.pm	/^sub check_for_keyword
 check_for_panic	/home/team03/pintos/src/tests/tests.pm	/^sub check_for_panic {$/;"	s
 check_for_triple_fault	/home/team03/pintos/src/tests/tests.pm	/^sub check_for_triple_fault {$/;"	s
 check_mlfqs_fair	/home/team03/pintos/src/tests/threads/mlfqs.pm	/^sub check_mlfqs_fair {$/;"	s
+check_priority	/home/team03/pintos/src/threads/thread.c	/^check_priority (struct thread * thr, int base)$/;"	f
 check_process_death	/home/team03/pintos/src/tests/vm/process_death.pm	/^sub check_process_death {$/;"	s
 check_tell	/home/team03/pintos/src/tests/filesys/extended/grow-tell.c	/^check_tell (int fd, long ofs) $/;"	f	file:
 checkf	/home/team03/pintos/src/tests/internal/stdio.c	/^checkf (const char *expect, const char *format, ...) $/;"	f	file:
@@ -757,6 +758,7 @@ do_remove	/home/team03/pintos/src/tests/filesys/extended/dir-rm-tree.c	/^do_remo
 do_swap	/home/team03/pintos/src/lib/stdlib.c	/^do_swap (unsigned char *array, size_t a_idx, size_t b_idx, size_t size)$/;"	f	file:
 do_touch	/home/team03/pintos/src/tests/filesys/extended/mk-tree.c	/^do_touch (const char *format, ...)$/;"	f	file:
 do_write	/home/team03/pintos/src/tests/filesys/extended/tar.c	/^do_write (int fd, const char *buffer, int size, bool *write_error) $/;"	f	file:
+donate_priority	/home/team03/pintos/src/threads/thread.c	/^donate_priority (struct thread * donor, struct thread * donee)$/;"	f
 donor_thread_func	/home/team03/pintos/src/tests/threads/priority-donate-chain.c	/^donor_thread_func (void *locks_) $/;"	f	file:
 donor_thread_func	/home/team03/pintos/src/tests/threads/priority-donate-chain.c	/^static thread_func donor_thread_func;$/;"	v	file:
 ds	/home/team03/pintos/src/threads/interrupt.h	/^    uint16_t ds, :16;           \/* Saved DS segment register. *\/$/;"	m	struct:intr_frame
@@ -958,10 +960,10 @@ heapify	/home/team03/pintos/src/lib/stdlib.c	/^heapify (unsigned char *array, si
 hex-dump_SRC	/home/team03/pintos/src/examples/Makefile	/^hex-dump_SRC = hex-dump.c$/;"	m
 hex_dump	/home/team03/pintos/src/lib/stdio.c	/^hex_dump (uintptr_t ofs, const void *buf_, size_t size, bool ascii)$/;"	f
 hex_dump	/home/team03/pintos/src/tests/tests.pm	/^sub hex_dump {$/;"	s
-high_priority	/home/team03/pintos/src/threads/synch.c	/^high_priority (const struct list_elem *a,$/;"	f	file:
-high_priority	/home/team03/pintos/src/threads/thread.c	/^high_priority (const struct list_elem *a,$/;"	f	file:
+high_orig_priority	/home/team03/pintos/src/threads/synch.c	/^high_orig_priority (const struct list_elem *a,$/;"	f	file:
 high_thread_func	/home/team03/pintos/src/tests/threads/priority-donate-nest.c	/^high_thread_func (void *lock_) $/;"	f	file:
 high_thread_func	/home/team03/pintos/src/tests/threads/priority-donate-nest.c	/^static thread_func high_thread_func;$/;"	v	file:
+higher_priority	/home/team03/pintos/src/threads/thread.c	/^higher_priority (const struct list_elem *a,$/;"	f	file:
 histogram	/home/team03/pintos/src/tests/vm/child-sort.c	/^size_t histogram[256];$/;"	v
 histogram	/home/team03/pintos/src/tests/vm/page-merge-seq.c	/^size_t histogram[256];$/;"	v
 histogram	/home/team03/pintos/src/tests/vm/parallel-merge.c	/^size_t histogram[256];$/;"	v
@@ -1115,7 +1117,7 @@ left_shift	/home/team03/pintos/src/devices/kbd.c	/^static bool left_shift, right
 length	/home/team03/pintos/src/filesys/inode.c	/^    off_t length;                       \/* File size in bytes. *\/$/;"	m	struct:inode_disk	file:
 length	/home/team03/pintos/src/lib/stdio.c	/^    int length;         \/* Length of output string. *\/$/;"	m	struct:vsnprintf_aux	file:
 less	/home/team03/pintos/src/lib/kernel/hash.h	/^    hash_less_func *less;       \/* Comparison function. *\/$/;"	m	struct:hash
-less_wake_tick	/home/team03/pintos/src/threads/thread.c	/^less_wake_tick (const struct list_elem *a,$/;"	f	file:
+lesser_wakeup_tick	/home/team03/pintos/src/threads/thread.c	/^lesser_wakeup_tick (const struct list_elem *a,$/;"	f	file:
 lib_SRC	/home/team03/pintos/src/threads/build/Makefile	/^lib_SRC  = lib\/debug.c			# Debug helpers.$/;"	m
 lineup_SRC	/home/team03/pintos/src/examples/Makefile	/^lineup_SRC = lineup.c$/;"	m
 list	/home/team03/pintos/src/lib/kernel/list.h	/^struct list $/;"	s
@@ -1387,12 +1389,9 @@ print_stats	/home/team03/pintos/src/threads/init.c	/^print_stats (void) $/;"	f	f
 printf	/home/team03/pintos/src/lib/stdio.c	/^printf (const char *format, ...) $/;"	f
 printf_conversion	/home/team03/pintos/src/lib/stdio.c	/^struct printf_conversion $/;"	s	file:
 priority	/home/team03/pintos/src/threads/thread.h	/^    int priority;                       \/* Priority. *\/$/;"	m	struct:thread
-priority_check	/home/team03/pintos/src/threads/thread.c	/^priority_check (struct thread * thr, int base)$/;"	f
 priority_condvar_thread	/home/team03/pintos/src/tests/threads/priority-condvar.c	/^priority_condvar_thread (void *aux UNUSED) $/;"	f	file:
 priority_condvar_thread	/home/team03/pintos/src/tests/threads/priority-condvar.c	/^static thread_func priority_condvar_thread;$/;"	v	file:
-priority_donate	/home/team03/pintos/src/threads/thread.c	/^priority_donate (struct thread * donor, struct thread * donee)$/;"	f
 priority_history	/home/team03/pintos/src/threads/thread.h	/^struct priority_history$/;"	s
-priority_recover	/home/team03/pintos/src/threads/thread.c	/^priority_recover (struct thread * thr)$/;"	f
 priority_sema_thread	/home/team03/pintos/src/tests/threads/priority-sema.c	/^priority_sema_thread (void *aux UNUSED) $/;"	f	file:
 priority_sema_thread	/home/team03/pintos/src/tests/threads/priority-sema.c	/^static thread_func priority_sema_thread;$/;"	v	file:
 process_activate	/home/team03/pintos/src/userprog/process.c	/^process_activate (void)$/;"	f
@@ -1440,6 +1439,7 @@ readdir	/home/team03/pintos/src/lib/user/syscall.c	/^readdir (int fd, char name[
 ready_list	/home/team03/pintos/src/threads/thread.c	/^static struct list ready_list;$/;"	v	typeref:struct:list	file:
 real_time_sleep	/home/team03/pintos/src/devices/timer.c	/^real_time_sleep (int64_t num, int32_t denom) $/;"	f	file:
 realloc	/home/team03/pintos/src/threads/malloc.c	/^realloc (void *old_block, size_t new_size) $/;"	f
+recover_priority	/home/team03/pintos/src/threads/thread.c	/^recover_priority (struct thread * thr)$/;"	f
 recursor_SRC	/home/team03/pintos/src/examples/Makefile	/^recursor_SRC = recursor.c$/;"	m
 reg_alt_status	/home/team03/pintos/src/devices/disk.c	29;"	d	file:
 reg_base	/home/team03/pintos/src/devices/disk.c	/^    uint16_t reg_base;          \/* Base I\/O port. *\/$/;"	m	struct:channel	file:
@@ -1558,7 +1558,7 @@ ss	/home/team03/pintos/src/userprog/tss.c	/^    uint16_t ss, :16;$/;"	m	struct:t
 ss0	/home/team03/pintos/src/userprog/tss.c	/^    uint16_t ss0, :16;                  \/* Ring 0 stack segment selector. *\/$/;"	m	struct:tss	file:
 ss1	/home/team03/pintos/src/userprog/tss.c	/^    uint16_t ss1, :16;$/;"	m	struct:tss	file:
 ss2	/home/team03/pintos/src/userprog/tss.c	/^    uint16_t ss2, :16;$/;"	m	struct:tss	file:
-stack	/home/team03/pintos/src/threads/thread.h	/^    int stack[PRI_DONATION_LIMIT];$/;"	m	struct:priority_history
+stack	/home/team03/pintos/src/threads/thread.h	/^    int stack[PRI_DONATION_LIMIT];    \/* Main stack. *\/$/;"	m	struct:priority_history
 stack	/home/team03/pintos/src/threads/thread.h	/^    uint8_t *stack;                     \/* Saved stack pointer. *\/$/;"	m	struct:thread
 start	/home/team03/pintos/src/examples/insult.c	/^char *start[] =$/;"	v
 start	/home/team03/pintos/src/filesys/inode.c	/^    disk_sector_t start;                \/* First data sector. *\/$/;"	m	struct:inode_disk	file:
@@ -1816,7 +1816,7 @@ timer_ticks	/home/team03/pintos/src/devices/timer.c	/^timer_ticks (void) $/;"	f
 timer_usleep	/home/team03/pintos/src/devices/timer.c	/^timer_usleep (int64_t us) $/;"	f
 tolower	/home/team03/pintos/src/lib/ctype.h	/^static inline int tolower (int c) { return isupper (c) ? c - 'A' + 'a' : c; }$/;"	f
 too_many_loops	/home/team03/pintos/src/devices/timer.c	/^too_many_loops (unsigned loops) $/;"	f	file:
-top	/home/team03/pintos/src/threads/thread.h	/^    int top;$/;"	m	struct:priority_history
+top	/home/team03/pintos/src/threads/thread.h	/^    int top;                          \/* The index to the first vacant node. *\/$/;"	m	struct:priority_history
 toupper	/home/team03/pintos/src/lib/ctype.h	/^static inline int toupper (int c) { return islower (c) ? c - 'a' + 'A' : c; }$/;"	f
 trace	/home/team03/pintos/src/userprog/tss.c	/^    uint16_t trace, bitmap;$/;"	m	struct:tss	file:
 traverse_balanced	/home/team03/pintos/src/tests/Algorithm/Diff.pm	/^sub traverse_balanced$/;"	s
