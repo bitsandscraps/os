@@ -139,7 +139,7 @@ void thread_yield (void);
 void priority_donate (struct thread * donor, struct thread * donee);
 void priority_check (struct thread * thr, int base);
 int priority_recover (struct thread * thr);
-void append_priority_history (struct priority_history * pri_his, int elem);
+bool append_priority_history (struct priority_history * pri_his, int elem);
 
 int thread_get_priority (void);
 void thread_set_priority (int);

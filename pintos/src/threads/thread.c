@@ -153,8 +153,8 @@ priority_donate (struct thread * donor, struct thread * donee)
   ASSERT (is_thread (donor) && is_thread (donee));
   if (donee->priority < donor->priority)
   {
-    append_priority_history (&donee->pri_his, donee->priority);
-    donee->priority = donor->priority;
+    if (append_priority_history (&donee->pri_his, donee->priority))
+      donee->priority = donor->priority;
   }
 }
 
@@ -189,12 +189,14 @@ priority_recover (struct thread * thr)
   return thr->priority;
 }
 
-/* Append an element to the priority history stack. */
-void append_priority_history (struct priority_history * pri_his, int elem) {
+/* Append an element to the priority history stack.
+ * If the stack is full and append failed, return false. */
+bool append_priority_history (struct priority_history * pri_his, int elem) {
   ASSERT (pri_his->top >= 0 && pri_his->top <= PRI_DONATION_LIMIT);
   if (pri_his->top >= PRI_DONATION_LIMIT)
-    return;
+    return false;
   pri_his->stack[pri_his->top++] = elem;
+  return true;
 }
 
 /* Prints thread statistics. */

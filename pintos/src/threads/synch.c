@@ -38,6 +38,8 @@ high_orig_priority (const struct list_elem *a,
 {
   const struct thread *a_thr = list_entry (a, struct thread, elem);
   const struct thread *b_thr = list_entry (b, struct thread, elem);
+  if (a_thr->priority > b_thr->priority)
+    return true;
   return a_thr->pri_his.stack[0] > b_thr->pri_his.stack[0];
 }
 
@@ -166,7 +168,7 @@ sema_test_helper (void *sema_)
       sema_up (&sema[1]);
     }
 }
-
+
 /* Initializes LOCK.  A lock can be held by at most a single
    thread at any given time.  Our locks are not "recursive", that
    is, it is an error for the thread currently holding a lock to
