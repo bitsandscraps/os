@@ -73,8 +73,6 @@ static bool higher_priority(const struct list_elem *a,
 static bool lesser_wakeup_tick (const struct list_elem *a,
                                 const struct list_elem *b,
                                 void *aux UNUSED); 
-static bool append_priority_history (struct priority_history * pri_his,
-                                     int elem);
 static bool is_thread (struct thread *) UNUSED;
 static void *alloc_frame (struct thread *, size_t size);
 static void schedule (void);
@@ -148,56 +146,42 @@ thread_tick (void)
     intr_yield_on_return ();
 }
 
-/* Donate priority of donor to donee. */
+/* Donate priority of donor to the holder of the lock
+ * the thread is trying to acquire. */
 void
-donate_priority (struct thread * donor, struct thread * donee)
+donate_priority (struct thread * donor)
 {
-  ASSERT (is_thread (donor) && is_thread (donee));
-  ASSERT (donee->priority < donor->priority);
-  if (append_priority_history (&donee->pri_his, donee->priority))
-    donee->priority = donor->priority;
-}
-
-/* Removes priority of level base from history and modify the
- * priority to an appropriate one. */
-void
-check_priority (struct thread * thr, int base)
-{
-  ASSERT (is_thread (thr));
-  struct priority_history * pri_his = &thr->pri_his;
-  int last = pri_his->top - 1;
-  ASSERT (last >= 0);
-  if (last <= 0) return;    /* Did not get donated. */
-  if (thr->priority == base) {
-    pri_his->top = last;
-    thr->priority = pri_his->stack[last - 1];
-  }
-}
-
-/* Recovers original priority of thr and
- * returns the original priority. */
-int
-recover_priority (struct thread * thr)
-{
-  ASSERT (is_thread (thr));
-  struct priority_history * pri_his = &thr->pri_his;
-  if (pri_his->top > 0)
+  struct lock * lock = donor->lock_trying_acquire;
+  ASSERT (lock);
+  while (lock)
   {
-    thr->priority = pri_his->stack[0];
-    pri_his->top = 1;
+    struct thread * donee = lock->holder;
+    ASSERT (is_thread (donor) && is_thread (donee));
+    if (donor->priority > donee->priority)
+    {
+      donee->priority = donor->priority;
+      lock->priority = donor->priority;
+    }
+    lock = donee->lock_trying_acquire;
   }
-  return thr->priority;
 }
 
-/* Append an element to the priority history stack. */
-static bool append_priority_history (struct priority_history * pri_his, int elem) {
-  ASSERT (pri_his->top >= 0 && pri_his->top <= PRI_DONATION_LIMIT);
-  if (pri_his->top >= PRI_DONATION_LIMIT)   /* Stack is full. */
-    return false;
-  if (pri_his->stack[0] == elem)
-    return true;
-  pri_his->stack[pri_his->top++] = elem;
-  return true;
+/* Restores initial priority of thr. */
+void
+restore_priority (struct thread * thr)
+{
+  ASSERT (is_thread (thr));
+  int priority = thr->initial_priority;
+  struct list * lock_list = &thr->locks_holding;
+  struct list_elem * e;
+  for (e = list_begin (lock_list); e != list_end (lock_list);
+       e = list_next (e))
+  {
+    struct lock * lock = list_entry (e, struct lock, elem);
+    if (priority < lock->priority)
+      priority = lock->priority;
+  }
+  thr->priority = priority;
 }
 
 /* Prints thread statistics. */
@@ -260,7 +244,9 @@ thread_create (const char *name, int priority,
 
   /* Add to run queue. */
   thread_unblock (t);
-  if(priority>thread_current()->priority)
+  
+  /* Yield the current thread if the new thread has higher priority. */
+  if(priority > thread_current ()->priority)
     thread_yield();
 
   return tid;
@@ -395,7 +381,9 @@ thread_set_priority (int new_priority)
 {
   struct thread * curr = thread_current ();
   int old_priority = curr->priority;
-  curr->priority = new_priority;
+  if (curr->priority == curr->initial_priority)
+    curr->priority = new_priority;
+  curr->initial_priority = new_priority;
   if (old_priority > new_priority)
     thread_yield();
 }
@@ -561,10 +549,10 @@ init_thread (struct thread *t, const char *name, int priority)
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
-  t->pri_his.stack[0] = priority;
-  t->pri_his.top = 1;
+  t->initial_priority = priority;
+  list_init (&t->locks_holding);
+  t->lock_trying_acquire = NULL;
   t->magic = THREAD_MAGIC;
- 
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and

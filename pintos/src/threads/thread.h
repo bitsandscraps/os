@@ -4,6 +4,7 @@
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
+#include "threads/synch.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -23,14 +24,6 @@ typedef int tid_t;
 #define PRI_MIN 0               /* Lowest priority. */
 #define PRI_DEFAULT 31          /* Default priority. */
 #define PRI_MAX 63              /* Highest priority. */
-#define PRI_DONATION_LIMIT 8    /* Limit of nested priority donation depth. */
-
-/* Data structure to store the history of a thread's priority level. */
-struct priority_history
-  {
-    int stack[PRI_DONATION_LIMIT];    /* Main stack. */
-    int top;                          /* The index to the first vacant node. */
-  };
 
 /* A kernel thread or user process.
 
@@ -95,8 +88,12 @@ struct thread
     enum thread_status status;          /* Thread state. */
     char name[16];                      /* Name (for debugging purposes). */
     uint8_t *stack;                     /* Saved stack pointer. */
-    int priority;                       /* Priority. */
-    struct priority_history pri_his;    /* Priority history stack. */
+    int priority;                       /* Current priority. */
+    int initial_priority;               /* Initial priority. */
+
+    /* Lock that the thread is trying to acquire. */
+    struct lock * lock_trying_acquire;
+    struct list locks_holding;          /* Locks the thread is holding. */
     int64_t wakeup_tick;                /* Timer tick to wake up. */
 
     /* Shared between thread.c and synch.c. */
@@ -137,9 +134,8 @@ void thread_exit (void) NO_RETURN;
 void thread_sleep (int64_t wakeup_tick);
 void thread_yield (void);
 
-void donate_priority (struct thread * donor, struct thread * donee);
-void check_priority (struct thread * thr, int base);
-int recover_priority (struct thread * thr);
+void donate_priority (struct thread * donor);
+void restore_priority (struct thread * thr);
 
 int thread_get_priority (void);
 void thread_set_priority (int);
