@@ -1,8 +1,4 @@
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/alarm-multiple.output
-Writing command line to /tmp/jMKuAdJuZE.dsk...
-=======
-Writing command line to /tmp/KwMMIjEzgW.dsk...
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/alarm-multiple.output
+Writing command line to /tmp/z5kynoAara.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q run alarm-multiple
@@ -55,13 +51,8 @@ Executing 'alarm-multiple':
 (alarm-multiple) thread 4: duration=50, iteration=7, product=350
 (alarm-multiple) end
 Execution of 'alarm-multiple' complete.
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/alarm-multiple.output
-Timer: 953 ticks
-Thread: 550 idle ticks, 406 kernel ticks, 0 user ticks
-=======
 Timer: 957 ticks
 Thread: 550 idle ticks, 410 kernel ticks, 0 user ticks
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/alarm-multiple.output
 Console: 2952 characters output
 Keyboard: 0 keys pressed
 Powering off...

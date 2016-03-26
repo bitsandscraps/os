@@ -1,8 +1,4 @@
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/priority-sema.output
-Writing command line to /tmp/Q1GSlI6GME.dsk...
-=======
-Writing command line to /tmp/M2lei9hNy4.dsk...
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/priority-sema.output
+Writing command line to /tmp/kVHCAw78Av.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q run priority-sema
@@ -23,11 +19,7 @@ Executing 'priority-sema':
 (priority-sema) Back in main thread.
 (priority-sema) Thread priority 26 woke up.
 (priority-sema) Back in main thread.
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/priority-sema.output
-(priority-sema) Thread priority 27 woke up.
-=======
 (priority-sema) Thread priority 25 woke up.
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/priority-sema.output
 (priority-sema) Back in main thread.
 (priority-sema) Thread priority 24 woke up.
 (priority-sema) Back in main thread.
@@ -39,14 +31,8 @@ Executing 'priority-sema':
 (priority-sema) Back in main thread.
 (priority-sema) end
 Execution of 'priority-sema' complete.
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/priority-sema.output
-Timer: 135 ticks
-Thread: 0 idle ticks, 139 kernel ticks, 0 user ticks
-Console: 794 characters output
-=======
 Timer: 201 ticks
 Thread: 0 idle ticks, 204 kernel ticks, 0 user ticks
 Console: 1190 characters output
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/priority-sema.output
 Keyboard: 0 keys pressed
 Powering off...

@@ -1,8 +1,4 @@
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/priority-donate-nest.output
-Writing command line to /tmp/A7rgZQZNr1.dsk...
-=======
-Writing command line to /tmp/sSs66PQG0T.dsk...
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/priority-donate-nest.output
+Writing command line to /tmp/R4vUTW90tw.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q run priority-donate-nest
@@ -14,11 +10,7 @@ Boot complete.
 Executing 'priority-donate-nest':
 (priority-donate-nest) begin
 (priority-donate-nest) Low thread should have priority 32.  Actual priority: 32.
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/priority-donate-nest.output
-(priority-donate-nest) Low thread should have priority 33.  Actual priority: 32.
-=======
 (priority-donate-nest) Low thread should have priority 33.  Actual priority: 33.
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/priority-donate-nest.output
 (priority-donate-nest) Medium thread should have priority 33.  Actual priority: 33.
 (priority-donate-nest) Medium thread got the lock.
 (priority-donate-nest) High thread got the lock.
@@ -26,16 +18,11 @@ Executing 'priority-donate-nest':
 (priority-donate-nest) High thread should have just finished.
 (priority-donate-nest) Middle thread finished.
 (priority-donate-nest) Medium thread should just have finished.
-(priority-donate-nest) Low thread should have priority 31.  Actual priority: 32.
+(priority-donate-nest) Low thread should have priority 31.  Actual priority: 31.
 (priority-donate-nest) end
 Execution of 'priority-donate-nest' complete.
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/priority-donate-nest.output
-Timer: 144 ticks
-Thread: 0 idle ticks, 147 kernel ticks, 0 user ticks
-=======
 Timer: 141 ticks
 Thread: 0 idle ticks, 145 kernel ticks, 0 user ticks
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/priority-donate-nest.output
 Console: 1060 characters output
 Keyboard: 0 keys pressed
 Powering off...

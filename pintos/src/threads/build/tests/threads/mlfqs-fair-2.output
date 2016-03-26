@@ -1,8 +1,4 @@
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/mlfqs-fair-2.output
-Writing command line to /tmp/dPUaN3jme9.dsk...
-=======
-Writing command line to /tmp/s3wve7buTx.dsk...
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/mlfqs-fair-2.output
+Writing command line to /tmp/E6OteWyTN9.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q -mlfqs run mlfqs-fair-2

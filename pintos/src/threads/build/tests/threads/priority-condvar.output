@@ -1,8 +1,4 @@
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/priority-condvar.output
-Writing command line to /tmp/1XCB4w0URh.dsk...
-=======
-Writing command line to /tmp/Cfpm7UgJnI.dsk...
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/priority-condvar.output
+Writing command line to /tmp/uYAcclwLOH.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q run priority-condvar
@@ -30,12 +26,7 @@ Executing 'priority-condvar':
 (priority-condvar) Signaling...
 (priority-condvar) Thread priority 28 woke up.
 (priority-condvar) Signaling...
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/priority-condvar.output
-(priority-condvar) Thread priority 30 woke up.
-(priority-condvar) Thread priority 23 woke up.
-=======
 (priority-condvar) Thread priority 27 woke up.
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/priority-condvar.output
 (priority-condvar) Signaling...
 (priority-condvar) Thread priority 26 woke up.
 (priority-condvar) Signaling...
@@ -50,14 +41,8 @@ Executing 'priority-condvar':
 (priority-condvar) Thread priority 21 woke up.
 (priority-condvar) end
 Execution of 'priority-condvar' complete.
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/priority-condvar.output
-Timer: 205 ticks
-Thread: 0 idle ticks, 208 kernel ticks, 0 user ticks
-Console: 1289 characters output
-=======
 Timer: 265 ticks
 Thread: 0 idle ticks, 268 kernel ticks, 0 user ticks
 Console: 1665 characters output
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/priority-condvar.output
 Keyboard: 0 keys pressed
 Powering off...

@@ -1,8 +1,4 @@
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/priority-fifo.output
-Writing command line to /tmp/VSErMajIvA.dsk...
-=======
-Writing command line to /tmp/2zLodDre9U.dsk...
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/priority-fifo.output
+Writing command line to /tmp/Br5NQ77NH6.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q run priority-fifo
@@ -15,16 +11,6 @@ Executing 'priority-fifo':
 (priority-fifo) begin
 (priority-fifo) 16 threads will iterate 16 times in the same order each time.
 (priority-fifo) If the order varies then there is a bug.
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/priority-fifo.output
-(priority-fifo)Kernel PANIC at ../../threads/thread.c:153 in priority_donate(): assertion `is_thread (donor) && is_thread (donee)' failed.
-Call stack: 0xc0107794 0xc010083f 0xc0102c16 0xc010af31 0xc0100f55.
-The `backtrace' program can make call stacks useful.
-Read "Backtraces" in the "Debugging Tools" chapter
-of the Pintos documentation for more information.
-Timer: 101 ticks
-Thread: 0 idle ticks, 101 kernel ticks, 0 user ticks
-Console: 817 characters output
-=======
 (priority-fifo) iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
 (priority-fifo) iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
 (priority-fifo) iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
@@ -46,6 +32,5 @@ Execution of 'priority-fifo' complete.
 Timer: 343 ticks
 Thread: 0 idle ticks, 346 kernel ticks, 0 user ticks
 Console: 1555 characters output
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/priority-fifo.output
 Keyboard: 0 keys pressed
 Powering off...

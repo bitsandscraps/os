@@ -1,8 +1,4 @@
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/mlfqs-block.output
-Writing command line to /tmp/uJ4W4CAFZM.dsk...
-=======
-Writing command line to /tmp/z34Yz0bLnC.dsk...
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/mlfqs-block.output
+Writing command line to /tmp/n9JRlRBq4w.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q -mlfqs run mlfqs-block

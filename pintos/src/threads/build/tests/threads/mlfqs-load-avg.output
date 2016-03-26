@@ -1,8 +1,4 @@
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/mlfqs-load-avg.output
-Writing command line to /tmp/RRSpyffEXw.dsk...
-=======
-Writing command line to /tmp/YyGYeoT9OD.dsk...
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/mlfqs-load-avg.output
+Writing command line to /tmp/FmnJ3H6IUR.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q -mlfqs run mlfqs-load-avg
@@ -108,11 +104,7 @@ Executing 'mlfqs-load-avg':
 (mlfqs-load-avg) end
 Execution of 'mlfqs-load-avg' complete.
 Timer: 18850 ticks
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/mlfqs-load-avg.output
-Thread: 6479 idle ticks, 12375 kernel ticks, 0 user ticks
-=======
 Thread: 6477 idle ticks, 12378 kernel ticks, 0 user ticks
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/mlfqs-load-avg.output
 Console: 5389 characters output
 Keyboard: 0 keys pressed
 Powering off...
