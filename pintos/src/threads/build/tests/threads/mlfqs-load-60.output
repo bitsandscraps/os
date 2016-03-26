@@ -1,4 +1,8 @@
+<<<<<<< HEAD:pintos/src/threads/build/tests/threads/mlfqs-load-60.output
 Writing command line to /tmp/UrWL5ynM6h.dsk...
+=======
+Writing command line to /tmp/gW8uKjC5U9.dsk...
+>>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/mlfqs-load-60.output
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q -mlfqs run mlfqs-load-60
@@ -104,7 +108,11 @@ Executing 'mlfqs-load-60':
 (mlfqs-load-60) end
 Execution of 'mlfqs-load-60' complete.
 Timer: 18849 ticks
+<<<<<<< HEAD:pintos/src/threads/build/tests/threads/mlfqs-load-60.output
 Thread: 11928 idle ticks, 6924 kernel ticks, 0 user ticks
+=======
+Thread: 11964 idle ticks, 6888 kernel ticks, 0 user ticks
+>>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/mlfqs-load-60.output
 Console: 5298 characters output
 Keyboard: 0 keys pressed
 Powering off...

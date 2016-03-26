@@ -1,4 +1,8 @@
+<<<<<<< HEAD:pintos/src/threads/build/tests/threads/alarm-negative.output
 Writing command line to /tmp/uBK1OPkWOB.dsk...
+=======
+Writing command line to /tmp/rc7cKB8SD2.dsk...
+>>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/alarm-negative.output
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q run alarm-negative
@@ -12,7 +16,7 @@ Executing 'alarm-negative':
 (alarm-negative) PASS
 (alarm-negative) end
 Execution of 'alarm-negative' complete.
-Timer: 47 ticks
+Timer: 48 ticks
 Thread: 1 idle ticks, 49 kernel ticks, 0 user ticks
 Console: 405 characters output
 Keyboard: 0 keys pressed

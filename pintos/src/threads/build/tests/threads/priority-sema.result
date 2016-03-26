@@ -1,3 +1,4 @@
+<<<<<<< HEAD:pintos/src/threads/build/tests/threads/priority-sema.result
 FAIL
 Test output failed to match any acceptable form.
 
@@ -48,3 +49,6 @@ Differences in `diff -u' format:
 - (priority-sema) Thread priority 21 woke up.
   (priority-sema) Back in main thread.
   (priority-sema) end
+=======
+PASS
+>>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/priority-sema.result
