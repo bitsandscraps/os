@@ -5,7 +5,6 @@
 #include <stdbool.h>
 
 /* A counting semaphore. */
-static bool high_priority(const struct list_elem *, const struct list_elem *, void *);
 struct semaphore 
   {
     unsigned value;             /* Current value. */
@@ -22,6 +21,8 @@ struct lock
   {
     struct thread *holder;      /* Thread holding lock (for debugging). */
     struct semaphore semaphore; /* Binary semaphore controlling access. */
+    int priority;               /* Most recent priority donation. */
+    struct list_elem elem;      /* List element. Managed in struct thread. */ 
   };
 
 void lock_init (struct lock *);

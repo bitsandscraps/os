@@ -1,4 +1,8 @@
+<<<<<<< HEAD:pintos/src/threads/build/tests/threads/mlfqs-fair-20.output
 Writing command line to /tmp/UJEyc8rSKc.dsk...
+=======
+Writing command line to /tmp/i4JqHlzf1Q.dsk...
+>>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/mlfqs-fair-20.output
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q -mlfqs run mlfqs-fair-20
@@ -12,10 +16,11 @@ Executing 'mlfqs-fair-20':
 (mlfqs-fair-20) Starting 20 threads...
 (mlfqs-fair-20) Starting threads took 67 ticks.
 (mlfqs-fair-20) Sleeping 40 seconds to let threads run, please wait...
-(mlfqs-fair-20) Thread 0 received 152 ticks.
-(mlfqs-fair-20) Thread 1 received 153 ticks.
+(mlfqs-fair-20) Thread 0 received 153 ticks.
+(mlfqs-fair-20) Thread 1 received 152 ticks.
 (mlfqs-fair-20) Thread 2 received 153 ticks.
 (mlfqs-fair-20) Thread 3 received 152 ticks.
+<<<<<<< HEAD:pintos/src/threads/build/tests/threads/mlfqs-fair-20.output
 (mlfqs-fair-20) Thread 4 received 152 ticks.
 (mlfqs-fair-20) Thread 5 received 152 ticks.
 (mlfqs-fair-20) Thread 6 received 153 ticks.
@@ -27,15 +32,41 @@ Executing 'mlfqs-fair-20':
 (mlfqs-fair-20) Thread 12 received 148 ticks.
 (mlfqs-fair-20) Thread 13 received 148 ticks.
 (mlfqs-fair-20) Thread 14 received 149 ticks.
+=======
+(mlfqs-fair-20) Thread 4 received 153 ticks.
+(mlfqs-fair-20) Thread 5 received 153 ticks.
+(mlfqs-fair-20) Thread 6 received 152 ticks.
+(mlfqs-fair-20) Thread 7 received 152 ticks.
+(mlfqs-fair-20) Thread 8 received 153 ticks.
+(mlfqs-fair-20) Thread 9 received 152 ticks.
+(mlfqs-fair-20) Thread 10 received 148 ticks.
+(mlfqs-fair-20) Thread 11 received 148 ticks.
+(mlfqs-fair-20) Thread 12 received 149 ticks.
+(mlfqs-fair-20) Thread 13 received 149 ticks.
+(mlfqs-fair-20) Thread 14 received 148 ticks.
+>>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/mlfqs-fair-20.output
 (mlfqs-fair-20) Thread 15 received 148 ticks.
+<<<<<<< HEAD:pintos/src/threads/build/tests/threads/mlfqs-fair-20.output
 (mlfqs-fair-20) Thread 16 received 148 ticks.
+=======
+(mlfqs-fair-20) Thread 16 received 149 ticks.
+>>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/mlfqs-fair-20.output
 (mlfqs-fair-20) Thread 17 received 148 ticks.
+<<<<<<< HEAD:pintos/src/threads/build/tests/threads/mlfqs-fair-20.output
 (mlfqs-fair-20) Thread 18 received 148 ticks.
+=======
+(mlfqs-fair-20) Thread 18 received 149 ticks.
+>>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/mlfqs-fair-20.output
 (mlfqs-fair-20) Thread 19 received 148 ticks.
 (mlfqs-fair-20) end
 Execution of 'mlfqs-fair-20' complete.
+<<<<<<< HEAD:pintos/src/threads/build/tests/threads/mlfqs-fair-20.output
 Timer: 4251 ticks
 Thread: 982 idle ticks, 3272 kernel ticks, 0 user ticks
+=======
+Timer: 4253 ticks
+Thread: 982 idle ticks, 3274 kernel ticks, 0 user ticks
+>>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/mlfqs-fair-20.output
 Console: 1459 characters output
 Keyboard: 0 keys pressed
 Powering off...

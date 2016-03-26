@@ -67,12 +67,12 @@ static void idle (void *aux UNUSED);
 static struct thread *running_thread (void);
 static struct thread *next_thread_to_run (void);
 static void init_thread (struct thread *, const char *name, int priority);
-static bool high_priority(const struct list_elem *a,
-                          const struct list_elem *b,
-                           void *aux UNUSED);
-static bool less_wake_tick (const struct list_elem *a,
+static bool higher_priority(const struct list_elem *a,
                             const struct list_elem *b,
-                            void *aux UNUSED); 
+                            void *aux UNUSED);
+static bool lesser_wakeup_tick (const struct list_elem *a,
+                                const struct list_elem *b,
+                                void *aux UNUSED); 
 static bool is_thread (struct thread *) UNUSED;
 static void *alloc_frame (struct thread *, size_t size);
 static void schedule (void);
@@ -146,52 +146,42 @@ thread_tick (void)
     intr_yield_on_return ();
 }
 
-/* Donate priority of donor to donee. */
+/* Donate priority of donor to the holder of the lock
+ * the thread is trying to acquire. */
 void
-priority_donate (struct thread * donor, struct thread * donee)
+donate_priority (struct thread * donor)
 {
-  ASSERT (is_thread (donor) && is_thread (donee));
-  ASSERT (donee->priority < donor->priority);
-  append_priority_history (&donee->pri_his, donee->priority);
-  donee->priority = donor->priority;
-}
-
-/* Removes priority of level base from history and modify the
- * priority to an appropriate one. */
-void
-priority_check (struct thread * thr, int base)
-{
-  ASSERT (is_thread (thr));
-  struct priority_history * pri_his = &thr->pri_his;
-  int last = pri_his->top - 1;
-  ASSERT (last >= 0);
-  if (last <= 0) return;    /* Did not get donated. */
-  if (thr->priority == base) {
-    pri_his->top = last;
-    thr->priority = pri_his->stack[last - 1];
+  struct lock * lock = donor->lock_trying_acquire;
+  ASSERT (lock);
+  while (lock)
+  {
+    struct thread * donee = lock->holder;
+    ASSERT (is_thread (donor) && is_thread (donee));
+    if (donor->priority > donee->priority)
+    {
+      donee->priority = donor->priority;
+      lock->priority = donor->priority;
+    }
+    lock = donee->lock_trying_acquire;
   }
 }
 
-/* Recovers original priority of thr and
- * returns the original priority. */
-int
-priority_recover (struct thread * thr)
+/* Restores initial priority of thr. */
+void
+restore_priority (struct thread * thr)
 {
   ASSERT (is_thread (thr));
-  struct priority_history * pri_his = &thr->pri_his;
-  if (pri_his->top <= 0)
-    return;
-  thr->priority = pri_his->stack[0];
-  pri_his->top = 1;
-  return thr->priority;
-}
-
-/* Append an element to the priority history stack. */
-void append_priority_history (struct priority_history * pri_his, int elem) {
-  ASSERT (pri_his->top >= 0 && pri_his->top <= PRI_DONATION_LIMIT);
-  if (pri_his->top >= PRI_DONATION_LIMIT)
-    return;
-  pri_his->stack[pri_his->top++] = elem;
+  int priority = thr->initial_priority;
+  struct list * lock_list = &thr->locks_holding;
+  struct list_elem * e;
+  for (e = list_begin (lock_list); e != list_end (lock_list);
+       e = list_next (e))
+  {
+    struct lock * lock = list_entry (e, struct lock, elem);
+    if (priority < lock->priority)
+      priority = lock->priority;
+  }
+  thr->priority = priority;
 }
 
 /* Prints thread statistics. */
@@ -254,7 +244,9 @@ thread_create (const char *name, int priority,
 
   /* Add to run queue. */
   thread_unblock (t);
-  if(priority>thread_current()->priority)
+  
+  /* Yield the current thread if the new thread has higher priority. */
+  if(priority > thread_current ()->priority)
     thread_yield();
 
   return tid;
@@ -293,7 +285,7 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  list_insert_ordered(&ready_list, &t->elem, high_priority, NULL);
+  list_insert_ordered(&ready_list, &t->elem, higher_priority, NULL);
   t->status = THREAD_READY;
   intr_set_level (old_level);
 }
@@ -360,7 +352,7 @@ thread_sleep (int64_t wakeup_tick)
   ASSERT (!intr_context ());
   old_level = intr_disable ();
   curr->wakeup_tick = wakeup_tick;
-  list_insert_ordered (&waiting_list, &curr->elem, less_wake_tick, NULL);
+  list_insert_ordered (&waiting_list, &curr->elem, lesser_wakeup_tick, NULL);
   thread_block();
   intr_set_level (old_level);
 }
@@ -377,7 +369,7 @@ thread_yield (void)
 
   old_level = intr_disable ();
   if (curr != idle_thread) 
-    list_insert_ordered(&ready_list, &curr->elem, high_priority, NULL);
+    list_insert_ordered(&ready_list, &curr->elem, higher_priority, NULL);
   curr->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
@@ -387,7 +379,13 @@ thread_yield (void)
 void
 thread_set_priority (int new_priority) 
 {
-  thread_current ()->priority = new_priority;
+  struct thread * curr = thread_current ();
+  int old_priority = curr->priority;
+  if (curr->priority == curr->initial_priority)
+    curr->priority = new_priority;
+  curr->initial_priority = new_priority;
+  if (old_priority > new_priority)
+    thread_yield();
 }
 
 /* Returns the current thread's priority. */
@@ -427,7 +425,7 @@ thread_get_recent_cpu (void)
   /* Not yet implemented. */
   return 0;
 }
-
+
 /* Idle thread.  Executes when no other thread is ready to run.
 
    The idle thread is initially put on the ready list by
@@ -510,9 +508,9 @@ wake_threads (int64_t current_tick)
   }
 }
 
-/* Returns true if wake_tick of a is less than wake_tick of b. */
+/* Returns true if wakeup_tick of a is less than wake_tick of b. */
 static bool
-less_wake_tick (const struct list_elem *a,
+lesser_wakeup_tick (const struct list_elem *a,
                 const struct list_elem *b, void *aux UNUSED)
 {
   const struct thread *a_thr = list_entry (a, struct thread, elem);
@@ -522,7 +520,7 @@ less_wake_tick (const struct list_elem *a,
 
 /* Returns true if priority of a is higher than priority of b. */
 static bool
-high_priority (const struct list_elem *a,
+higher_priority (const struct list_elem *a,
                const struct list_elem *b, void *aux UNUSED)
 {
   const struct thread *a_thr = list_entry (a, struct thread, elem);
@@ -551,10 +549,10 @@ init_thread (struct thread *t, const char *name, int priority)
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
-  t->pri_his.stack[0] = priority;
-  t->pri_his.top = 1;
+  t->initial_priority = priority;
+  list_init (&t->locks_holding);
+  t->lock_trying_acquire = NULL;
   t->magic = THREAD_MAGIC;
- 
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and

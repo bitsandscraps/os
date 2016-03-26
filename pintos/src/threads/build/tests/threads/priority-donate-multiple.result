@@ -1,3 +1,4 @@
+<<<<<<< HEAD:pintos/src/threads/build/tests/threads/priority-donate-multiple.result
 FAIL
 Test output failed to match any acceptable form.
 
@@ -29,3 +30,6 @@ Differences in `diff -u' format:
 - (priority-donate-multiple) Main thread should have priority 31.  Actual priority: 31.
 + (priority-donate-multiple) Main thread should have priority 31.  Actual priority: 33.
   (priority-donate-multiple) end
+=======
+PASS
+>>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/priority-donate-multiple.result

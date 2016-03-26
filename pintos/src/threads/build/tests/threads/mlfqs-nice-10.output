@@ -1,4 +1,8 @@
+<<<<<<< HEAD:pintos/src/threads/build/tests/threads/mlfqs-nice-10.output
 Writing command line to /tmp/OSqas71zjR.dsk...
+=======
+Writing command line to /tmp/nLckp9J1dq.dsk...
+>>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/mlfqs-nice-10.output
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q -mlfqs run mlfqs-nice-10
@@ -12,20 +16,35 @@ Executing 'mlfqs-nice-10':
 (mlfqs-nice-10) Starting 10 threads...
 (mlfqs-nice-10) Starting threads took 36 ticks.
 (mlfqs-nice-10) Sleeping 40 seconds to let threads run, please wait...
-(mlfqs-nice-10) Thread 0 received 301 ticks.
-(mlfqs-nice-10) Thread 1 received 300 ticks.
+(mlfqs-nice-10) Thread 0 received 300 ticks.
+(mlfqs-nice-10) Thread 1 received 301 ticks.
 (mlfqs-nice-10) Thread 2 received 301 ticks.
 (mlfqs-nice-10) Thread 3 received 300 ticks.
+<<<<<<< HEAD:pintos/src/threads/build/tests/threads/mlfqs-nice-10.output
 (mlfqs-nice-10) Thread 4 received 300 ticks.
 (mlfqs-nice-10) Thread 5 received 301 ticks.
+=======
+(mlfqs-nice-10) Thread 4 received 301 ticks.
+(mlfqs-nice-10) Thread 5 received 300 ticks.
+>>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/mlfqs-nice-10.output
 (mlfqs-nice-10) Thread 6 received 300 ticks.
 (mlfqs-nice-10) Thread 7 received 300 ticks.
+<<<<<<< HEAD:pintos/src/threads/build/tests/threads/mlfqs-nice-10.output
 (mlfqs-nice-10) Thread 8 received 300 ticks.
 (mlfqs-nice-10) Thread 9 received 301 ticks.
+=======
+(mlfqs-nice-10) Thread 8 received 301 ticks.
+(mlfqs-nice-10) Thread 9 received 300 ticks.
+>>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/mlfqs-nice-10.output
 (mlfqs-nice-10) end
 Execution of 'mlfqs-nice-10' complete.
+<<<<<<< HEAD:pintos/src/threads/build/tests/threads/mlfqs-nice-10.output
 Timer: 4155 ticks
 Thread: 991 idle ticks, 3167 kernel ticks, 0 user ticks
+=======
+Timer: 4157 ticks
+Thread: 990 idle ticks, 3170 kernel ticks, 0 user ticks
+>>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/mlfqs-nice-10.output
 Console: 999 characters output
 Keyboard: 0 keys pressed
 Powering off...

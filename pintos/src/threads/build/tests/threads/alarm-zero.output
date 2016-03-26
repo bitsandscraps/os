@@ -1,4 +1,8 @@
+<<<<<<< HEAD:pintos/src/threads/build/tests/threads/alarm-zero.output
 Writing command line to /tmp/t04gexJ7e2.dsk...
+=======
+Writing command line to /tmp/rsoFPyxVIX.dsk...
+>>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/alarm-zero.output
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q run alarm-zero
@@ -12,8 +16,8 @@ Executing 'alarm-zero':
 (alarm-zero) PASS
 (alarm-zero) end
 Execution of 'alarm-zero' complete.
-Timer: 45 ticks
-Thread: 1 idle ticks, 47 kernel ticks, 0 user ticks
+Timer: 47 ticks
+Thread: 1 idle ticks, 49 kernel ticks, 0 user ticks
 Console: 381 characters output
 Keyboard: 0 keys pressed
 Powering off...

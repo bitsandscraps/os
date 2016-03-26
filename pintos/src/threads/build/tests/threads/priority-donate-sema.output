@@ -1,4 +1,8 @@
+<<<<<<< HEAD:pintos/src/threads/build/tests/threads/priority-donate-sema.output
 Writing command line to /tmp/AI5skUEJhz.dsk...
+=======
+Writing command line to /tmp/CotoOENhJf.dsk...
+>>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/priority-donate-sema.output
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q run priority-donate-sema
@@ -10,9 +14,15 @@ Boot complete.
 Executing 'priority-donate-sema':
 (priority-donate-sema) begin
 (priority-donate-sema) Thread L acquired lock.
+(priority-donate-sema) Thread L downed semaphore.
+(priority-donate-sema) Thread H acquired lock.
+(priority-donate-sema) Thread H finished.
+(priority-donate-sema) Thread M finished.
+(priority-donate-sema) Thread L finished.
 (priority-donate-sema) Main thread finished.
 (priority-donate-sema) end
 Execution of 'priority-donate-sema' complete.
+<<<<<<< HEAD:pintos/src/threads/build/tests/threads/priority-donate-sema.output
 Timer: 67 ticks
 (priority-donate-sema) Thread L downed semaphore.
 Kernel PANIC at ../../threads/synch.c:249 in lock_release(): assertion `lock_held_by_current_thread (lock)' failed.
@@ -23,5 +33,10 @@ of the Pintos documentation for more information.
 Timer: 77 ticks
 Thread: 0 idle ticks, 77 kernel ticks, 0 user ticks
 Console: 898 characters output
+=======
+Timer: 102 ticks
+Thread: 0 idle ticks, 106 kernel ticks, 0 user ticks
+Console: 730 characters output
+>>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/priority-donate-sema.output
 Keyboard: 0 keys pressed
 Powering off...
