@@ -5,6 +5,7 @@
 #include <list.h>
 #include <stdint.h>
 #include "threads/synch.h"
+#include "threads/fixed-point.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -94,7 +95,7 @@ struct thread
 
     /* parameters for advanced scheduler */
     int nice;
-    int recent_cpu;
+    fixed_point recent_cpu;
 
     /* Lock that the thread is trying to acquire. */
     struct lock * lock_trying_acquire;
@@ -147,6 +148,9 @@ void restore_priority (struct thread * thr);
 int thread_get_priority (void);
 void thread_set_priority (int);
 
+void recent_cpu_recalculate(void);
+void recent_cpu_incr(void);
+void priority_recalculate(void);
 int thread_get_nice (void);
 void thread_set_nice (int);
 int thread_get_recent_cpu (void);

@@ -1,13 +1,13 @@
 FAIL
-Kernel panic in run: PANIC at ../../lib/kernel/list.c:290 in list_front(): assertion `!list_empty (list)' failed.
-Call stack: 0xc01077e0 0xc0107ddc 0xc01006e0 0xc010bf7b 0xc010bde6 0xc01098a6 0xc0100535 0xc0100601 0xc0100094
+Kernel panic in run: PANIC at ../../threads/interrupt.c:373 in intr_handler(): Unexpected interrupt
+Call stack: 0xc0107b80 0xc0101dc5 0xc0101f5b 0xc010078c 0xc010406d 0xc0101d81 0xc0101f5b 0xc01011c3 0xc010120c
 Translation of call stack:
-0xc01077e0: debug_panic (.../../lib/kernel/debug.c:34)
-0xc0107ddc: list_front (.../../lib/kernel/list.c:291)
-0xc01006e0: thread_set_nice (..../../threads/thread.c:107)
-0xc010bf7b: test_mlfqs_fair (...s/threads/mlfqs-fair.c:81)
-0xc010bde6: test_mlfqs_fair_2 (...s/threads/mlfqs-fair.c:34)
-0xc01098a6: run_test (.../tests/threads/tests.c:57)
-0xc0100535: run_task (.../../../threads/init.c:270)
-0xc0100601: run_actions (.../../../threads/init.c:319)
-0xc0100094: main (.../../../threads/init.c:124)
+0xc0107b80: debug_panic (.../../lib/kernel/debug.c:34)
+0xc0101dc5: intr_handler (..../threads/interrupt.c:377)
+0xc0101f5b: intr_entry (threads/intr-stubs.S:38)
+0xc010078c: fp_divide_int (.../threads/fixed-point.h:74)
+0xc010406d: timer_interrupt (...../../devices/timer.c:140)
+0xc0101d81: intr_handler (..../threads/interrupt.c:361)
+0xc0101f5b: intr_entry (threads/intr-stubs.S:38)
+0xc01011c3: idle (..../../threads/thread.c:556)
+0xc010120c: kernel_thread (..../../threads/thread.c:586)
