@@ -96,7 +96,7 @@ timer_elapsed (int64_t then)
 void
 timer_sleep (int64_t ticks) 
 {
-  int64_t wakeup_tick = timer_ticks () + ticks;
+  int64_t wakeup_tick = timer_ticks()+ ticks;
   thread_sleep (wakeup_tick);
 }
 

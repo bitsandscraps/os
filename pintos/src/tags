@@ -1170,7 +1170,7 @@ list_splice	/home/team03/seongsu/os/os/pintos/src/lib/kernel/list.c	/^list_splic
 list_tail	/home/team03/seongsu/os/os/pintos/src/lib/kernel/list.c	/^list_tail (struct list *list) $/;"	f
 list_unique	/home/team03/seongsu/os/os/pintos/src/lib/kernel/list.c	/^list_unique (struct list *list, struct list *duplicates,$/;"	f
 load	/home/team03/seongsu/os/os/pintos/src/userprog/process.c	/^load (const char *file_name, void (**eip) (void), void **esp) $/;"	f
-load_avg	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^static fixed_point load_avg=0;$/;"	v	file:
+load_avg	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^static fixed_point load_avg;$/;"	v	file:
 load_segment	/home/team03/seongsu/os/os/pintos/src/userprog/process.c	/^load_segment (struct file *file, off_t ofs, uint8_t *upage,$/;"	f	file:
 load_thread	/home/team03/seongsu/os/os/pintos/src/tests/threads/mlfqs-fair.c	/^load_thread (void *ti_) $/;"	f	file:
 load_thread	/home/team03/seongsu/os/os/pintos/src/tests/threads/mlfqs-load-60.c	/^load_thread (void *aux UNUSED) $/;"	f	file:
@@ -1412,7 +1412,7 @@ priority	/home/team03/seongsu/os/os/pintos/src/threads/synch.h	/^    int priorit
 priority	/home/team03/seongsu/os/os/pintos/src/threads/thread.h	/^    int priority;                       \/* Current priority. *\/$/;"	m	struct:thread
 priority_condvar_thread	/home/team03/seongsu/os/os/pintos/src/tests/threads/priority-condvar.c	/^priority_condvar_thread (void *aux UNUSED) $/;"	f	file:
 priority_condvar_thread	/home/team03/seongsu/os/os/pintos/src/tests/threads/priority-condvar.c	/^static thread_func priority_condvar_thread;$/;"	v	file:
-priority_recalculate	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^priority_recalculate(void)$/;"	f
+priority_recalculate	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^void priority_recalculate(void)$/;"	f
 priority_recalculate_indiv	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^priority_recalculate_indiv(struct thread * thr)$/;"	f
 priority_sema_thread	/home/team03/seongsu/os/os/pintos/src/tests/threads/priority-sema.c	/^priority_sema_thread (void *aux UNUSED) $/;"	f	file:
 priority_sema_thread	/home/team03/seongsu/os/os/pintos/src/tests/threads/priority-sema.c	/^static thread_func priority_sema_thread;$/;"	v	file:

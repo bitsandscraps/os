@@ -46,7 +46,7 @@ tests/threads/mlfqs-fair-2.output		\
 tests/threads/mlfqs-fair-20.output		\
 tests/threads/mlfqs-nice-2.output		\
 tests/threads/mlfqs-nice-10.output		\
-tests/threads/mlfqs-block.output
+tests/threads/mlfqs-block.output     
 
 $(MLFQS_OUTPUTS): KERNELFLAGS += -mlfqs
 $(MLFQS_OUTPUTS): TIMEOUT = 480

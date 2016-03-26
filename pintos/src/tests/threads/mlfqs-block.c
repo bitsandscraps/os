@@ -1,3 +1,4 @@
+
 /* Checks that recent_cpu and priorities are updated for blocked
    threads.
 
@@ -59,6 +60,5 @@ block_thread (void *lock_)
 
   msg ("Block thread acquiring lock...");
   lock_acquire (lock);
-
   msg ("...got it.");
 }

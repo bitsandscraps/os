@@ -103,7 +103,7 @@ priority_yield(void)
   if(list_empty(&ready_list)) return;
   struct thread * thr;
   thr=list_entry(list_front(&ready_list), struct thread, elem);
-  if(thread_current()->priority<thr->priority)
+  if(thread_current()->priority < thr->priority)
     thread_yield();
   intr_set_level(old_level);
 }
@@ -130,6 +130,7 @@ void priority_recalculate(void)
     thr=list_entry(e, struct thread, elem_);
     priority_recalculate_indiv(thr);
   }
+  list_sort(&ready_list, higher_priority, NULL);
   intr_set_level(old_level);
 }
 /* recalculate priority of given thread*/
@@ -140,13 +141,11 @@ priority_recalculate_indiv(struct thread * thr)
   if(thr==idle_thread) return;
   ASSERT(thr!=idle_thread);
   int new_pri;
-  fixed_point pri_;
-  pri_=fp_divide_int(thr->recent_cpu, 4);
-  pri_=fp_subtract(fp(PRI_MAX),pri_);
-  pri_=fp_subtract_int(pri_,(thr->nice));
-  pri_=fp_subtract_int(pri_,(thr->nice));
-  new_pri=fp_round(pri_);
+  new_pri=
+    PRI_MAX-fp_round(fp_divide_int(thr->recent_cpu,4))-(thr->nice)*2;
   thr->priority=new_pri;
+  if(thr->priority>PRI_MAX) thr->priority=PRI_MAX;
+  if(thr->priority<PRI_MIN) thr->priority=PRI_MIN;
 }
 
 /* recalculate priority of every threads in thread_list */
@@ -172,13 +171,13 @@ recent_cpu_recalculate(void)
   struct list_elem *a;
   struct thread * thr;
   int size_thread;
+  enum intr_level old_level=intr_disable();
   size_thread=list_size(&ready_list);
   if(thread_current()!=idle_thread)
     size_thread++;
 
   load_avg=fp_add(fp_divide_int(fp_multiply_int(load_avg,59),60),
                   fp_divide_int(fp(size_thread),60));
-  enum intr_level old_level=intr_disable();
   for(a=list_begin(&thread_list);a!=list_end(&thread_list);a=list_next(a))
   {
     thr=list_entry(a, struct thread, elem_);
@@ -481,8 +480,6 @@ thread_exit (void)
   intr_disable ();
   list_remove(&(thread_current()->elem_));
   thread_current ()->status = THREAD_DYING;
-  //thread_current()->elem_.prev->next=thread_current()->elem_.next;
-  //thread_current()->elem_.next->prev=thread_current()->elem_.prev;
   schedule ();
   NOT_REACHED ();
 }
@@ -680,6 +677,7 @@ init_thread (struct thread *t, const char *name, int priority)
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
+  list_push_back(&thread_list, &t->elem_);
   t->initial_priority = priority;
   list_init (&t->locks_holding);
   t->lock_trying_acquire = NULL;
@@ -694,7 +692,6 @@ init_thread (struct thread *t, const char *name, int priority)
     }
   }
   t->magic = THREAD_MAGIC;
-  list_push_back(&thread_list, &t->elem_);
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
@@ -721,7 +718,6 @@ next_thread_to_run (void)
   if (list_empty (&ready_list))
     return idle_thread;
   else
-    list_sort(&ready_list, higher_priority, NULL);
     return list_entry (list_pop_front (&ready_list), struct thread, elem);
 }
 
