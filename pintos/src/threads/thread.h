@@ -91,6 +91,9 @@ struct thread
     int priority;                       /* Current priority. */
     int initial_priority;               /* Initial priority. */
 
+    /* parameters for advanced scheduler */
+    int nice;
+
     /* Lock that the thread is trying to acquire. */
     struct lock * lock_trying_acquire;
     struct list locks_holding;          /* Locks the thread is holding. */

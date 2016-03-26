@@ -78,6 +78,40 @@ static void *alloc_frame (struct thread *, size_t size);
 static void schedule (void);
 void schedule_tail (struct thread *prev);
 static tid_t allocate_tid (void);
+int thread_get_nice(void);
+void thread_set_nice(int new_nice);
+
+/*returns the current thread's nice value */
+int
+thread_get_nice(void)
+{
+  return thread_current ()->nice;
+}
+
+/* sets the current thread's nice value to new_value
+ * and recalcultae the thrads' priority.
+ * if it's priority is no more the highes, yield it.
+ * */
+void
+thread_set_nice(int new_nice)
+{
+  return ;
+  struct thread * thr;
+  thr=thread_current ();
+  thr->nice=new_nice;
+  struct thread * thr_ready;
+  thr_ready=list_entry(list_front(&ready_list),struct thread, elem);
+  if(thr->priority<thr_ready->priority)
+    thread_yield();
+}
+
+
+
+
+
+
+
+
 
 /* Initializes the threading system by transforming the code
    that's currently running into a thread.  This can't work in
@@ -395,20 +429,7 @@ thread_get_priority (void)
   return thread_current ()->priority;
 }
 
-/* Sets the current thread's nice value to NICE. */
-void
-thread_set_nice (int nice UNUSED) 
-{
-  /* Not yet implemented. */
-}
 
-/* Returns the current thread's nice value. */
-int
-thread_get_nice (void) 
-{
-  /* Not yet implemented. */
-  return 0;
-}
 
 /* Returns 100 times the system load average. */
 int
