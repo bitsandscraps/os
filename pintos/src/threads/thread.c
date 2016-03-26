@@ -91,16 +91,35 @@ void priority_recalculate(void);
 void recent_cpu_incr(void);
 void recent_cpu_recalculate(void);
 void priority_recalculate_indiv(struct thread *);
+void priority_yield(void);
 
+
+/* yeild current thread if it's priority is no more the highest */
+void
+priority_yield(void)
+{
+  enum intr_level old_level=intr_disable();
+  if(list_empty(&ready_list)) return;
+  struct thread * thr;
+  thr=list_entry(list_front(&ready_list), struct thread, elem);
+  if(thread_current()->priority<thr->priority)
+    thread_yield();
+  intr_set_level(old_level);
+}
+
+
+/* increase running thread's recent_cpu */
 void
 recent_cpu_incr(void)
 {
+  if(thread_current()==idle_thread) return;
   enum intr_level old_level=intr_disable();
   struct thread * thr=thread_current();
   thr->recent_cpu=fp_add_int(thr->recent_cpu, 1);
   intr_set_level(old_level);
 }
 
+/* recalculate priority of given thread*/
 void
 priority_recalculate_indiv(struct thread * thr)
 {
@@ -114,7 +133,7 @@ priority_recalculate_indiv(struct thread * thr)
   intr_set_level(old_level);
 }
 
-
+/* recalculate priorities of every threads in thread_list */
 void
 priority_recalculate(void)
 {
@@ -136,6 +155,7 @@ priority_recalculate(void)
   intr_set_level(old_level);
 }
 
+/* recalculate recent_cpu of every threads in thread_list */
 void
 recent_cpu_recalculate(void)
 {
@@ -192,13 +212,9 @@ thread_set_nice(int new_nice)
   thr=thread_current ();
   thr->nice=new_nice;
   priority_recalculate_indiv(thr);
-  struct thread * thr_ready;
-  if(!list_empty(&ready_list)) {
-    thr_ready=list_entry(list_front(&ready_list),struct thread, elem);
-    if(thr->priority<thr_ready->priority)
-      thread_yield();
-    intr_set_level(old_level);
-  }
+  priority_yield(); 
+  intr_set_level(old_level);
+  
 }
 /* Initializes the threading system by transforming the code
    that's currently running into a thread.  This can't work in

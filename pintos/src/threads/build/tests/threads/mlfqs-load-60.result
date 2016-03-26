@@ -1,17 +1,17 @@
 FAIL
 Kernel panic in run: PANIC at ../../threads/interrupt.c:373 in intr_handler(): Unexpected interrupt
-Call stack: 0xc0107b80 0xc0101dc5 0xc0101f5b 0xc010078c 0xc010406d 0xc0101d81 0xc0101f5b 0xc01017b7 0xc0101767 0xc010100a 0xc0103fa3 0xc010bd79 0xc010120c
+Call stack: 0xc0107be4 0xc0101e29 0xc0101fbf 0xc01007f8 0xc01040d1 0xc0101de5 0xc0101fbf 0xc010181b 0xc01017cb 0xc010106d 0xc0104007 0xc010bddd 0xc010126f
 Translation of call stack:
-0xc0107b80: debug_panic (.../../lib/kernel/debug.c:34)
-0xc0101dc5: intr_handler (..../threads/interrupt.c:377)
-0xc0101f5b: intr_entry (threads/intr-stubs.S:38)
-0xc010078c: fp_divide_int (.../threads/fixed-point.h:74)
-0xc010406d: timer_interrupt (...../../devices/timer.c:140)
-0xc0101d81: intr_handler (..../threads/interrupt.c:361)
-0xc0101f5b: intr_entry (threads/intr-stubs.S:38)
-0xc01017b7: intr_enable (...../threads/interrupt.c:87)
-0xc0101767: intr_set_level (...../threads/interrupt.c:70)
-0xc010100a: thread_sleep (..../../threads/thread.c:483)
-0xc0103fa3: timer_sleep (...../../devices/timer.c:101)
-0xc010bd79: load_thread (...reads/mlfqs-load-60.c:155)
-0xc010120c: kernel_thread (..../../threads/thread.c:586)
+0xc0107be4: debug_panic (.../../lib/kernel/debug.c:34)
+0xc0101e29: intr_handler (..../threads/interrupt.c:377)
+0xc0101fbf: intr_entry (threads/intr-stubs.S:38)
+0xc01007f8: fp_divide_int (.../threads/fixed-point.h:75)
+0xc01040d1: timer_interrupt (...../../devices/timer.c:140)
+0xc0101de5: intr_handler (..../threads/interrupt.c:361)
+0xc0101fbf: intr_entry (threads/intr-stubs.S:38)
+0xc010181b: intr_enable (...../threads/interrupt.c:87)
+0xc01017cb: intr_set_level (...../threads/interrupt.c:70)
+0xc010106d: thread_sleep (..../../threads/thread.c:499)
+0xc0104007: timer_sleep (...../../devices/timer.c:101)
+0xc010bddd: load_thread (...reads/mlfqs-load-60.c:155)
+0xc010126f: kernel_thread (..../../threads/thread.c:602)

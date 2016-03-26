@@ -66,12 +66,14 @@ fp_multiply_int (fixed_point x, int y)
 static inline fixed_point
 fp_divide (fixed_point x, fixed_point y)
 {
+  ASSERT(y!=0);
   return ((int64_t) x) * FIXED_POINT_F / y;
 }
 
 static inline fixed_point
 fp_divide_int (fixed_point x, int n)
 {
+  ASSERT(n!=0);
   return x / n;
 }
 

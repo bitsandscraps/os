@@ -1,13 +1,13 @@
 FAIL
 Kernel panic in run: PANIC at ../../threads/interrupt.c:373 in intr_handler(): Unexpected interrupt
-Call stack: 0xc0107b80 0xc0101dc5 0xc0101f5b 0xc010078c 0xc010406d 0xc0101d81 0xc0101f5b 0xc01011c3 0xc010120c
+Call stack: 0xc0107be4 0xc0101e29 0xc0101fbf 0xc01007f8 0xc01040d1 0xc0101de5 0xc0101fbf 0xc0101226 0xc010126f
 Translation of call stack:
-0xc0107b80: debug_panic (.../../lib/kernel/debug.c:34)
-0xc0101dc5: intr_handler (..../threads/interrupt.c:377)
-0xc0101f5b: intr_entry (threads/intr-stubs.S:38)
-0xc010078c: fp_divide_int (.../threads/fixed-point.h:74)
-0xc010406d: timer_interrupt (...../../devices/timer.c:140)
-0xc0101d81: intr_handler (..../threads/interrupt.c:361)
-0xc0101f5b: intr_entry (threads/intr-stubs.S:38)
-0xc01011c3: idle (..../../threads/thread.c:556)
-0xc010120c: kernel_thread (..../../threads/thread.c:586)
+0xc0107be4: debug_panic (.../../lib/kernel/debug.c:34)
+0xc0101e29: intr_handler (..../threads/interrupt.c:377)
+0xc0101fbf: intr_entry (threads/intr-stubs.S:38)
+0xc01007f8: fp_divide_int (.../threads/fixed-point.h:75)
+0xc01040d1: timer_interrupt (...../../devices/timer.c:140)
+0xc0101de5: intr_handler (..../threads/interrupt.c:361)
+0xc0101fbf: intr_entry (threads/intr-stubs.S:38)
+0xc0101226: idle (..../../threads/thread.c:572)
+0xc010126f: kernel_thread (..../../threads/thread.c:602)

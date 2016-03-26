@@ -1,4 +1,4 @@
-Writing command line to /tmp/Y2nSvwTgG1.dsk...
+Writing command line to /tmp/cwzofZZXGj.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q -mlfqs run mlfqs-load-60
@@ -72,13 +72,13 @@ Executing 'mlfqs-load-60':
 (mlfqs-load-60) After 116 seconds, load average=166.77.
 (mlfqs-load-60) After 118 seconds, load average=163.49.
 (mlfqs-load-60) After 120 seconds, load average=160.06.
-Interrupt 0x0e (#PF Page-Fault Exception) at eip=0xc010078c
+Interrupt 0x0e (#PF Page-Fault Exception) at eip=0xc01007f8
  cr2=cccccca4 error=00000000
- eax=c011056c ebx=cccccc7c ecx=73335374 edx=0001cccd
- esi=cccccccc edi=00000004 esp=c0110564 ebp=c0119ea4
- cs=0008 ds=0010 es=0010 ss=0000
+ eax=c011056c ebx=73335374 ecx=cccccc7c edx=73333374
+ esi=cccccccc edi=00000004 esp=c0110564 ebp=c0118ea4
+ cs=0008 ds=0010 es=0010 ss=1829
 Kernel PANIC at ../../threads/interrupt.c:373 in intr_handler(): Unexpected interrupt
-Call stack: 0xc0107b80 0xc0101dc5 0xc0101f5b 0xc010078c 0xc010406d 0xc0101d81 0xc0101f5b 0xc01017b7 0xc0101767 0xc010100a 0xc0103fa3 0xc010bd79 0xc010120c.
+Call stack: 0xc0107be4 0xc0101e29 0xc0101fbf 0xc01007f8 0xc01040d1 0xc0101de5 0xc0101fbf 0xc010181b 0xc01017cb 0xc010106d 0xc0104007 0xc010bddd 0xc010126f.
 The `backtrace' program can make call stacks useful.
 Read "Backtraces" in the "Debugging Tools" chapter
 of the Pintos documentation for more information.
