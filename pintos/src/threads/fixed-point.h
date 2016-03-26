@@ -9,7 +9,7 @@ typedef int fixed_point;
 static inline fixed_point
 fp (int n)
 {
-  return n * FIXED_POINT_Q;
+  return n * FIXED_POINT_F;
 }
 
 static inline int
