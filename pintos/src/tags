@@ -1416,6 +1416,7 @@ priority_recalculate	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^pr
 priority_recalculate_indiv	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^priority_recalculate_indiv(struct thread * thr)$/;"	f
 priority_sema_thread	/home/team03/seongsu/os/os/pintos/src/tests/threads/priority-sema.c	/^priority_sema_thread (void *aux UNUSED) $/;"	f	file:
 priority_sema_thread	/home/team03/seongsu/os/os/pintos/src/tests/threads/priority-sema.c	/^static thread_func priority_sema_thread;$/;"	v	file:
+priority_yield	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^priority_yield(void)$/;"	f
 process_activate	/home/team03/seongsu/os/os/pintos/src/userprog/process.c	/^process_activate (void)$/;"	f
 process_execute	/home/team03/seongsu/os/os/pintos/src/userprog/process.c	/^process_execute (const char *file_name) $/;"	f
 process_exit	/home/team03/seongsu/os/os/pintos/src/userprog/process.c	/^process_exit (void)$/;"	f
@@ -1464,6 +1465,7 @@ realloc	/home/team03/seongsu/os/os/pintos/src/threads/malloc.c	/^realloc (void *
 recent_cpu	/home/team03/seongsu/os/os/pintos/src/threads/thread.h	/^    fixed_point recent_cpu;$/;"	m	struct:thread
 recent_cpu_incr	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^recent_cpu_incr(void)$/;"	f
 recent_cpu_recalculate	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^recent_cpu_recalculate(void)$/;"	f
+recent_cpu_recalculate_indiv	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^recent_cpu_recalculate_indiv(struct thread * thr)$/;"	f
 recursor_SRC	/home/team03/seongsu/os/os/pintos/src/examples/Makefile	/^recursor_SRC = recursor.c$/;"	m
 reg_alt_status	/home/team03/seongsu/os/os/pintos/src/devices/disk.c	29;"	d	file:
 reg_base	/home/team03/seongsu/os/os/pintos/src/devices/disk.c	/^    uint16_t reg_base;          \/* Base I\/O port. *\/$/;"	m	struct:channel	file:

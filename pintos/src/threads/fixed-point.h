@@ -51,6 +51,7 @@ fp_subtract_int (fixed_point x, int n)
   return x - n * FIXED_POINT_F;
 }
 
+
 static inline fixed_point
 fp_multiply (fixed_point x, fixed_point y)
 {

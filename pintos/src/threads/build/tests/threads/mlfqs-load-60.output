@@ -1,4 +1,4 @@
-Writing command line to /tmp/cwzofZZXGj.dsk...
+Writing command line to /tmp/zY49D78Krh.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q -mlfqs run mlfqs-load-60
@@ -11,79 +11,79 @@ Executing 'mlfqs-load-60':
 (mlfqs-load-60) begin
 (mlfqs-load-60) Starting 60 niced load threads...
 (mlfqs-load-60) Starting threads took 2 seconds.
-(mlfqs-load-60) After 0 seconds, load average=0.00.
-(mlfqs-load-60) After 2 seconds, load average=0.56.
-(mlfqs-load-60) After 4 seconds, load average=6.58.
-(mlfqs-load-60) After 6 seconds, load average=10.94.
-(mlfqs-load-60) After 8 seconds, load average=16.23.
-(mlfqs-load-60) After 10 seconds, load average=21.46.
-(mlfqs-load-60) After 12 seconds, load average=26.65.
-(mlfqs-load-60) After 14 seconds, load average=31.80.
-(mlfqs-load-60) After 16 seconds, load average=36.91.
-(mlfqs-load-60) After 18 seconds, load average=41.97.
-(mlfqs-load-60) After 20 seconds, load average=47.00.
-(mlfqs-load-60) After 22 seconds, load average=51.98.
-(mlfqs-load-60) After 24 seconds, load average=56.93.
-(mlfqs-load-60) After 26 seconds, load average=61.84.
-(mlfqs-load-60) After 28 seconds, load average=66.71.
-(mlfqs-load-60) After 30 seconds, load average=71.54.
-(mlfqs-load-60) After 32 seconds, load average=76.33.
-(mlfqs-load-60) After 34 seconds, load average=81.09.
-(mlfqs-load-60) After 36 seconds, load average=85.80.
-(mlfqs-load-60) After 38 seconds, load average=90.47.
-(mlfqs-load-60) After 40 seconds, load average=95.12.
-(mlfqs-load-60) After 42 seconds, load average=99.72.
-(mlfqs-load-60) After 44 seconds, load average=104.28.
-(mlfqs-load-60) After 46 seconds, load average=108.81.
-(mlfqs-load-60) After 48 seconds, load average=113.29.
-(mlfqs-load-60) After 50 seconds, load average=117.74.
-(mlfqs-load-60) After 52 seconds, load average=122.15.
-(mlfqs-load-60) After 54 seconds, load average=126.52.
-(mlfqs-load-60) After 56 seconds, load average=130.85.
-(mlfqs-load-60) After 58 seconds, load average=135.15.
-(mlfqs-load-60) After 60 seconds, load average=139.40.
-(mlfqs-load-60) After 62 seconds, load average=143.57.
-(mlfqs-load-60) After 64 seconds, load average=148.47.
-(mlfqs-load-60) After 66 seconds, load average=153.10.
-(mlfqs-load-60) After 68 seconds, load average=157.44.
-(mlfqs-load-60) After 70 seconds, load average=161.50.
-(mlfqs-load-60) After 72 seconds, load average=165.28.
-(mlfqs-load-60) After 74 seconds, load average=168.76.
-(mlfqs-load-60) After 76 seconds, load average=171.95.
-(mlfqs-load-60) After 78 seconds, load average=174.84.
-(mlfqs-load-60) After 80 seconds, load average=177.42.
-(mlfqs-load-60) After 82 seconds, load average=179.69.
-(mlfqs-load-60) After 84 seconds, load average=181.65.
-(mlfqs-load-60) After 86 seconds, load average=183.31.
-(mlfqs-load-60) After 88 seconds, load average=184.66.
-(mlfqs-load-60) After 90 seconds, load average=185.71.
-(mlfqs-load-60) After 92 seconds, load average=186.44.
-(mlfqs-load-60) After 94 seconds, load average=186.88.
-(mlfqs-load-60) After 96 seconds, load average=187.01.
-(mlfqs-load-60) After 98 seconds, load average=186.84.
-(mlfqs-load-60) After 100 seconds, load average=186.37.
-(mlfqs-load-60) After 102 seconds, load average=184.66.
-(mlfqs-load-60) After 104 seconds, load average=182.74.
-(mlfqs-load-60) After 106 seconds, load average=180.57.
-(mlfqs-load-60) After 108 seconds, load average=178.20.
-(mlfqs-load-60) After 110 seconds, load average=175.63.
-(mlfqs-load-60) After 112 seconds, load average=172.85.
-(mlfqs-load-60) After 114 seconds, load average=169.90.
-(mlfqs-load-60) After 116 seconds, load average=166.77.
-(mlfqs-load-60) After 118 seconds, load average=163.49.
-(mlfqs-load-60) After 120 seconds, load average=160.06.
-Interrupt 0x0e (#PF Page-Fault Exception) at eip=0xc01007f8
+(mlfqs-load-60) After 0 seconds, load average=5.80.
+(mlfqs-load-60) After 2 seconds, load average=8.67.
+(mlfqs-load-60) After 4 seconds, load average=12.55.
+(mlfqs-load-60) After 6 seconds, load average=16.71.
+(mlfqs-load-60) After 8 seconds, load average=20.97.
+(mlfqs-load-60) After 10 seconds, load average=25.28.
+(mlfqs-load-60) After 12 seconds, load average=29.60.
+(mlfqs-load-60) After 14 seconds, load average=33.92.
+(mlfqs-load-60) After 16 seconds, load average=38.23.
+(mlfqs-load-60) After 18 seconds, load average=42.53.
+(mlfqs-load-60) After 20 seconds, load average=46.80.
+(mlfqs-load-60) After 22 seconds, load average=51.05.
+(mlfqs-load-60) After 24 seconds, load average=55.28.
+(mlfqs-load-60) After 26 seconds, load average=59.48.
+(mlfqs-load-60) After 28 seconds, load average=63.65.
+(mlfqs-load-60) After 30 seconds, load average=67.80.
+(mlfqs-load-60) After 32 seconds, load average=71.91.
+(mlfqs-load-60) After 34 seconds, load average=76.00.
+(mlfqs-load-60) After 36 seconds, load average=80.05.
+(mlfqs-load-60) After 38 seconds, load average=84.08.
+(mlfqs-load-60) After 40 seconds, load average=88.07.
+(mlfqs-load-60) After 42 seconds, load average=92.03.
+(mlfqs-load-60) After 44 seconds, load average=95.96.
+(mlfqs-load-60) After 46 seconds, load average=99.86.
+(mlfqs-load-60) After 48 seconds, load average=103.73.
+(mlfqs-load-60) After 50 seconds, load average=109.51.
+(mlfqs-load-60) After 52 seconds, load average=115.20.
+(mlfqs-load-60) After 54 seconds, load average=120.81.
+(mlfqs-load-60) After 56 seconds, load average=126.34.
+(mlfqs-load-60) After 58 seconds, load average=131.80.
+(mlfqs-load-60) After 60 seconds, load average=137.18.
+(mlfqs-load-60) After 62 seconds, load average=140.40.
+(mlfqs-load-60) After 64 seconds, load average=143.41.
+(mlfqs-load-60) After 66 seconds, load average=146.20.
+(mlfqs-load-60) After 68 seconds, load average=148.76.
+(mlfqs-load-60) After 70 seconds, load average=151.10.
+(mlfqs-load-60) After 72 seconds, load average=153.21.
+(mlfqs-load-60) After 74 seconds, load average=155.10.
+(mlfqs-load-60) After 76 seconds, load average=156.76.
+(mlfqs-load-60) After 78 seconds, load average=158.18.
+(mlfqs-load-60) After 80 seconds, load average=159.36.
+(mlfqs-load-60) After 82 seconds, load average=160.31.
+(mlfqs-load-60) After 84 seconds, load average=161.03.
+(mlfqs-load-60) After 86 seconds, load average=161.51.
+(mlfqs-load-60) After 88 seconds, load average=161.75.
+(mlfqs-load-60) After 90 seconds, load average=161.76.
+(mlfqs-load-60) After 92 seconds, load average=161.54.
+(mlfqs-load-60) After 94 seconds, load average=161.09.
+(mlfqs-load-60) After 96 seconds, load average=160.41.
+(mlfqs-load-60) After 98 seconds, load average=159.52.
+(mlfqs-load-60) After 100 seconds, load average=158.41.
+(mlfqs-load-60) After 102 seconds, load average=157.09.
+(mlfqs-load-60) After 104 seconds, load average=155.56.
+(mlfqs-load-60) After 106 seconds, load average=153.84.
+(mlfqs-load-60) After 108 seconds, load average=151.92.
+(mlfqs-load-60) After 110 seconds, load average=149.82.
+(mlfqs-load-60) After 112 seconds, load average=147.54.
+(mlfqs-load-60) After 114 seconds, load average=145.11.
+(mlfqs-load-60) After 116 seconds, load average=142.53.
+(mlfqs-load-60) After 118 seconds, load average=139.80.
+(mlfqs-load-60) After 120 seconds, load average=136.94.
+Interrupt 0x0e (#PF Page-Fault Exception) at eip=0xc01007cc
  cr2=cccccca4 error=00000000
- eax=c011056c ebx=73335374 ecx=cccccc7c edx=73333374
- esi=cccccccc edi=00000004 esp=c0110564 ebp=c0118ea4
- cs=0008 ds=0010 es=0010 ss=1829
+ eax=00000000 ebx=cccccc7c ecx=00000001 edx=ce94cccd
+ esi=00000000 edi=00000000 esp=bc930000 ebp=c0134e74
+ cs=0008 ds=0010 es=0010 ss=0001
 Kernel PANIC at ../../threads/interrupt.c:373 in intr_handler(): Unexpected interrupt
-Call stack: 0xc0107be4 0xc0101e29 0xc0101fbf 0xc01007f8 0xc01040d1 0xc0101de5 0xc0101fbf 0xc010181b 0xc01017cb 0xc010106d 0xc0104007 0xc010bddd 0xc010126f.
+Call stack: 0xc0107cf0 0xc0101f2d 0xc01020c3 0xc01007cc 0xc0100a49 0xc01041ef 0xc0101ee9 0xc01020c3 0xc010191f 0xc01018cf 0xc010116b 0xc010410b 0xc010bee9 0xc010136d.
 The `backtrace' program can make call stacks useful.
 Read "Backtraces" in the "Debugging Tools" chapter
 of the Pintos documentation for more information.
-Timer: 13048 ticks
-Thread: 6490 idle ticks, 6558 kernel ticks, 0 user ticks
-Console: 4393 characters output
+Timer: 13100 ticks
+Thread: 6525 idle ticks, 6575 kernel ticks, 0 user ticks
+Console: 4403 characters output
 Keyboard: 0 keys pressed
 Powering off...
