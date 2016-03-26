@@ -1,4 +1,4 @@
-Writing command line to /tmp/Tmjg7TDaDa.dsk...
+Writing command line to /tmp/8tO0OAkPfV.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q run priority-donate-sema
@@ -8,18 +8,9 @@ Pintos booting with 4,096 kB RAM...
 Calibrating timer...  102,400 loops/s.
 Boot complete.
 Executing 'priority-donate-sema':
-(priority-donate-sema) begin
-(priority-donate-sema) Thread L acquired lock.
-(priority-donate-sema) Thread L downed semaphore.
-(priority-donate-sema) Thread H acquired lock.
-(priority-donate-sema) Thread H finished.
-(priority-donate-sema) Thread M finished.
-(priority-donate-sema) Thread L finished.
-(priority-donate-sema) Main thread finished.
-(priority-donate-sema) end
-Execution of 'priority-donate-sema' complete.
-Timer: 101 ticks
-Thread: 0 idle ticks, 105 kernel ticks, 0 user ticks
-Console: 730 characters output
+(priority-donate-sema) begin (priority-donate-sema) Thread L acquired lock. (priority-donate-sema) Thread L downed semaphore. (priority-donate-sema) Thread H acquired lock. (priority-donate-sema) Thread H finished. (priority-donate-sema) Thread M finished. (priority-donate-sema) Thread L finished. (priority-donate-sema) Main thread finished. (priority-donate-sema) end Execution of 'priority-donate-sema' complete.
+Timer: 97 ticks
+Thread: 0 idle ticks, 99 kernel ticks, 0 user ticks
+Console: 728 characters output
 Keyboard: 0 keys pressed
 Powering off...

@@ -1,1 +1,2 @@
-PASS
+FAIL
+Run started 'alarm-simultaneous' but it never finished

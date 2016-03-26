@@ -1,1 +1,2 @@
-PASS
+FAIL
+Run started 'alarm-priority' but it never finished

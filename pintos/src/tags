@@ -1081,6 +1081,7 @@ is_ata	/home/team03/seongsu/os/os/pintos/src/devices/disk.c	/^    bool is_ata;  
 is_dir	/home/team03/seongsu/os/os/pintos/src/tests/tests.pm	/^sub is_dir {$/;"	s
 is_head	/home/team03/seongsu/os/os/pintos/src/lib/kernel/list.c	/^is_head (struct list_elem *elem)$/;"	f	file:
 is_interior	/home/team03/seongsu/os/os/pintos/src/lib/kernel/list.c	/^is_interior (struct list_elem *elem)$/;"	f	file:
+is_interior	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^is_interior(struct list_elem * elem)$/;"	f	file:
 is_kernel_vaddr	/home/team03/seongsu/os/os/pintos/src/threads/vaddr.h	/^is_kernel_vaddr (const void *vaddr) $/;"	f
 is_partitioned	/home/team03/seongsu/os/os/pintos/src/tests/vm/qsort.c	/^is_partitioned (const unsigned char *array, size_t size,$/;"	f	file:
 is_power_of_2	/home/team03/seongsu/os/os/pintos/src/lib/kernel/hash.c	/^is_power_of_2 (size_t x) $/;"	f	file:
@@ -1170,7 +1171,7 @@ list_splice	/home/team03/seongsu/os/os/pintos/src/lib/kernel/list.c	/^list_splic
 list_tail	/home/team03/seongsu/os/os/pintos/src/lib/kernel/list.c	/^list_tail (struct list *list) $/;"	f
 list_unique	/home/team03/seongsu/os/os/pintos/src/lib/kernel/list.c	/^list_unique (struct list *list, struct list *duplicates,$/;"	f
 load	/home/team03/seongsu/os/os/pintos/src/userprog/process.c	/^load (const char *file_name, void (**eip) (void), void **esp) $/;"	f
-load_avg	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^static fixed_point load_avg;$/;"	v	file:
+load_avg	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^fixed_point load_avg;$/;"	v
 load_segment	/home/team03/seongsu/os/os/pintos/src/userprog/process.c	/^load_segment (struct file *file, off_t ofs, uint8_t *upage,$/;"	f	file:
 load_thread	/home/team03/seongsu/os/os/pintos/src/tests/threads/mlfqs-fair.c	/^load_thread (void *ti_) $/;"	f	file:
 load_thread	/home/team03/seongsu/os/os/pintos/src/tests/threads/mlfqs-load-60.c	/^load_thread (void *aux UNUSED) $/;"	f	file:

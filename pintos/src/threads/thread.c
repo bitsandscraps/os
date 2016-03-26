@@ -33,7 +33,9 @@ static struct list ready_list;
 /* List of processes that are sleeping. */
 static struct list waiting_list;
 
-/* List of processes */
+/* List of processes. it includes running, blocked, and ready states.
+ * threads are included when init_thread called
+ * and threads are excluded when thread_exit called*/
 static struct list thread_list;
 
 /* Idle thread. */
@@ -466,6 +468,12 @@ thread_tid (void)
 
 /* Deschedules the current thread and destroys it.  Never
    returns to the caller. */
+
+static inline bool
+is_interior(struct list_elem * elem)
+{
+  return elem !=NULL && elem->prev !=NULL && elem->next !=NULL;
+}
 void
 thread_exit (void) 
 {
@@ -478,7 +486,9 @@ thread_exit (void)
   /* Just set our status to dying and schedule another process.
      We will be destroyed during the call to schedule_tail(). */
   intr_disable ();
-  list_remove(&(thread_current()->elem_));
+  if(!list_empty(&thread_list) &&
+     is_interior(&(thread_current()->elem_)))
+    list_remove(&(thread_current()->elem_));
   thread_current ()->status = THREAD_DYING;
   schedule ();
   NOT_REACHED ();

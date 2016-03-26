@@ -1,1 +1,2 @@
-PASS
+FAIL
+Run started 'mlfqs-nice-2' but it never finished

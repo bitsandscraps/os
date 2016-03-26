@@ -1,1 +1,2 @@
-PASS
+FAIL
+Run started 'mlfqs-load-avg' but it never finished

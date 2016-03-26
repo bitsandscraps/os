@@ -1,1 +1,2 @@
-PASS
+FAIL
+35 fewer wakeups than expected.
