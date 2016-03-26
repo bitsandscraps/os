@@ -132,6 +132,7 @@ timer_print_stats (void)
 static void
 timer_interrupt (struct intr_frame *args UNUSED)
 {
+  if(ticks%4==0) priority_recalculate();
   ticks++;
   wake_threads (ticks);
   thread_tick ();
