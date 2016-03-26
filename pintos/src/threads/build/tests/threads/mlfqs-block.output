@@ -1,4 +1,4 @@
-Writing command line to /tmp/2cf3rLQhcB.dsk...
+Writing command line to /tmp/5yR9AOfa8o.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q -mlfqs run mlfqs-block
@@ -19,8 +19,8 @@ Executing 'mlfqs-block':
 (mlfqs-block) Block thread should have already acquired lock.
 ÿÀ8ðÀend
 Execution of 'mlfqs-block' complete.
-Timer: 3135 ticks
-Thread: 534 idle ticks, 2604 kernel ticks, 0 user ticks
+Timer: 3087 ticks
+Thread: 486 idle ticks, 2604 kernel ticks, 0 user ticks
 Console: 770 characters output
 Keyboard: 0 keys pressed
 Powering off...

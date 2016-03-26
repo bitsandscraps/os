@@ -136,8 +136,8 @@ timer_interrupt (struct intr_frame *args UNUSED)
   thread_tick();
   if(thread_mlfqs) {
     recent_cpu_incr();
-    if(ticks%TIMER_FREQ==0) recent_cpu_recalculate();
-    else if(ticks%4==0) priority_recalculate();
+    if(ticks % TIMER_FREQ==0) recent_cpu_recalculate();
+    else if(ticks % 4==0) priority_recalculate();
   }
   wake_threads (ticks);
 }
