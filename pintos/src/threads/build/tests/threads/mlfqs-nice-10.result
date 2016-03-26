@@ -1,14 +1,14 @@
 FAIL
-Kernel panic in run: PANIC at ../../threads/interrupt.c:373 in intr_handler(): Unexpected interrupt
-Call stack: 0xc0107cf0 0xc0101f2d 0xc01020c3 0xc01007cc 0xc0100a49 0xc01041ef 0xc0101ee9 0xc01020c3 0xc0101324 0xc010136d
-Translation of call stack:
-0xc0107cf0: debug_panic (.../../lib/kernel/debug.c:34)
-0xc0101f2d: intr_handler (..../threads/interrupt.c:377)
-0xc01020c3: intr_entry (threads/intr-stubs.S:38)
-0xc01007cc: fp_divide_int (.../threads/fixed-point.h:76)
-0xc0100a49: recent_cpu_recalculate (..../../threads/thread.c:188)
-0xc01041ef: timer_interrupt (...../../devices/timer.c:139)
-0xc0101ee9: intr_handler (..../threads/interrupt.c:361)
-0xc01020c3: intr_entry (threads/intr-stubs.S:38)
-0xc0101324: idle (..../../threads/thread.c:583)
-0xc010136d: kernel_thread (..../../threads/thread.c:613)
+Some tick counts were missing or differed from those expected by more than 25.
+thread   actual <-> expected explanation
+------ -------- --- -------- ----------------------------------------
+     0      797 >>> 672      Too big, by 100.
+     1      668 >>> 588      Too big, by 55.
+     2      541 >>> 492      Too big, by 24.
+     3      412  =  408      
+     4      292  =  316      
+     5      185 <<< 232      Too small, by 22.
+     6       88 <<< 152      Too small, by 39.
+     7       20 <<< 92       Too small, by 47.
+     8        0 <<< 40       Too small, by 15.
+     9        0  =  8        

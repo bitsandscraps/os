@@ -1,11 +1,11 @@
 FAIL
 Kernel panic in run: PANIC at ../../tests/threads/tests.c:93 in fail(): test failed
-Call stack: 0xc0107cf0 0xc0109e61 0xc010bbd8 0xc0109db6 0xc0100535 0xc0100601 0xc0100094
+Call stack: 0xc0107d68 0xc0109ed9 0xc010bc50 0xc0109e2e 0xc0100535 0xc0100601 0xc0100094
 Translation of call stack:
-0xc0107cf0: debug_panic (.../../lib/kernel/debug.c:34)
-0xc0109e61: pass (.../tests/threads/tests.c:99)
-0xc010bbd8: test_mlfqs_load_1 (...threads/mlfqs-load-1.c:35)
-0xc0109db6: run_test (.../tests/threads/tests.c:57)
+0xc0107d68: debug_panic (.../../lib/kernel/debug.c:34)
+0xc0109ed9: pass (.../tests/threads/tests.c:99)
+0xc010bc50: test_mlfqs_load_1 (...threads/mlfqs-load-1.c:35)
+0xc0109e2e: run_test (.../tests/threads/tests.c:57)
 0xc0100535: run_task (.../../../threads/init.c:270)
 0xc0100601: run_actions (.../../../threads/init.c:319)
 0xc0100094: main (.../../../threads/init.c:124)

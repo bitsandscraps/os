@@ -1,16 +1,93 @@
 FAIL
-Kernel panic in run: PANIC at ../../threads/interrupt.c:373 in intr_handler(): Unexpected interrupt
-Call stack: 0xc0107cf0 0xc0101f2d 0xc01020c3 0xc01007cc 0xc0100a49 0xc01041ef 0xc0101ee9 0xc01020c3 0xc0101925 0xc01040e6 0xc010c105 0xc010136d
-Translation of call stack:
-0xc0107cf0: debug_panic (.../../lib/kernel/debug.c:34)
-0xc0101f2d: intr_handler (..../threads/interrupt.c:377)
-0xc01020c3: intr_entry (threads/intr-stubs.S:38)
-0xc01007cc: fp_divide_int (.../threads/fixed-point.h:76)
-0xc0100a49: recent_cpu_recalculate (..../../threads/thread.c:188)
-0xc01041ef: timer_interrupt (...../../devices/timer.c:139)
-0xc0101ee9: intr_handler (..../threads/interrupt.c:361)
-0xc01020c3: intr_entry (threads/intr-stubs.S:38)
-0xc0101925: intr_disable (...../threads/interrupt.c:92)
-0xc01040e6: timer_elapsed (.../../../devices/timer.c:92)
-0xc010c105: load_thread (...eads/mlfqs-load-avg.c:165)
-0xc010136d: kernel_thread (..../../threads/thread.c:613)
+Some load average values were missing or differed from those expected by more than 2.5.
+  time   actual <-> expected explanation
+------ -------- --- -------- ----------------------------------------
+     2    undef     0.05     Missing value.
+     4    undef     0.16     Missing value.
+     6    undef     0.34     Missing value.
+     8    undef     0.58     Missing value.
+    10    undef     0.87     Missing value.
+    12    undef     1.22     Missing value.
+    14    undef     1.63     Missing value.
+    16    undef     2.09     Missing value.
+    18    undef     2.60     Missing value.
+    20    undef     3.16     Missing value.
+    22    undef     3.76     Missing value.
+    24    undef     4.42     Missing value.
+    26    undef     5.11     Missing value.
+    28    undef     5.85     Missing value.
+    30    undef     6.63     Missing value.
+    32    undef     7.46     Missing value.
+    34    undef     8.32     Missing value.
+    36    undef     9.22     Missing value.
+    38    undef     10.15    Missing value.
+    40    undef     11.12    Missing value.
+    42    undef     12.13    Missing value.
+    44    undef     13.16    Missing value.
+    46    undef     14.23    Missing value.
+    48    undef     15.33    Missing value.
+    50    undef     16.46    Missing value.
+    52    undef     17.62    Missing value.
+    54    undef     18.81    Missing value.
+    56    undef     20.02    Missing value.
+    58    undef     21.26    Missing value.
+    60    undef     22.52    Missing value.
+    62    undef     23.71    Missing value.
+    64    undef     24.80    Missing value.
+    66    undef     25.78    Missing value.
+    68    undef     26.66    Missing value.
+    70    undef     27.45    Missing value.
+    72    undef     28.14    Missing value.
+    74    undef     28.75    Missing value.
+    76    undef     29.27    Missing value.
+    78    undef     29.71    Missing value.
+    80  1301.50 >>> 30.06    Too big, by 1268.94.
+    82  1264.42 >>> 30.34    Too big, by 1231.58.
+    84  1228.19 >>> 30.55    Too big, by 1195.14.
+    86  1192.86 >>> 30.68    Too big, by 1159.68.
+    88  1158.48 >>> 30.74    Too big, by 1125.24.
+    90  1125.18 >>> 30.73    Too big, by 1091.95.
+    92  1092.92 >>> 30.66    Too big, by 1059.76.
+    94  1061.97 >>> 30.52    Too big, by 1028.95.
+    96  1032.18 >>> 30.32    Too big, by 999.36.
+    98  1003.82 >>> 30.06    Too big, by 971.26.
+   100   976.87 >>> 29.74    Too big, by 944.63.
+   102   951.49 >>> 29.37    Too big, by 919.62.
+   104   927.75 >>> 28.95    Too big, by 896.30.
+   106   905.62 >>> 28.47    Too big, by 874.65.
+   108   885.29 >>> 27.94    Too big, by 854.85.
+   110   866.81 >>> 27.36    Too big, by 836.95.
+   112   850.37 >>> 26.74    Too big, by 821.13.
+   114   836.12 >>> 26.07    Too big, by 807.55.
+   116   824.13 >>> 25.36    Too big, by 796.27.
+   118   814.54 >>> 24.60    Too big, by 787.44.
+   120   807.63 >>> 23.81    Too big, by 781.32.
+   122   803.41 >>> 23.02    Too big, by 777.89.
+   124   801.99 >>> 22.26    Too big, by 777.23.
+   126   803.05 >>> 21.52    Too big, by 779.03.
+   128   806.92 >>> 20.81    Too big, by 783.61.
+   130   813.24 >>> 20.12    Too big, by 790.62.
+   132   822.20 >>> 19.46    Too big, by 800.24.
+   134   833.54 >>> 18.81    Too big, by 812.23.
+   136   847.32 >>> 18.19    Too big, by 826.63.
+   138   863.37 >>> 17.59    Too big, by 843.28.
+   140   881.73 >>> 17.01    Too big, by 862.22.
+   142   902.31 >>> 16.45    Too big, by 883.36.
+   144   925.02 >>> 15.90    Too big, by 906.62.
+   146   949.63 >>> 15.38    Too big, by 931.75.
+   148   976.05 >>> 14.87    Too big, by 958.68.
+   150  1004.15 >>> 14.38    Too big, by 987.27.
+   152  1033.91 >>> 13.90    Too big, by 1017.51.
+   154  1065.18 >>> 13.44    Too big, by 1049.24.
+   156  1097.81 >>> 13.00    Too big, by 1082.31.
+   158  1131.74 >>> 12.57    Too big, by 1116.67.
+   160  1166.72 >>> 12.15    Too big, by 1152.07.
+   162  1202.58 >>> 11.75    Too big, by 1188.33.
+   164  1239.33 >>> 11.36    Too big, by 1225.47.
+   166  1276.71 >>> 10.99    Too big, by 1263.22.
+   168    undef     10.62    Missing value.
+   170    undef     10.27    Missing value.
+   172    undef     9.93     Missing value.
+   174    undef     9.61     Missing value.
+   176    undef     9.29     Missing value.
+   178    undef     8.98     Missing value.

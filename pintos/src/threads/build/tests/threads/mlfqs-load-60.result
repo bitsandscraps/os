@@ -1,18 +1,93 @@
 FAIL
-Kernel panic in run: PANIC at ../../threads/interrupt.c:373 in intr_handler(): Unexpected interrupt
-Call stack: 0xc0107cf0 0xc0101f2d 0xc01020c3 0xc01007cc 0xc0100a49 0xc01041ef 0xc0101ee9 0xc01020c3 0xc010191f 0xc01018cf 0xc010116b 0xc010410b 0xc010bee9 0xc010136d
-Translation of call stack:
-0xc0107cf0: debug_panic (.../../lib/kernel/debug.c:34)
-0xc0101f2d: intr_handler (..../threads/interrupt.c:377)
-0xc01020c3: intr_entry (threads/intr-stubs.S:38)
-0xc01007cc: fp_divide_int (.../threads/fixed-point.h:76)
-0xc0100a49: recent_cpu_recalculate (..../../threads/thread.c:188)
-0xc01041ef: timer_interrupt (...../../devices/timer.c:139)
-0xc0101ee9: intr_handler (..../threads/interrupt.c:361)
-0xc01020c3: intr_entry (threads/intr-stubs.S:38)
-0xc010191f: intr_enable (...../threads/interrupt.c:87)
-0xc01018cf: intr_set_level (...../threads/interrupt.c:70)
-0xc010116b: thread_sleep (..../../threads/thread.c:510)
-0xc010410b: timer_sleep (...../../devices/timer.c:101)
-0xc010bee9: load_thread (...reads/mlfqs-load-60.c:155)
-0xc010136d: kernel_thread (..../../threads/thread.c:613)
+Some load average values were missing or differed from those expected by more than 3.5.
+  time   actual <-> expected explanation
+------ -------- --- -------- ----------------------------------------
+     2    34.37 >>> 2.95     Too big, by 27.92.
+     4    37.73 >>> 4.84     Too big, by 29.39.
+     6    42.48 >>> 6.66     Too big, by 32.32.
+     8    47.89 >>> 8.42     Too big, by 35.97.
+    10    54.67 >>> 10.13    Too big, by 41.04.
+    12    61.51 >>> 11.78    Too big, by 46.23.
+    14    67.51 >>> 13.37    Too big, by 50.64.
+    16    75.49 >>> 14.91    Too big, by 57.08.
+    18    81.56 >>> 16.40    Too big, by 61.66.
+    20    87.68 >>> 17.84    Too big, by 66.34.
+    22    93.83 >>> 19.24    Too big, by 71.09.
+    24    99.99 >>> 20.58    Too big, by 75.91.
+    26   106.16 >>> 21.89    Too big, by 80.77.
+    28   115.20 >>> 23.15    Too big, by 88.55.
+    30   121.24 >>> 24.37    Too big, by 93.37.
+    32   129.19 >>> 25.54    Too big, by 100.15.
+    34   135.14 >>> 26.68    Too big, by 104.96.
+    36   143.00 >>> 27.78    Too big, by 111.72.
+    38   148.84 >>> 28.85    Too big, by 116.49.
+    40   156.61 >>> 29.88    Too big, by 123.23.
+    42   162.34 >>> 30.87    Too big, by 127.97.
+    44   170.00 >>> 31.84    Too big, by 134.66.
+    46   175.63 >>> 32.77    Too big, by 139.36.
+    48   183.19 >>> 33.67    Too big, by 146.02.
+    50   188.72 >>> 34.54    Too big, by 150.68.
+    52   196.17 >>> 35.38    Too big, by 157.29.
+    54   201.60 >>> 36.19    Too big, by 161.91.
+    56   208.94 >>> 36.98    Too big, by 168.46.
+    58   214.26 >>> 37.74    Too big, by 173.02.
+    60   220.49 >>> 37.48    Too big, by 179.51.
+    62   225.47 >>> 36.24    Too big, by 185.73.
+    64   227.19 >>> 35.04    Too big, by 188.65.
+    66   228.66 >>> 33.88    Too big, by 191.28.
+    68   229.86 >>> 32.76    Too big, by 193.60.
+    70   230.80 >>> 31.68    Too big, by 195.62.
+    72   231.48 >>> 30.63    Too big, by 197.35.
+    74   231.90 >>> 29.62    Too big, by 198.78.
+    76   232.04 >>> 28.64    Too big, by 199.90.
+    78   231.92 >>> 27.69    Too big, by 200.73.
+    80   231.55 >>> 26.78    Too big, by 201.27.
+    82   230.90 >>> 25.89    Too big, by 201.51.
+    84   229.99 >>> 25.04    Too big, by 201.45.
+    86   228.82 >>> 24.21    Too big, by 201.11.
+    88   227.39 >>> 23.41    Too big, by 200.48.
+    90   225.71 >>> 22.64    Too big, by 199.57.
+    92   223.78 >>> 21.89    Too big, by 198.39.
+    94   221.61 >>> 21.16    Too big, by 196.95.
+    96   219.19 >>> 20.46    Too big, by 195.23.
+    98   216.56 >>> 19.79    Too big, by 193.27.
+   100   213.70 >>> 19.13    Too big, by 191.07.
+   102   210.62 >>> 18.50    Too big, by 188.62.
+   104   207.34 >>> 17.89    Too big, by 185.95.
+   106   203.86 >>> 17.30    Too big, by 183.06.
+   108   200.21 >>> 16.73    Too big, by 179.98.
+   110   196.38 >>> 16.17    Too big, by 176.71.
+   112   192.39 >>> 15.64    Too big, by 173.25.
+   114   188.25 >>> 15.12    Too big, by 169.63.
+   116   183.97 >>> 14.62    Too big, by 165.85.
+   118   179.57 >>> 14.14    Too big, by 161.93.
+   120   176.06 >>> 13.67    Too big, by 158.89.
+   122   173.49 >>> 13.22    Too big, by 156.77.
+   124   167.89 >>> 12.78    Too big, by 151.61.
+   126   162.30 >>> 12.36    Too big, by 146.44.
+   128   156.70 >>> 11.95    Too big, by 141.25.
+   130   151.14 >>> 11.56    Too big, by 136.08.
+   132   145.61 >>> 11.17    Too big, by 130.94.
+   134   140.12 >>> 10.80    Too big, by 125.82.
+   136   134.71 >>> 10.45    Too big, by 120.76.
+   138   129.37 >>> 10.10    Too big, by 115.77.
+   140   124.12 >>> 9.77     Too big, by 110.85.
+   142   118.96 >>> 9.45     Too big, by 106.01.
+   144   113.91 >>> 9.13     Too big, by 101.28.
+   146   108.98 >>> 8.83     Too big, by 96.65.
+   148   104.18 >>> 8.54     Too big, by 92.14.
+   150    99.50 >>> 8.26     Too big, by 87.74.
+   152    94.97 >>> 7.98     Too big, by 83.49.
+   154    90.59 >>> 7.72     Too big, by 79.37.
+   156    86.35 >>> 7.47     Too big, by 75.38.
+   158    82.27 >>> 7.22     Too big, by 71.55.
+   160    78.35 >>> 6.98     Too big, by 67.87.
+   162    74.58 >>> 6.75     Too big, by 64.33.
+   164    70.97 >>> 6.53     Too big, by 60.94.
+   166    67.52 >>> 6.31     Too big, by 57.71.
+   168    64.23 >>> 6.10     Too big, by 54.63.
+   170    61.09 >>> 5.90     Too big, by 51.69.
+   172    58.10 >>> 5.70     Too big, by 48.90.
+   174    55.27 >>> 5.52     Too big, by 46.25.
+   176    52.58 >>> 5.33     Too big, by 43.75.
+   178    50.03 >>> 5.16     Too big, by 41.37.

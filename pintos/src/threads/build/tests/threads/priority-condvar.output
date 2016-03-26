@@ -1,4 +1,4 @@
-Writing command line to /tmp/T0NhM0vKzi.dsk...
+Writing command line to /tmp/kdVylUuteK.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q run priority-condvar
@@ -41,8 +41,8 @@ Executing 'priority-condvar':
 (priority-condvar) Thread priority 21 woke up.
 (priority-condvar) end
 Execution of 'priority-condvar' complete.
-Timer: 267 ticks
-Thread: 0 idle ticks, 271 kernel ticks, 0 user ticks
+Timer: 279 ticks
+Thread: 0 idle ticks, 282 kernel ticks, 0 user ticks
 Console: 1665 characters output
 Keyboard: 0 keys pressed
 Powering off...

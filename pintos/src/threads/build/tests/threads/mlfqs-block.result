@@ -1,25 +1,26 @@
 FAIL
-Kernel panic in run: PANIC at ../../threads/interrupt.c:373 in intr_handler(): Unexpected interrupt
-Call stack: 0xc0107cf0 0xc0101f2d 0xc01020c3 0xc01007cc 0xc0100a49 0xc01041ef 0xc0101ee9 0xc01020c3 0xc010191f 0xc01018cf 0xc0104aea 0xc0109d34 0xc0109cd8 0xc0106981 0xc01062ef 0xc0109c0e 0xc0106138 0xc0109b24 0xc01006a6 0xc0100654 0xc01000a2
-Translation of call stack:
-0xc0107cf0: debug_panic (.../../lib/kernel/debug.c:34)
-0xc0101f2d: intr_handler (..../threads/interrupt.c:377)
-0xc01020c3: intr_entry (threads/intr-stubs.S:38)
-0xc01007cc: fp_divide_int (.../threads/fixed-point.h:76)
-0xc0100a49: recent_cpu_recalculate (..../../threads/thread.c:188)
-0xc01041ef: timer_interrupt (...../../devices/timer.c:139)
-0xc0101ee9: intr_handler (..../threads/interrupt.c:361)
-0xc01020c3: intr_entry (threads/intr-stubs.S:38)
-0xc010191f: intr_enable (...../threads/interrupt.c:87)
-0xc01018cf: intr_set_level (...../threads/interrupt.c:70)
-0xc0104aea: serial_putc (..../../devices/serial.c:130)
-0xc0109d34: putchar_have_lock (.../lib/kernel/console.c:190)
-0xc0109cd8: vprintf_helper (.../lib/kernel/console.c:179)
-0xc0106981: format_integer (...ild/../../lib/stdio.c:544)
-0xc01062ef: __vprintf (...ild/../../lib/stdio.c:226)
-0xc0109c0e: vprintf (.../lib/kernel/console.c:132)
-0xc0106138: printf (...uild/../../lib/stdio.c:89)
-0xc0109b24: console_print_stats (..../lib/kernel/console.c:84)
-0xc01006a6: print_stats (.../../../threads/init.c:394)
-0xc0100654: power_off (.../../../threads/init.c:374)
-0xc01000a2: main (.../../../threads/init.c:126)
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (mlfqs-block) begin
+  (mlfqs-block) Main thread acquiring lock.
+  (mlfqs-block) Main thread creating block thread, sleeping 25 seconds...
+  (mlfqs-block) Block thread spinning for 20 seconds...
+  (mlfqs-block) Block thread acquiring lock...
+  (mlfqs-block) Main thread spinning for 5 seconds...
+  (mlfqs-block) Main thread releasing lock.
+  (mlfqs-block) ...got it.
+  (mlfqs-block) Block thread should have already acquired lock.
+  (mlfqs-block) end
+Differences in `diff -u' format:
+  (mlfqs-block) begin
+  (mlfqs-block) Main thread acquiring lock.
+  (mlfqs-block) Main thread creating block thread, sleeping 25 seconds...
+  (mlfqs-block) Block thread spinning for 20 seconds...
+  (mlfqs-block) Block thread acquiring lock...
+  (mlfqs-block) Main thread spinning for 5 seconds...
+  (mlfqs-block) Main thread releasing lock.
+  (mlfqs-block) ...got it.
+  (mlfqs-block) Block thread should have already acquired lock.
+- (mlfqs-block) end
++ ÿÀ8ðÀend
