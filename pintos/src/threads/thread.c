@@ -32,6 +32,9 @@ static struct list ready_list;
 /* List of processes that are sleeping. */
 static struct list waiting_list;
 
+/* List of processes */
+static struct list thread_list;
+
 /* Idle thread. */
 static struct thread *idle_thread;
 
@@ -40,7 +43,7 @@ static struct thread *initial_thread;
 
 /* Lock used by allocate_tid(). */
 static struct lock tid_lock;
-
+static int load_avg=0;
 /* Stack frame for kernel_thread(). */
 struct kernel_thread_frame 
   {
@@ -80,22 +83,34 @@ void schedule_tail (struct thread *prev);
 static tid_t allocate_tid (void);
 int thread_get_nice(void);
 void thread_set_nice(int new_nice);
+void priority_recalculate(void);
+
+void
+priority_recalculate(void)
+{
+  struct list_elem
+
+
+
+
 
 /*returns the current thread's nice value */
+
 int
 thread_get_nice(void)
 {
-  return thread_current ()->nice;
+  return thread_current()->nice;
 }
+
 
 /* sets the current thread's nice value to new_value
  * and recalcultae the thrads' priority.
  * if it's priority is no more the highes, yield it.
  * */
+
 void
 thread_set_nice(int new_nice)
 {
-  return ;
   struct thread * thr;
   thr=thread_current ();
   thr->nice=new_nice;
@@ -104,15 +119,6 @@ thread_set_nice(int new_nice)
   if(thr->priority<thr_ready->priority)
     thread_yield();
 }
-
-
-
-
-
-
-
-
-
 /* Initializes the threading system by transforming the code
    that's currently running into a thread.  This can't work in
    general and it is possible in this case only because loader.S
@@ -260,6 +266,7 @@ thread_create (const char *name, int priority,
 
   /* Initialize thread. */
   init_thread (t, name, priority);
+  list_push_back(&thread_list,&t->elem_);
   tid = t->tid = allocate_tid ();
 
   /* Stack frame for kernel_thread(). */
@@ -372,6 +379,7 @@ thread_exit (void)
      We will be destroyed during the call to schedule_tail(). */
   intr_disable ();
   thread_current ()->status = THREAD_DYING;
+  struct thread * a=list_remove(&thread_current()->elem_);
   schedule ();
   NOT_REACHED ();
 }
@@ -435,16 +443,14 @@ thread_get_priority (void)
 int
 thread_get_load_avg (void) 
 {
-  /* Not yet implemented. */
-  return 0;
+  return 100*load_avg;
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
 int
 thread_get_recent_cpu (void) 
 {
-  /* Not yet implemented. */
-  return 0;
+  return 100*thread_current()->recent_cpu;
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.
@@ -685,7 +691,7 @@ allocate_tid (void)
 
   return tid;
 }
-
+
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);

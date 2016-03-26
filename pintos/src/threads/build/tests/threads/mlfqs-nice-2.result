@@ -1,6 +1,13 @@
 FAIL
-Some tick counts were missing or differed from those expected by more than 50.
-thread   actual <-> expected explanation
------- -------- --- -------- ----------------------------------------
-     0     1500 <<< 1904     Too small, by 354.
-     1     1501 >>> 1096     Too big, by 355.
+Kernel panic in run: PANIC at ../../lib/kernel/list.c:290 in list_front(): assertion `!list_empty (list)' failed.
+Call stack: 0xc01077e0 0xc0107ddc 0xc01006e0 0xc010bf7b 0xc010be2e 0xc01098a6 0xc0100535 0xc0100601 0xc0100094
+Translation of call stack:
+0xc01077e0: debug_panic (.../../lib/kernel/debug.c:34)
+0xc0107ddc: list_front (.../../lib/kernel/list.c:291)
+0xc01006e0: thread_set_nice (..../../threads/thread.c:107)
+0xc010bf7b: test_mlfqs_fair (...s/threads/mlfqs-fair.c:81)
+0xc010be2e: test_mlfqs_nice_2 (...s/threads/mlfqs-fair.c:46)
+0xc01098a6: run_test (.../tests/threads/tests.c:57)
+0xc0100535: run_task (.../../../threads/init.c:270)
+0xc0100601: run_actions (.../../../threads/init.c:319)
+0xc0100094: main (.../../../threads/init.c:124)

@@ -1,24 +1,13 @@
 FAIL
-Some tick counts were missing or differed from those expected by more than 25.
-thread   actual <-> expected explanation
------- -------- --- -------- ----------------------------------------
-     0      300 <<< 672      Too small, by 347.
-     1      301 <<< 588      Too small, by 262.
-     2      301 <<< 492      Too small, by 166.
-     3      300 <<< 408      Too small, by 83.
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/mlfqs-nice-10.result
-     4      300  =  316      
-     5      301 >>> 232      Too big, by 44.
-=======
-     4      301  =  316      
-     5      300 >>> 232      Too big, by 43.
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/mlfqs-nice-10.result
-     6      300 >>> 152      Too big, by 123.
-     7      300 >>> 92       Too big, by 183.
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/mlfqs-nice-10.result
-     8      300 >>> 40       Too big, by 235.
-     9      301 >>> 8        Too big, by 268.
-=======
-     8      301 >>> 40       Too big, by 236.
-     9      300 >>> 8        Too big, by 267.
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/mlfqs-nice-10.result
+Kernel panic in run: PANIC at ../../lib/kernel/list.c:290 in list_front(): assertion `!list_empty (list)' failed.
+Call stack: 0xc01077e0 0xc0107ddc 0xc01006e0 0xc010bf7b 0xc010be52 0xc01098a6 0xc0100535 0xc0100601 0xc0100094
+Translation of call stack:
+0xc01077e0: debug_panic (.../../lib/kernel/debug.c:34)
+0xc0107ddc: list_front (.../../lib/kernel/list.c:291)
+0xc01006e0: thread_set_nice (..../../threads/thread.c:107)
+0xc010bf7b: test_mlfqs_fair (...s/threads/mlfqs-fair.c:81)
+0xc010be52: test_mlfqs_nice_10 (...s/threads/mlfqs-fair.c:52)
+0xc01098a6: run_test (.../tests/threads/tests.c:57)
+0xc0100535: run_task (.../../../threads/init.c:270)
+0xc0100601: run_actions (.../../../threads/init.c:319)
+0xc0100094: main (.../../../threads/init.c:124)

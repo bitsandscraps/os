@@ -1,8 +1,4 @@
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/priority-donate-chain.output
-Writing command line to /tmp/T8Dmve2A4z.dsk...
-=======
-Writing command line to /tmp/KwNnR2i7xi.dsk...
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/priority-donate-chain.output
+Writing command line to /tmp/NMPw2DjDI0.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q run priority-donate-chain
@@ -52,8 +48,8 @@ Executing 'priority-donate-chain':
 (priority-donate-chain) main finishing with priority 0.
 (priority-donate-chain) end
 Execution of 'priority-donate-chain' complete.
-Timer: 395 ticks
-Thread: 0 idle ticks, 398 kernel ticks, 0 user ticks
+Timer: 396 ticks
+Thread: 0 idle ticks, 399 kernel ticks, 0 user ticks
 Console: 2634 characters output
 Keyboard: 0 keys pressed
 Powering off...

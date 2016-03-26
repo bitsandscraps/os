@@ -1,8 +1,4 @@
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/priority-preempt.output
-Writing command line to /tmp/fqiZtQZZBL.dsk...
-=======
-Writing command line to /tmp/DFwx3jRZuo.dsk...
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/priority-preempt.output
+Writing command line to /tmp/OAmrqUkIFf.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q run priority-preempt
