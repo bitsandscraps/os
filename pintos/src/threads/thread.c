@@ -129,7 +129,7 @@ void priority_recalculate(void)
   if(list_empty(&all_list)) return;
   for(e=list_begin(&all_list);e!=list_end(&all_list);e=list_next(e))
   {
-    thr=list_entry(e, struct thread, elem_);
+    thr=list_entry(e, struct thread, elem_all);
     priority_recalculate_indiv(thr);
   }
   list_sort(&ready_list, higher_priority, NULL);
@@ -182,7 +182,7 @@ recent_cpu_recalculate(void)
                   fp_divide_int(fp(size_thread),60));
   for(a=list_begin(&all_list);a!=list_end(&all_list);a=list_next(a))
   {
-    thr=list_entry(a, struct thread, elem_);
+    thr=list_entry(a, struct thread, elem_all);
     recent_cpu_recalculate_indiv(thr);
   }
   intr_set_level(old_level);
@@ -487,8 +487,8 @@ thread_exit (void)
      We will be destroyed during the call to schedule_tail(). */
   intr_disable ();
   if(!list_empty(&all_list) &&
-     is_interior(&(thread_current()->elem_)))
-    list_remove(&(thread_current()->elem_));
+     is_interior(&(thread_current()->elem_all)))
+    list_remove(&(thread_current()->elem_all));
   thread_current ()->status = THREAD_DYING;
   schedule ();
   NOT_REACHED ();
@@ -687,7 +687,7 @@ init_thread (struct thread *t, const char *name, int priority)
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
-  list_push_back(&all_list, &t->elem_);
+  list_push_back(&all_list, &t->elem_all);
   t->initial_priority = priority;
   list_init (&t->locks_holding);
   t->lock_trying_acquire = NULL;

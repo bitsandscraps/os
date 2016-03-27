@@ -104,8 +104,8 @@ struct thread
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
-    /* elem for thread_list */
-    struct list_elem elem_;             /* List elemetn. */
+    /* Element in all_list of thread.c. */
+    struct list_elem elem_all;          /* List element. */
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
