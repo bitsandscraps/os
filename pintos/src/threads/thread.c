@@ -101,13 +101,11 @@ void recent_cpu_recalculate_indiv(struct thread *);
 void
 priority_yield(void)
 {
-  enum intr_level old_level=intr_disable();
   if(list_empty(&ready_list)) return;
-  struct thread * thr;
-  thr=list_entry(list_front(&ready_list), struct thread, elem);
+  struct thread * thr=list_entry(list_front(&ready_list), struct thread, elem);
   if(thread_current()->priority < thr->priority)
     thread_yield();
-  intr_set_level(old_level);
+  
 }
 
 
@@ -486,9 +484,7 @@ thread_exit (void)
   /* Just set our status to dying and schedule another process.
      We will be destroyed during the call to schedule_tail(). */
   intr_disable ();
-  if(!list_empty(&thread_list) &&
-     is_interior(&(thread_current()->elem_)))
-    list_remove(&(thread_current()->elem_));
+  list_remove(&thread_current()->elem_);
   thread_current ()->status = THREAD_DYING;
   schedule ();
   NOT_REACHED ();
@@ -695,10 +691,12 @@ init_thread (struct thread *t, const char *name, int priority)
     if(t==initial_thread) {
       t->recent_cpu=0;
       t->nice=0;
+      t->priority;
     }
     else {
       t->recent_cpu=thread_current()->recent_cpu;
       t->nice=thread_current()->nice;
+      priority_recalculate_indiv(t);
     }
   }
   t->magic = THREAD_MAGIC;

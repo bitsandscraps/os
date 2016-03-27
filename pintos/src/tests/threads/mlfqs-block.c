@@ -59,6 +59,5 @@ block_thread (void *lock_)
 
   msg ("Block thread acquiring lock...");
   lock_acquire (lock);
-
   msg ("...got it.");
 }

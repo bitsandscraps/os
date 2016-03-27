@@ -240,9 +240,9 @@ PRIX64	/home/team03/seongsu/os/os/pintos/src/lib/inttypes.h	32;"	d
 PRIX8	/home/team03/seongsu/os/os/pintos/src/lib/inttypes.h	11;"	d
 PRIXMAX	/home/team03/seongsu/os/os/pintos/src/lib/inttypes.h	39;"	d
 PRIXPTR	/home/team03/seongsu/os/os/pintos/src/lib/inttypes.h	46;"	d
-PRI_DEFAULT	/home/team03/seongsu/os/os/pintos/src/threads/thread.h	25;"	d
-PRI_MAX	/home/team03/seongsu/os/os/pintos/src/threads/thread.h	26;"	d
-PRI_MIN	/home/team03/seongsu/os/os/pintos/src/threads/thread.h	24;"	d
+PRI_DEFAULT	/home/team03/seongsu/os/os/pintos/src/threads/thread.h	26;"	d
+PRI_MAX	/home/team03/seongsu/os/os/pintos/src/threads/thread.h	27;"	d
+PRI_MIN	/home/team03/seongsu/os/os/pintos/src/threads/thread.h	25;"	d
 PRId16	/home/team03/seongsu/os/os/pintos/src/lib/inttypes.h	13;"	d
 PRId32	/home/team03/seongsu/os/os/pintos/src/lib/inttypes.h	20;"	d
 PRId64	/home/team03/seongsu/os/os/pintos/src/lib/inttypes.h	27;"	d
@@ -405,19 +405,19 @@ THREADS_SWITCH_H	/home/team03/seongsu/os/os/pintos/src/threads/switch.h	2;"	d
 THREADS_SYNCH_H	/home/team03/seongsu/os/os/pintos/src/threads/synch.h	2;"	d
 THREADS_THREAD_H	/home/team03/seongsu/os/os/pintos/src/threads/thread.h	2;"	d
 THREADS_VADDR_H	/home/team03/seongsu/os/os/pintos/src/threads/vaddr.h	2;"	d
-THREAD_BASIC	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	26;"	d	file:
+THREAD_BASIC	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	27;"	d	file:
 THREAD_BLOCKED	/home/team03/seongsu/os/os/pintos/src/threads/thread.h	/^    THREAD_BLOCKED,     \/* Waiting for an event to trigger. *\/$/;"	e	enum:thread_status
 THREAD_CNT	/home/team03/seongsu/os/os/pintos/src/tests/threads/mlfqs-load-60.c	112;"	d	file:
 THREAD_CNT	/home/team03/seongsu/os/os/pintos/src/tests/threads/mlfqs-load-avg.c	123;"	d	file:
 THREAD_CNT	/home/team03/seongsu/os/os/pintos/src/tests/threads/priority-fifo.c	26;"	d	file:
 THREAD_DYING	/home/team03/seongsu/os/os/pintos/src/threads/thread.h	/^    THREAD_DYING        \/* About to be destroyed. *\/$/;"	e	enum:thread_status
-THREAD_MAGIC	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	22;"	d	file:
+THREAD_MAGIC	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	23;"	d	file:
 THREAD_READY	/home/team03/seongsu/os/os/pintos/src/threads/thread.h	/^    THREAD_READY,       \/* Not running but ready to run. *\/$/;"	e	enum:thread_status
 THREAD_RUNNING	/home/team03/seongsu/os/os/pintos/src/threads/thread.h	/^    THREAD_RUNNING,     \/* Running thread. *\/$/;"	e	enum:thread_status
 THR_REG	/home/team03/seongsu/os/os/pintos/src/devices/serial.c	22;"	d	file:
-TID_ERROR	/home/team03/seongsu/os/os/pintos/src/threads/thread.h	21;"	d
+TID_ERROR	/home/team03/seongsu/os/os/pintos/src/threads/thread.h	22;"	d
 TIMER_FREQ	/home/team03/seongsu/os/os/pintos/src/devices/timer.h	8;"	d
-TIME_SLICE	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	58;"	d	file:
+TIME_SLICE	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	67;"	d	file:
 UCHAR_MAX	/home/team03/seongsu/os/os/pintos/src/lib/limits.h	8;"	d
 UINT16_MAX	/home/team03/seongsu/os/os/pintos/src/lib/stdint.h	24;"	d
 UINT32_MAX	/home/team03/seongsu/os/os/pintos/src/lib/stdint.h	27;"	d
@@ -808,6 +808,7 @@ elem	/home/team03/seongsu/os/os/pintos/src/tests/internal/list.c	/^    struct li
 elem	/home/team03/seongsu/os/os/pintos/src/threads/synch.c	/^    struct list_elem elem;              \/* List element. *\/$/;"	m	struct:semaphore_elem	typeref:struct:semaphore_elem::list_elem	file:
 elem	/home/team03/seongsu/os/os/pintos/src/threads/synch.h	/^    struct list_elem elem;      \/* List element. Managed in struct thread. *\/ $/;"	m	struct:lock	typeref:struct:lock::list_elem
 elem	/home/team03/seongsu/os/os/pintos/src/threads/thread.h	/^    struct list_elem elem;              \/* List element. *\/$/;"	m	struct:thread	typeref:struct:thread::list_elem
+elem_	/home/team03/seongsu/os/os/pintos/src/threads/thread.h	/^    struct list_elem elem_;             \/* List elemetn. *\/$/;"	m	struct:thread	typeref:struct:thread::list_elem
 elem_cnt	/home/team03/seongsu/os/os/pintos/src/lib/kernel/bitmap.c	/^elem_cnt (size_t bit_cnt)$/;"	f	file:
 elem_cnt	/home/team03/seongsu/os/os/pintos/src/lib/kernel/hash.h	/^    size_t elem_cnt;            \/* Number of elements in table. *\/$/;"	m	struct:hash
 elem_idx	/home/team03/seongsu/os/os/pintos/src/lib/kernel/bitmap.c	/^elem_idx (size_t bit_idx) $/;"	f	file:
@@ -1080,6 +1081,7 @@ is_ata	/home/team03/seongsu/os/os/pintos/src/devices/disk.c	/^    bool is_ata;  
 is_dir	/home/team03/seongsu/os/os/pintos/src/tests/tests.pm	/^sub is_dir {$/;"	s
 is_head	/home/team03/seongsu/os/os/pintos/src/lib/kernel/list.c	/^is_head (struct list_elem *elem)$/;"	f	file:
 is_interior	/home/team03/seongsu/os/os/pintos/src/lib/kernel/list.c	/^is_interior (struct list_elem *elem)$/;"	f	file:
+is_interior	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^is_interior(struct list_elem * elem)$/;"	f	file:
 is_kernel_vaddr	/home/team03/seongsu/os/os/pintos/src/threads/vaddr.h	/^is_kernel_vaddr (const void *vaddr) $/;"	f
 is_partitioned	/home/team03/seongsu/os/os/pintos/src/tests/vm/qsort.c	/^is_partitioned (const unsigned char *array, size_t size,$/;"	f	file:
 is_power_of_2	/home/team03/seongsu/os/os/pintos/src/lib/kernel/hash.c	/^is_power_of_2 (size_t x) $/;"	f	file:
@@ -1169,6 +1171,7 @@ list_splice	/home/team03/seongsu/os/os/pintos/src/lib/kernel/list.c	/^list_splic
 list_tail	/home/team03/seongsu/os/os/pintos/src/lib/kernel/list.c	/^list_tail (struct list *list) $/;"	f
 list_unique	/home/team03/seongsu/os/os/pintos/src/lib/kernel/list.c	/^list_unique (struct list *list, struct list *duplicates,$/;"	f
 load	/home/team03/seongsu/os/os/pintos/src/userprog/process.c	/^load (const char *file_name, void (**eip) (void), void **esp) $/;"	f
+load_avg	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^fixed_point load_avg;$/;"	v
 load_segment	/home/team03/seongsu/os/os/pintos/src/userprog/process.c	/^load_segment (struct file *file, off_t ofs, uint8_t *upage,$/;"	f	file:
 load_thread	/home/team03/seongsu/os/os/pintos/src/tests/threads/mlfqs-fair.c	/^load_thread (void *ti_) $/;"	f	file:
 load_thread	/home/team03/seongsu/os/os/pintos/src/tests/threads/mlfqs-load-60.c	/^load_thread (void *aux UNUSED) $/;"	f	file:
@@ -1300,6 +1303,7 @@ next	/home/team03/seongsu/os/os/pintos/src/lib/kernel/list.h	/^    struct list_e
 next	/home/team03/seongsu/os/os/pintos/src/threads/switch.h	/^    struct thread *next;        \/* 24: switch_threads()'s NEXT argument. *\/$/;"	m	struct:switch_threads_frame	typeref:struct:switch_threads_frame::thread
 next_thread_to_run	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^next_thread_to_run (void) $/;"	f	file:
 nice	/home/team03/seongsu/os/os/pintos/src/tests/threads/mlfqs-fair.c	/^    int nice;$/;"	m	struct:thread_info	file:
+nice	/home/team03/seongsu/os/os/pintos/src/threads/thread.h	/^    int nice;$/;"	m	struct:thread
 nlz	/home/team03/seongsu/os/os/pintos/src/lib/arithmetic.c	/^nlz (uint32_t x) $/;"	f	file:
 normalize_fs	/home/team03/seongsu/os/os/pintos/src/tests/tests.pm	/^sub normalize_fs {$/;"	s
 not_empty	/home/team03/seongsu/os/os/pintos/src/devices/intq.h	/^    struct thread *not_empty;   \/* Thread waiting for not-empty condition. *\/$/;"	m	struct:intq	typeref:struct:intq::thread
@@ -1409,8 +1413,11 @@ priority	/home/team03/seongsu/os/os/pintos/src/threads/synch.h	/^    int priorit
 priority	/home/team03/seongsu/os/os/pintos/src/threads/thread.h	/^    int priority;                       \/* Current priority. *\/$/;"	m	struct:thread
 priority_condvar_thread	/home/team03/seongsu/os/os/pintos/src/tests/threads/priority-condvar.c	/^priority_condvar_thread (void *aux UNUSED) $/;"	f	file:
 priority_condvar_thread	/home/team03/seongsu/os/os/pintos/src/tests/threads/priority-condvar.c	/^static thread_func priority_condvar_thread;$/;"	v	file:
+priority_recalculate	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^void priority_recalculate(void)$/;"	f
+priority_recalculate_indiv	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^priority_recalculate_indiv(struct thread * thr)$/;"	f
 priority_sema_thread	/home/team03/seongsu/os/os/pintos/src/tests/threads/priority-sema.c	/^priority_sema_thread (void *aux UNUSED) $/;"	f	file:
 priority_sema_thread	/home/team03/seongsu/os/os/pintos/src/tests/threads/priority-sema.c	/^static thread_func priority_sema_thread;$/;"	v	file:
+priority_yield	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^priority_yield(void)$/;"	f
 process_activate	/home/team03/seongsu/os/os/pintos/src/userprog/process.c	/^process_activate (void)$/;"	f
 process_execute	/home/team03/seongsu/os/os/pintos/src/userprog/process.c	/^process_execute (const char *file_name) $/;"	f
 process_exit	/home/team03/seongsu/os/os/pintos/src/userprog/process.c	/^process_exit (void)$/;"	f
@@ -1456,6 +1463,10 @@ readdir	/home/team03/seongsu/os/os/pintos/src/lib/user/syscall.c	/^readdir (int 
 ready_list	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^static struct list ready_list;$/;"	v	typeref:struct:list	file:
 real_time_sleep	/home/team03/seongsu/os/os/pintos/src/devices/timer.c	/^real_time_sleep (int64_t num, int32_t denom) $/;"	f	file:
 realloc	/home/team03/seongsu/os/os/pintos/src/threads/malloc.c	/^realloc (void *old_block, size_t new_size) $/;"	f
+recent_cpu	/home/team03/seongsu/os/os/pintos/src/threads/thread.h	/^    fixed_point recent_cpu;$/;"	m	struct:thread
+recent_cpu_incr	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^recent_cpu_incr(void)$/;"	f
+recent_cpu_recalculate	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^recent_cpu_recalculate(void)$/;"	f
+recent_cpu_recalculate_indiv	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^recent_cpu_recalculate_indiv(struct thread * thr)$/;"	f
 recursor_SRC	/home/team03/seongsu/os/os/pintos/src/examples/Makefile	/^recursor_SRC = recursor.c$/;"	m
 reg_alt_status	/home/team03/seongsu/os/os/pintos/src/devices/disk.c	29;"	d	file:
 reg_base	/home/team03/seongsu/os/os/pintos/src/devices/disk.c	/^    uint16_t reg_base;          \/* Base I\/O port. *\/$/;"	m	struct:channel	file:
@@ -1793,15 +1804,16 @@ thread_current	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^thread_c
 thread_exit	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^thread_exit (void) $/;"	f
 thread_func	/home/team03/seongsu/os/os/pintos/src/threads/thread.h	/^typedef void thread_func (void *aux);$/;"	t
 thread_get_load_avg	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^thread_get_load_avg (void) $/;"	f
-thread_get_nice	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^thread_get_nice (void) $/;"	f
+thread_get_nice	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^thread_get_nice(void)$/;"	f
 thread_get_priority	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^thread_get_priority (void) $/;"	f
 thread_get_recent_cpu	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^thread_get_recent_cpu (void) $/;"	f
 thread_info	/home/team03/seongsu/os/os/pintos/src/tests/threads/mlfqs-fair.c	/^struct thread_info $/;"	s	file:
 thread_init	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^thread_init (void) $/;"	f
+thread_list	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^static struct list thread_list;$/;"	v	typeref:struct:list	file:
 thread_mlfqs	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^bool thread_mlfqs;$/;"	v
 thread_name	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^thread_name (void) $/;"	f
 thread_print_stats	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^thread_print_stats (void) $/;"	f
-thread_set_nice	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^thread_set_nice (int nice UNUSED) $/;"	f
+thread_set_nice	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^thread_set_nice(int new_nice)$/;"	f
 thread_set_priority	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^thread_set_priority (int new_priority) $/;"	f
 thread_sleep	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^thread_sleep (int64_t wakeup_tick)$/;"	f
 thread_stack_ofs	/home/team03/seongsu/os/os/pintos/src/threads/thread.c	/^uint32_t thread_stack_ofs = offsetof (struct thread, stack);$/;"	v
