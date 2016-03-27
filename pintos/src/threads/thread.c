@@ -687,18 +687,25 @@ init_thread (struct thread *t, const char *name, int priority)
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
-  list_push_back(&all_list, &t->elem_all);
+  list_push_back (&all_list, &t->elem_all);
   t->initial_priority = priority;
   list_init (&t->locks_holding);
   t->lock_trying_acquire = NULL;
-  if(thread_mlfqs) {
-    if(t==initial_thread) {
-      t->recent_cpu=0;
-      t->nice=0;
+  if (thread_mlfqs)
+  {
+    /* Initial value of nice and recent_cpu are both zero in the first
+     * thread created. */
+    if (t == initial_thread)
+    {
+      t->nice = 0;
+      t->recent_cpu = 0;
     }
-    else {
-      t->recent_cpu=thread_current()->recent_cpu;
-      t->nice=thread_current()->nice;
+    /* Threads other than the initial thread inherits its nice and
+     * recent_cpu values from its parent. */
+    else
+    {
+      t->nice = thread_current()->nice;
+      t->recent_cpu = thread_current()->recent_cpu;
     }
   }
   t->magic = THREAD_MAGIC;
