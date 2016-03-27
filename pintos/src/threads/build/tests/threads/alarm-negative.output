@@ -1,8 +1,4 @@
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/alarm-negative.output
-Writing command line to /tmp/uBK1OPkWOB.dsk...
-=======
-Writing command line to /tmp/rc7cKB8SD2.dsk...
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/alarm-negative.output
+Writing command line to /tmp/evV5VphVEi.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q run alarm-negative

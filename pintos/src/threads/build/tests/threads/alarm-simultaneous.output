@@ -1,8 +1,4 @@
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/alarm-simultaneous.output
-Writing command line to /tmp/umMqHnWx7z.dsk...
-=======
-Writing command line to /tmp/dtn3NK6qeE.dsk...
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/alarm-simultaneous.output
+Writing command line to /tmp/u6LJcXUdjg.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q run alarm-simultaneous
@@ -33,13 +29,8 @@ Executing 'alarm-simultaneous':
 (alarm-simultaneous) iteration 4, thread 2: woke up 0 ticks later
 (alarm-simultaneous) end
 Execution of 'alarm-simultaneous' complete.
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/alarm-simultaneous.output
-Timer: 464 ticks
-Thread: 248 idle ticks, 219 kernel ticks, 0 user ticks
-=======
 Timer: 470 ticks
 Thread: 248 idle ticks, 225 kernel ticks, 0 user ticks
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/alarm-simultaneous.output
 Console: 1612 characters output
 Keyboard: 0 keys pressed
 Powering off...

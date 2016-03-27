@@ -1,8 +1,4 @@
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/priority-donate-multiple.output
-Writing command line to /tmp/li0Nc0tcEm.dsk...
-=======
-Writing command line to /tmp/wrhXtkECIx.dsk...
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/priority-donate-multiple.output
+Writing command line to /tmp/lM2p2U20M2.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q run priority-donate-multiple
@@ -25,14 +21,8 @@ Executing 'priority-donate-multiple':
 (priority-donate-multiple) Main thread should have priority 31.  Actual priority: 31.
 (priority-donate-multiple) end
 Execution of 'priority-donate-multiple' complete.
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/priority-donate-multiple.output
-Timer: 119 ticks
-Thread: 0 idle ticks, 122 kernel ticks, 0 user ticks
-Console: 905 characters output
-=======
-Timer: 148 ticks
-Thread: 0 idle ticks, 151 kernel ticks, 0 user ticks
+Timer: 146 ticks
+Thread: 0 idle ticks, 149 kernel ticks, 0 user ticks
 Console: 1103 characters output
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/priority-donate-multiple.output
 Keyboard: 0 keys pressed
 Powering off...

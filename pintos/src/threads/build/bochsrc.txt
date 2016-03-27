@@ -6,10 +6,6 @@ megs: 4
 log: bochsout.txt
 panic: action=fatal
 clock: sync=none, time0=0
-<<<<<<< HEAD:pintos/src/threads/build/bochsrc.txt
-ata0-master: type=disk, path=/tmp/uJ4W4CAFZM.dsk, mode=flat, cylinders=1, heads=16, spt=63, translation=none
-=======
-ata0-master: type=disk, path=/tmp/z34Yz0bLnC.dsk, mode=flat, cylinders=1, heads=16, spt=63, translation=none
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/bochsrc.txt
+ata0-master: type=disk, path=/tmp/5rUqkvoeiZ.dsk, mode=flat, cylinders=1, heads=16, spt=63, translation=none
 com1: enabled=1, mode=file, dev=/dev/stdout
 display_library: nogui

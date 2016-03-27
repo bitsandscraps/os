@@ -5,6 +5,7 @@
 #include <list.h>
 #include <stdint.h>
 #include "threads/synch.h"
+#include "threads/fixed-point.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -81,6 +82,7 @@ typedef int tid_t;
    only because they are mutually exclusive: only a thread in the
    ready state is on the run queue, whereas only a thread in the
    blocked state is on a semaphore wait list. */
+
 struct thread
   {
     /* Owned by thread.c. */
@@ -91,6 +93,10 @@ struct thread
     int priority;                       /* Current priority. */
     int initial_priority;               /* Initial priority. */
 
+    /* parameters for advanced scheduler */
+    int nice;
+    fixed_point recent_cpu;
+
     /* Lock that the thread is trying to acquire. */
     struct lock * lock_trying_acquire;
     struct list locks_holding;          /* Locks the thread is holding. */
@@ -98,6 +104,8 @@ struct thread
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
+    /* elem for thread_list */
+    struct list_elem elem_;             /* List elemetn. */
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
@@ -140,6 +148,9 @@ void restore_priority (struct thread * thr);
 int thread_get_priority (void);
 void thread_set_priority (int);
 
+void recent_cpu_recalculate(void);
+void recent_cpu_incr(void);
+void priority_recalculate(void);
 int thread_get_nice (void);
 void thread_set_nice (int);
 int thread_get_recent_cpu (void);
