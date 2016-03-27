@@ -1,4 +1,3 @@
-
 /* Checks that recent_cpu and priorities are updated for blocked
    threads.
 
@@ -31,9 +30,9 @@ test_mlfqs_block (void)
   msg ("Main thread acquiring lock.");
   lock_init (&lock);
   lock_acquire (&lock);
+  
   msg ("Main thread creating block thread, sleeping 25 seconds...");
   thread_create ("block", PRI_DEFAULT, block_thread, &lock);
-  
   timer_sleep (25 * TIMER_FREQ);
 
   msg ("Main thread spinning for 5 seconds...");
@@ -60,5 +59,6 @@ block_thread (void *lock_)
 
   msg ("Block thread acquiring lock...");
   lock_acquire (lock);
+
   msg ("...got it.");
 }

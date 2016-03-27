@@ -72,7 +72,7 @@ msg (const char *format, ...)
   va_start (args, format);
   vprintf (format, args);
   va_end (args);
-  putchar ('\n ');
+  putchar ('\n');
 }
 
 /* Prints failure message FORMAT as if with printf(),
