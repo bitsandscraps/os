@@ -1,8 +1,4 @@
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/priority-donate-lower.output
-Writing command line to /tmp/dGGBqfbN0d.dsk...
-=======
-Writing command line to /tmp/tetDiZ1H9B.dsk...
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/priority-donate-lower.output
+Writing command line to /tmp/As9Sj7QwK6.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q run priority-donate-lower
@@ -22,14 +18,8 @@ Executing 'priority-donate-lower':
 (priority-donate-lower) Main thread should have priority 21.  Actual priority: 21.
 (priority-donate-lower) end
 Execution of 'priority-donate-lower' complete.
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/priority-donate-lower.output
-Timer: 100 ticks
-Thread: 0 idle ticks, 103 kernel ticks, 0 user ticks
-Console: 779 characters output
-=======
 Timer: 110 ticks
 Thread: 0 idle ticks, 113 kernel ticks, 0 user ticks
 Console: 863 characters output
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/priority-donate-lower.output
 Keyboard: 0 keys pressed
 Powering off...

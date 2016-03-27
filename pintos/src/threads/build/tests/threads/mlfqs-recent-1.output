@@ -1,8 +1,4 @@
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/mlfqs-recent-1.output
-Writing command line to /tmp/1zNNo9UTWz.dsk...
-=======
-Writing command line to /tmp/udhlNQIyzr.dsk...
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/mlfqs-recent-1.output
+Writing command line to /tmp/Cm7On69LPQ.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q -mlfqs run mlfqs-recent-1
@@ -106,13 +102,8 @@ Executing 'mlfqs-recent-1':
 (mlfqs-recent-1) After 180 seconds, recent_cpu is 0.00, load_avg is 0.00.
 (mlfqs-recent-1) end
 Execution of 'mlfqs-recent-1' complete.
-<<<<<<< HEAD:pintos/src/threads/build/tests/threads/mlfqs-recent-1.output
-Timer: 19020 ticks
-Thread: 956 idle ticks, 18067 kernel ticks, 0 user ticks
-=======
 Timer: 19019 ticks
 Thread: 956 idle ticks, 18066 kernel ticks, 0 user ticks
->>>>>>> a0ae42f809d041328823ccbbed10a797f2bb8f86:pintos/src/threads/build/tests/threads/mlfqs-recent-1.output
 Console: 7087 characters output
 Keyboard: 0 keys pressed
 Powering off...
