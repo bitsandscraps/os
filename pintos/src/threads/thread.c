@@ -33,10 +33,10 @@ static struct list ready_list;
 /* List of processes that are sleeping. */
 static struct list waiting_list;
 
-/* List of processes. it includes running, blocked, and ready states.
- * threads are included when init_thread called
- * and threads are excluded when thread_exit called*/
-static struct list thread_list;
+/* List of all processes, by all we mean threads in THREAD_READY,
+ * THREAD_BLOCKED, and THREAD_RUNNING states. Threads are added to the
+ * list during init_thread and removed during thread_exit. */
+static struct list all_list;
 
 /* Idle thread. */
 static struct thread *idle_thread;
@@ -126,8 +126,8 @@ void priority_recalculate(void)
   struct list_elem * e;
   struct thread * thr;
   enum intr_level old_level=intr_disable();
-  if(list_empty(&thread_list)) return;
-  for(e=list_begin(&thread_list);e!=list_end(&thread_list);e=list_next(e))
+  if(list_empty(&all_list)) return;
+  for(e=list_begin(&all_list);e!=list_end(&all_list);e=list_next(e))
   {
     thr=list_entry(e, struct thread, elem_);
     priority_recalculate_indiv(thr);
@@ -150,7 +150,7 @@ priority_recalculate_indiv(struct thread * thr)
   if(thr->priority<PRI_MIN) thr->priority=PRI_MIN;
 }
 
-/* recalculate priority of every threads in thread_list */
+/* recalculate priority of every threads in all_list */
 void
 recent_cpu_recalculate_indiv(struct thread * thr)
 {
@@ -164,7 +164,7 @@ recent_cpu_recalculate_indiv(struct thread * thr)
                              thr->nice);
 }
 
-/* recalculate recent_cpu of every threads in thread_list */
+/* recalculate recent_cpu of every threads in all_list */
 void
 recent_cpu_recalculate(void)
 {
@@ -180,7 +180,7 @@ recent_cpu_recalculate(void)
 
   load_avg=fp_add(fp_divide_int(fp_multiply_int(load_avg,59),60),
                   fp_divide_int(fp(size_thread),60));
-  for(a=list_begin(&thread_list);a!=list_end(&thread_list);a=list_next(a))
+  for(a=list_begin(&all_list);a!=list_end(&all_list);a=list_next(a))
   {
     thr=list_entry(a, struct thread, elem_);
     recent_cpu_recalculate_indiv(thr);
@@ -239,7 +239,7 @@ thread_init (void)
   lock_init (&tid_lock);
   list_init (&ready_list);
   list_init (&waiting_list);
-  list_init (&thread_list);
+  list_init (&all_list);
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
   init_thread (initial_thread, "main", PRI_DEFAULT);
@@ -486,7 +486,7 @@ thread_exit (void)
   /* Just set our status to dying and schedule another process.
      We will be destroyed during the call to schedule_tail(). */
   intr_disable ();
-  if(!list_empty(&thread_list) &&
+  if(!list_empty(&all_list) &&
      is_interior(&(thread_current()->elem_)))
     list_remove(&(thread_current()->elem_));
   thread_current ()->status = THREAD_DYING;
@@ -687,7 +687,7 @@ init_thread (struct thread *t, const char *name, int priority)
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
-  list_push_back(&thread_list, &t->elem_);
+  list_push_back(&all_list, &t->elem_);
   t->initial_priority = priority;
   list_init (&t->locks_holding);
   t->lock_trying_acquire = NULL;
