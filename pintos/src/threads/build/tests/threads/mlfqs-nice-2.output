@@ -1,4 +1,4 @@
-Writing command line to /tmp/rwP1eUfWli.dsk...
+Writing command line to /tmp/NI1bQP55S9.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q -mlfqs run mlfqs-nice-2
@@ -14,9 +14,10 @@ Executing 'mlfqs-nice-2':
 (mlfqs-nice-2) Sleeping 40 seconds to let threads run, please wait...
 (mlfqs-nice-2) Thread 0 received 1932 ticks.
 (mlfqs-nice-2) Thread 1 received 1068 ticks.
-endExecution of 'mlfqs-nice-2' complete.
-Timer: 4080 ticks
-Thread: 999 idle ticks, 3084 kernel ticks, 0 user ticks
-Console: 614 characters output
+(mlfqs-nice-2) end
+Execution of 'mlfqs-nice-2' complete.
+Timer: 4084 ticks
+Thread: 999 idle ticks, 3088 kernel ticks, 0 user ticks
+Console: 630 characters output
 Keyboard: 0 keys pressed
 Powering off...

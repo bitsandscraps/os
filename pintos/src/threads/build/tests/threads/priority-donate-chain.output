@@ -1,4 +1,4 @@
-Writing command line to /tmp/yJUPCFftbY.dsk...
+Writing command line to /tmp/h98jpKhPzT.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q run priority-donate-chain
@@ -46,9 +46,10 @@ Executing 'priority-donate-chain':
 (priority-donate-chain) thread 1 finishing with priority 3.
 (priority-donate-chain) interloper 1 finished.
 (priority-donate-chain) main finishing with priority 0.
-endExecution of 'priority-donate-chain' complete.
-Timer: 394 ticks
-Thread: 0 idle ticks, 397 kernel ticks, 0 user ticks
-Console: 2609 characters output
+(priority-donate-chain) end
+Execution of 'priority-donate-chain' complete.
+Timer: 398 ticks
+Thread: 0 idle ticks, 401 kernel ticks, 0 user ticks
+Console: 2634 characters output
 Keyboard: 0 keys pressed
 Powering off...
