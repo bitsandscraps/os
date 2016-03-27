@@ -96,7 +96,7 @@ timer_elapsed (int64_t then)
 void
 timer_sleep (int64_t ticks) 
 {
-  int64_t wakeup_tick = timer_ticks () + ticks;
+  int64_t wakeup_tick = timer_ticks()+ ticks;
   thread_sleep (wakeup_tick);
 }
 
@@ -133,8 +133,13 @@ static void
 timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
+  thread_tick();
+  if(thread_mlfqs) {
+    recent_cpu_incr();
+    if(ticks % TIMER_FREQ==0) recent_cpu_recalculate();
+    else if(ticks % 4==0) priority_recalculate();
+  }
   wake_threads (ticks);
-  thread_tick ();
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
