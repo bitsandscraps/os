@@ -308,7 +308,7 @@ run_actions (char **argv)
           PANIC ("unknown action `%s' (use -h for help)", *argv);
         else if (!strcmp (*argv, a->name))
           break;
-
+      
       /* Check for required arguments. */
       for (i = 1; i < a->argc; i++)
         if (argv[i] == NULL)

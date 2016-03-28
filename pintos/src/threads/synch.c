@@ -131,6 +131,7 @@ sema_up (struct semaphore *sema)
   {
     struct list_elem * max = list_max (&sema->waiters, lesser_priority, NULL);
     max_thr = list_entry (max, struct thread, elem);
+    ASSERT (max_thr->magic == 0xcd6abf4b);
     list_remove (max);
     thread_unblock (max_thr);
   }
@@ -218,6 +219,7 @@ lock_acquire (struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
+  enum intr_level old_level = intr_disable ();
   struct thread * curr = thread_current ();
   if(!thread_mlfqs) {
     if (lock->holder != NULL) {
@@ -230,6 +232,7 @@ lock_acquire (struct lock *lock)
   lock->holder = curr;
   lock->priority = curr->priority;
   list_push_back (&curr->locks_holding, &lock->elem);
+  intr_set_level (old_level);
 }
 
 /* Tries to acquires LOCK and returns true if successful or false
@@ -263,14 +266,19 @@ lock_release (struct lock *lock)
 {
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
+  enum intr_level old_level = intr_disable ();
   lock->holder = NULL;
   sema_up (&lock->semaphore);
   list_remove (&lock->elem);
-  struct thread * curr = thread_current ();
-  int orig_pri = curr->priority;
-  if(!thread_mlfqs) restore_priority (curr);
-  if (orig_pri > curr->priority)
-    thread_yield ();
+  if (!thread_mlfqs)
+  {
+    struct thread * curr = thread_current ();
+    int orig_pri = curr->priority;
+    restore_priority (curr);
+    if (orig_pri > curr->priority)
+      thread_yield ();
+  }
+  intr_set_level (old_level);
 }
 
 /* Returns true if the current thread holds LOCK, false
