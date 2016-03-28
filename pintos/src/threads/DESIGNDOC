@@ -113,6 +113,20 @@ the call to timer_sleep().
 >> how your implementation avoids it.  Can you use a lock to avoid
 >> this race?
 
+Suppose Thread 0 with priority 30 is holding lock A. It is trying to set
+its priority to be 20. Before the setting is finished, here comes
+Thread 1 with priority 40. It tries to acquire lock A. It finds out that
+its priority is higher than Thread 0, the holder of the lock. It donates
+its priority to Thread 0, making it 40. Now Thread 0 is back again in
+charge of the CPU. It sets its priority to 20, which was what it was
+planning to do before Thread 1 came. TAH-DAH! Priority inversion has
+occured.
+
+To prevent this from happening we turned off the interrupt while during
+thread_set_priority () call. We cannot use locks because, race
+conditions happen due to locks. The same scenario mentioned above will
+happen, except the fact that now Thread 0
+
 ---- RATIONALE ----
 
 >> B7: Why did you choose this design?  In what ways is it superior to

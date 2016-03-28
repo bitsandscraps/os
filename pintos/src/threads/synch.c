@@ -270,9 +270,9 @@ lock_release (struct lock *lock)
   enum intr_level old_level = intr_disable ();
   lock->holder = NULL;
   sema_up (&lock->semaphore);
-    list_remove (&lock->elem);
   if (!thread_mlfqs)
   {
+    list_remove (&lock->elem);
     struct thread * curr = thread_current ();
     int orig_pri = curr->priority;
     restore_priority (curr);
