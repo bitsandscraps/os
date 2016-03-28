@@ -92,6 +92,23 @@ the call to timer_sleep().
 >> `struct' member, global or static variable, `typedef', or
 >> enumeration.  Identify the purpose of each in 25 words or less.
 
+Added to struct thread:
+
+    int initial_priority;         /* Initial priority. */
+    /* Lock that the thread is trying to acquire. */
+    struct lock * lock_trying_acquire;
+    struct list locks_holding;    /* Locks the thread is holding. */
+
+Added to struct lock:
+
+    int priority;                 /* Most recent priority donation. */
+    struct list_elem elem;        /* List element. Managed in struct thread. */
+
+Added to struct semaphore_elem:
+
+    int priority;                 /* Priority of thread waiting. */
+
+
 >> B2: Explain the data structure used to track priority donation.
 >> Use ASCII art to diagram a nested donation.  (Alternately, submit a
 >> .png file.)
@@ -100,6 +117,19 @@ the call to timer_sleep().
 
 >> B3: How do you ensure that the highest priority thread waiting for
 >> a lock, semaphore, or condition variable wakes up first?
+
+The sema_up () function awakens the thread with the highest priority
+using the list_max () function on its waiters list. To ensure that
+that the running thread should always be the one with the highest
+priority, the function compares the priority of the current thread
+and the newly unblocked thread. If the new thread has higher priority
+the current thread will yield to the new one.
+
+Since each lock uses a single semaphore, highest priority awakens first
+rule is automatically applied to locks. For conditional variables,
+though, this is not the case. Conditional variables assign different
+semaphores to different threads. 
+
 
 >> B4: Describe the sequence of events when a call to lock_acquire()
 >> causes a priority donation.  How is nested donation handled?
@@ -125,7 +155,10 @@ occured.
 To prevent this from happening we turned off the interrupt while during
 thread_set_priority () call. We cannot use locks because, race
 conditions happen due to locks. The same scenario mentioned above will
-happen, except the fact that now Thread 0
+still happen. What is worse is the fact that now the problem may occur
+even if Thread 0 was not holding any locks before calling the
+thread_priority_set () function, since the function itself tries to
+acquire a lock during its call.
 
 ---- RATIONALE ----
 

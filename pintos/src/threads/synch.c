@@ -308,7 +308,6 @@ void
 cond_init (struct condition *cond)
 {
   ASSERT (cond != NULL);
-
   list_init (&cond->waiters);
 }
 
@@ -317,13 +316,11 @@ cond_init (struct condition *cond)
  * returns true if the original priority of a is less than
  * the original priority of b. */
 static bool
-lesser_priority_sem (const struct list_elem *a,
-                     const struct list_elem *b, void *aux UNUSED)
+lesser_priority_sema (const struct list_elem *a,
+                      const struct list_elem *b, void *aux UNUSED)
 {
-  const struct semaphore_elem *a_sem =
-      list_entry (a, struct semaphore_elem, elem);
-  const struct semaphore_elem *b_sem =
-      list_entry (b, struct semaphore_elem, elem);
+  struct semaphore_elem * a_sem = list_entry (a, struct semaphore_elem, elem);
+  struct semaphore_elem * b_sem = list_entry (b, struct semaphore_elem, elem);
   return a_sem->priority < b_sem->priority;
 }
 
@@ -356,11 +353,10 @@ cond_wait (struct condition *cond, struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (!intr_context ());
   ASSERT (lock_held_by_current_thread (lock));
-  
-  waiter.priority = thread_current ()->priority;
   sema_init (&waiter.semaphore, 0);
+  waiter.priority = thread_current ()->priority;
   list_insert_ordered (&cond->waiters, &waiter.elem,
-                       lesser_priority_sem, NULL);
+                       lesser_priority_sema, NULL);
   lock_release (lock);
   sema_down (&waiter.semaphore);
   lock_acquire (lock);
@@ -380,7 +376,6 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED)
   ASSERT (lock != NULL);
   ASSERT (!intr_context ());
   ASSERT (lock_held_by_current_thread (lock));
-
   if (!list_empty (&cond->waiters)) 
     sema_up (&list_entry (list_pop_back (&cond->waiters),
                           struct semaphore_elem, elem)->semaphore);
