@@ -74,18 +74,18 @@ Functionality of advanced scheduler (tests/threads/Rubric.mlfqs):
 DETAILS OF tests/threads/mlfqs-block FAILURE:
 
 Kernel panic in run: PANIC at ../../threads/interrupt.c:373 in intr_handler(): Unexpected interrupt
-Call stack: 0xc0107fd4 0xc0102199 0xc002f038 0xc01075f6 0xc01005a4 0xc0100094
+Call stack: 0xc0107f88 0xc010214d 0xc002f038 0xc01075aa 0xc01005a4 0xc0100094
 Translation of call stack:
-0xc0107fd4: debug_panic (.../../lib/kernel/debug.c:34)
-0xc0102199: intr_handler (..../threads/interrupt.c:377)
+0xc0107f88: debug_panic (.../../lib/kernel/debug.c:34)
+0xc010214d: intr_handler (..../threads/interrupt.c:377)
 0xc002f038: (unknown)
-0xc01075f6: strcmp (...ild/../../lib/string.c:84)
+0xc01075aa: strcmp (...ild/../../lib/string.c:84)
 0xc01005a4: run_actions (.../../../threads/init.c:309)
 0xc0100094: main (.../../../threads/init.c:124)
 
 OUTPUT FROM tests/threads/mlfqs-block:
 
-Writing command line to /tmp/cfsWcxCXgl.dsk...
+Writing command line to /tmp/BlYnBjMoB3.dsk...
 warning: can't find squish-pty, so terminal input will fail
 bochs -q
 Kernel command line: -q -mlfqs run mlfqs-block
@@ -106,13 +106,13 @@ Executing 'mlfqs-block':
 (mlfqs-block) Block thread should have already acquired lock.
 ÿÀ8ðÀend
 Execution of 'mlfqs-block' complete.
-Interrupt 0x0e (#PF Page-Fault Exception) at eip=0xc01075f6
+Interrupt 0x0e (#PF Page-Fault Exception) at eip=0xc01075aa
  cr2=000009f9 error=00000000
- eax=000009f9 ebx=c010caf4 ecx=c010de1c edx=000009f9
- esi=c002f040 edi=c0112000 esp=c010daca ebp=c002ff88
+ eax=000009f9 ebx=c010cab4 ecx=c010ddc0 edx=000009f9
+ esi=c002f040 edi=c0112000 esp=c010da8a ebp=c002ff88
  cs=0008 ds=0010 es=0010 ss=7d8c
 Kernel PANIC at ../../threads/interrupt.c:373 in intr_handler(): Unexpected interrupt
-Call stack: 0xc0107fd4 0xc0102199 0xc002f038 0xc01075f6 0xc01005a4 0xc0100094.
+Call stack: 0xc0107f88 0xc010214d 0xc002f038 0xc01075aa 0xc01005a4 0xc0100094.
 The `backtrace' program can make call stacks useful.
 Read "Backtraces" in the "Debugging Tools" chapter
 of the Pintos documentation for more information.

@@ -472,12 +472,6 @@ thread_tid (void)
 
 /* Deschedules the current thread and destroys it.  Never
    returns to the caller. */
-
-static inline bool
-is_interior(struct list_elem * elem)
-{
-  return elem !=NULL && elem->prev !=NULL && elem->next !=NULL;
-}
 void
 thread_exit (void) 
 {
@@ -487,7 +481,6 @@ thread_exit (void)
   process_exit ();
 #endif
   struct thread * curr = thread_current ();
-  ASSERT (is_interior (&curr->elem_all));
   if (!list_empty (&all_list))
     list_remove (&curr->elem_all);
   /* Just set our status to dying and schedule another process.
@@ -691,7 +684,6 @@ init_thread (struct thread *t, const char *name, int priority)
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
-  list_push_back (&all_list, &t->elem_all);
   t->initial_priority = priority;
   list_init (&t->locks_holding);
   t->lock_trying_acquire = NULL;
@@ -713,6 +705,7 @@ init_thread (struct thread *t, const char *name, int priority)
     }
   }
   t->magic = THREAD_MAGIC;
+  list_push_back (&all_list, &t->elem_all);
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
