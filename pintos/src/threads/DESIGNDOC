@@ -137,8 +137,48 @@ highest priority will be unblocked.
 >> B4: Describe the sequence of events when a call to lock_acquire()
 >> causes a priority donation.  How is nested donation handled?
 
+An important point to remember is that a thread will never try to
+acquire more than one lock at a time. This makes things a lot easier.
+We added a new member in struct thread to remember what lock the thread
+is trying to acquire. The actual and detailed processes is as following.
+
+Suppose Thread 0 of priority 20 holds lock A. Thread 1 of priority 30
+holding lock B tries to acquire lock A. It sets the lock_trying_acquire
+to point at lock A. It sees that Thread 0, the holder of lock A has
+lower priority than itself, so it donates its priority to Thread 0, and
+Thread 0 now has priority 30.
+
+Now Thread 2 of priority 40 holding lock C tries to acquire lock B. It
+sets its lock_trying_acquire to point at lock B. It sees that Thread 1,
+the holder of lock B has lower priority than itself, so it donates its
+priority to Thread 1, and Thread 1 now has priority 40. It does not
+stop here, though. It sees if Thread 1 is waiting for any lock, which it
+is. After knowing that Thread 1 is waiting for lock A, held by Thread 0,
+it compares its priority with Thread 0, and finds out that Thread 0 has
+lower priority than itself. So it donates its priority to Thread 0 and
+priority of Thread 0 becomes 40. Seeing that Thread 0 is not waiting for
+any locks, Thread 2 goes into blocked state.
+
+Now Thread 3 of priority 10 tries to acquire lock C. It sets its
+lock_trying_acquire to point at lock C and finds out that it is held by
+Thread 2. But Thread 2 has higher priority than itself, so Thread 3 just
+goes into blocked state without taking any further actions.
+
 >> B5: Describe the sequence of events when lock_release() is called
 >> on a lock that a higher-priority thread is waiting for.
+
+To restore its original priority after releasing the lock, the thread
+must remember its initial priority, so we added initial_priority to
+struct thread. Looks quite simple. But there is more to it. This is
+because of multiple donations. For example if Thread 0 of priority 30
+is holding both locks A and B, and Thread 1 donates priority 40 via
+lock A and Thread 2 donates priority 50 via lock B. If Thread 0 wants
+to release lock A, it should not return to its initial priority, which
+is 30, but rather to 50 since Thread 2 is still waiting for Thread 0 to
+release lock B. To resolve this kind of problem we made the lock itself
+to remember what kinds of priority donations have happened through
+itself, and the thread to remember what kinds of locks it is holding.
+We will explain how it works.
 
 ---- SYNCHRONIZATION ----
 
@@ -152,8 +192,8 @@ Thread 1 with priority 40. It tries to acquire lock A. It finds out that
 its priority is higher than Thread 0, the holder of the lock. It donates
 its priority to Thread 0, making it 40. Now Thread 0 is back again in
 charge of the CPU. It sets its priority to 20, which was what it was
-planning to do before Thread 1 came. TAH-DAH! Priority inversion has
-occured.
+planning to do before Thread 1 came. WHAM! Priority inversion has
+occurred.
 
 To prevent this from happening we turned off the interrupt while during
 thread_set_priority () call. We cannot use locks because, race
@@ -231,7 +271,7 @@ ticks   A   B   C   A   B   C   to run
 There is an ambiguity in choosing which thread to run when
 thread_yield () is called if multiple threads have the same priority.
 Our decision was to use the FIFO principle for threads with same
-priority, i.e. we scheduled  in ready_list. And it matched with my scheduler.
+priority, i.e. we scheduled them according  in ready_list. And it matched with my scheduler.
    Moreover, when runing thread and reay thread have same priories, I choosed to run running thread in order to maintain FIFO.
   Finally, I choosed not to use thread_yield immediately when some thread from THREAD_BLOCK converts to THREAD_READY. However, final test mlfqs-block forced me to use thread_yield immediately especially just after lock_release.
 
@@ -239,7 +279,8 @@ priority, i.e. we scheduled  in ready_list. And it matched with my scheduler.
 >> inside and outside interrupt context likely to affect performance?
 
 When the algorithmic complexity of a function was greater or equal to
-O(n), we used timerer interrupt. Hence, the priority or recent_cpu was not changed during searching for thread_list. Especially, I did not use timer interrupt when i implanted priority_yield function inside lock_release. (priority_level compares priority of running thread and front element of ready_list) When i use the function thread_yield, i avoided to use timer interrupt. because it is unable to enable timer_interrupt after thread_yield.
+O(n), we used timerer interrupt. Hence, the priority or recent_cpu
+cannot be changed, for example, while traversing the all_list.
 
 ---- RATIONALE ----
 
@@ -255,7 +296,7 @@ the interrupt off.
 
 Disadvantages of our design.
 
-We implanted new elem_list elem_ in the struct thread. so that there is ambitigy to make error when we try to use the size of struct thread. And also we did not make check to make thread_list empty when the process ends. So for load_avg.
+We added a new list_elem in struct thread. so that there is ambitigy to make error when we try to use the size of struct thread. And also we did not make check to make thread_list empty when the process ends. So for load_avg.
   Finally, our fixed-point head file does not care about 64-bit representation system since we only take care of 32-bit system.
   If i had more timer, i would refine those disadvantages.
 

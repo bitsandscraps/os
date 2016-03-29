@@ -297,7 +297,7 @@ thread_tick (void)
 void
 donate_priority (struct thread * donor)
 {
-  if(thread_mlfqs) return;
+  ASSERT (!thread_mlfqs);
   struct lock * lock = donor->lock_trying_acquire;
   ASSERT (lock);
   while (lock)
@@ -317,7 +317,7 @@ donate_priority (struct thread * donor)
 void
 restore_priority (struct thread * thr)
 {
-  if(thread_mlfqs) return;
+  ASSERT (!thread_mlfqs);
   ASSERT (is_thread (thr));
   int priority = thr->initial_priority;
   struct list * lock_list = &thr->locks_holding;
