@@ -91,7 +91,6 @@ int thread_get_nice(void);
 void thread_set_nice(int new_nice);
 
 void priority_recalculate_indiv(struct thread *);
-void priority_yield(void);
 void recent_cpu_recalculate_indiv(struct thread *);
 
 /* Yields to another thread if the priority of the current thread is
@@ -485,8 +484,8 @@ thread_exit (void)
     list_remove (&curr->elem_all);
   /* Just set our status to dying and schedule another process.
      We will be destroyed during the call to schedule_tail(). */
-  intr_disable ();
   thread_current ()->status = THREAD_DYING;
+  intr_disable ();
   schedule ();
   NOT_REACHED ();
 }

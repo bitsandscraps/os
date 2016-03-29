@@ -148,6 +148,7 @@ void restore_priority (struct thread * thr);
 int thread_get_priority (void);
 void thread_set_priority (int);
 
+void priority_yield(void);
 void recent_cpu_recalculate(void);
 void recent_cpu_incr(void);
 void priority_recalculate(void);
