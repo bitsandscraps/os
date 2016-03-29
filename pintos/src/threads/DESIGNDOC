@@ -127,6 +127,73 @@ the call to timer_sleep().
 >> `struct' member, global or static variable, `typedef', or
 >> enumeration.  Identify the purpose of each in 25 words or less.
 
+fixed-point.h:
+/* define fixed-point, and its operators.
+for 32 bit system, sign for 1 bit, 17 bit for num, 14 bit for float. */
+
+typedef int fixed_point;
+
+static inline fixed_point
+fp (int n)
+{
+  return n * FIXED_POINT_F;
+}
+
+static inline int
+fp_floor (fixed_point x)
+{
+  return x / FIXED_POINT_F;
+}
+
+static inline int
+fp_round (fixed_point x)
+{
+  if (x >= 0)
+    return (x + FIXED_POINT_F / 2) / FIXED_POINT_F;
+  else
+    return (x - FIXED_POINT_F / 2) / FIXED_POINT_F;
+}
+
+static inline fixed_point
+fp_add (fixed_point x, fixed_point y)
+{
+  return x + y;
+}
+
+static inline fixed_point
+fp_add_int (fixed_point x, int n)
+{
+  return x + n * FIXED_POINT_F;
+}
+
+static inline fixed_point
+fp_subtract (fixed_point x, fixed_point y)
+{
+  return x - y;
+}
+
+static inline fixed_point
+fp_subtract_int (fixed_point x, int n)
+{
+  return x - n * FIXED_POINT_F;
+}
+
+
+static inline fixed_point
+fp_multiply (fixed_point x, fixed_point y)
+thread.c :
+static struct list thread_list; //list of every threads(status of BLOCKED, RUNNING, RADY)
+static;
+fixed_point load_avg;   //value of load_avg over system.  value is floating point.
+
+
+
+thread.h :
+struct thread {
+  int nice;                     // thread's nice vaue(integer)
+  fixed_point recent_cpu;       // thread's recent_cpu value(floating value)
+  struct elem_list elem_;       // elem_list of thread for element of thread_list
+}
 ---- ALGORITHMS ----
 
 >> C2: Suppose threads A, B, and C have nice values 0, 1, and 2.  Each
@@ -137,31 +204,37 @@ the call to timer_sleep().
 timer  recent_cpu    priority   thread
 ticks   A   B   C   A   B   C   to run
 -----  --  --  --  --  --  --   ------
- 0
- 4
- 8
-12
-16
-20
-24
-28
-32
-36
-
+ 0      0   0   0  64  62  60     A
+ 4      4   0   0  63  62  60     A 
+ 8      8   0   0  62  62  60     A
+12      12  0   0  61  62  60     B
+16      12  4   0  61  61  60     B
+20      12  8   0  61  60  60     A
+24      16  8   0  60  60  60     A
+28      20  8   0  59  60  60     C
+32      20  8   4  59  60  59     B
+36      20  12  4  59  59  59     B
+    
 >> C3: Did any ambiguities in the scheduler specification make values
 >> in the table uncertain?  If so, what rule did you use to resolve
 >> them?  Does this match the behavior of your scheduler?
-
+   
+   It is ambiguity for OS to choose which thread to run at the time of thread_yield when two threads are same. Our decision is to use FIFO for same priorities in ready_list. And it matched with my scheduler.
+   Moreover, when runing thread and reay thread have same priories, I choosed to run running thread in order to maintain FIFO.
+  Finally, I choosed not to use thread_yield immediately when some thread from THREAD_BLOCK converts to THREAD_READY. However, final test mlfqs-block forced me to use thread_yield immediately especially just after lock_release.
 >> C4: How is the way you divided the cost of scheduling between code
 >> inside and outside interrupt context likely to affect performance?
-
+  When a function's time is more or equal than O(n), I used timerer interrupt. Hence, the priority or recent_cpu was not changed during searching for thread_list. Especially, I did not use timer interrupt when i implanted priority_yield function inside lock_release. (priority_level compares priority of running thread and front element of ready_list) When i use the function thread_yield, i avoided to use timer interrupt. because it is unable to enable timer_interrupt after thread_yield.
 ---- RATIONALE ----
 
 >> C5: Briefly critique your design, pointing out advantages and
 >> disadvantages in your design choices.  If you were to have extra
 >> time to work on this part of the project, how might you choose to
 >> refine or improve your design?
-
+  Advantage: i did not use too much intr_disable() hence our design avoids interrupt disable as much as we could.
+  Disadvanage: We implanted new elem_list elem_ in the struct thread. so that there is ambitigy to make error when we try to use the size of struct thread. And also we did not make check to make thread_list empty when the process ends. So for load_avg.
+  Finally, our fixed-point head file does not care about 64-bit representation system since we only take care of 32-bit system.
+  If i had more timer, i would refine those disadvantages.
 >> C6: The assignment explains arithmetic for fixed-point math in
 >> detail, but it leaves it open to you to implement it.  Why did you
 >> decide to implement it the way you did?  If you created an
