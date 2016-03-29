@@ -93,8 +93,11 @@ struct thread
     int priority;                       /* Current priority. */
     int initial_priority;               /* Initial priority. */
 
-    /* parameters for advanced scheduler */
+    /* Parameters for advanced scheduler */
+    /* Integer value that determines how nice the thread should be to
+     * other threads. */
     int nice;
+    /* Metric of how much CPU time the thread has received recently. */
     fixed_point recent_cpu;
 
     /* Lock that the thread is trying to acquire. */

@@ -47,8 +47,9 @@ static struct thread *initial_thread;
 /* Lock used by allocate_tid(). */
 static struct lock tid_lock;
 
-/* value of load_avg used wehn mlfqs is 1 */
-fixed_point load_avg;
+/* Estimation of the average number of threads ready to run over the
+ * past minute. */
+static fixed_point load_avg;
 
 /* Stack frame for kernel_thread(). */
 struct kernel_thread_frame 
