@@ -101,12 +101,10 @@ void recent_cpu_recalculate_indiv(struct thread *);
 void
 priority_yield(void)
 {
-  enum intr_level old_level=intr_disable();
   if(list_empty(&ready_list)) return;
   struct thread * thr=list_entry(list_front(&ready_list), struct thread, elem);
   if(thread_current()->priority < thr->priority)
     thread_yield();
-  intr_set_level(old_level);
 }
 
 
@@ -684,9 +682,7 @@ init_thread (struct thread *t, const char *name, int priority)
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
-  enum intr_level old_level=intr_disable();
   list_push_back(&thread_list, &t->elem_);
-  intr_set_level(old_level);
   t->initial_priority = priority;
   list_init (&t->locks_holding);
   t->lock_trying_acquire = NULL;
