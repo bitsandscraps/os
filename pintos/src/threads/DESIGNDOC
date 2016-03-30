@@ -219,22 +219,30 @@ ticks   A   B   C   A   B   C   to run
 >> in the table uncertain?  If so, what rule did you use to resolve
 >> them?  Does this match the behavior of your scheduler?
    
-   It is ambiguity for OS to choose which thread to run at the time of thread_yield when priorities of two threads are same. Our decision is to use FIFO for same priorities in ready_list. And it matched with my scheduler.
-   Moreover, when runing thread and reay thread have same priories, I choosed to run running thread in order to maintain FIFO.
-  Finally, I choosed not to use thread_yield immediately when some thread from THREAD_BLOCK converts to THREAD_READY. However, final test mlfqs-block forced me to use thread_yield immediately especially just after lock_release.
+   It is ambiguity in the table for OS to choose which thread to run at the call of thread_yield when priorities of two threads are same. Our decision is to use FIFO for same priorities in ready_list. And it matched with my scheduler.
+   Moreover, when runing thread and reay_thread have same priorities, we choosed to run running thread continuously in order to maintain FIFO.
+  At the first time, We choosed not to use thread_yield immediately when some thread from THREAD_BLOCK is inserted to THREAD_READY. However, final test mlfqs-block forced us to use thread_yield immediately especially just after lock_release is called.
+
 >> C4: How is the way you divided the cost of scheduling between code
 >> inside and outside interrupt context likely to affect performance?
-  When a function's time is more or equal than O(n), I used timerer interrupt. Hence, the priority or recent_cpu was not changed during searching for thread_list. Especially, I did not use timer interrupt when i implanted priority_yield function inside lock_release. (priority_level compares priority of running thread and front element of ready_list) When i use the function thread_yield, i avoided to use timer interrupt. because it is unable to enable timer_interrupt after thread_yield.
+
+  When a new function either recalculating priority or recent_cpu has calculate time O(n), We used timerer interrupt in order to avoid new recalculate during calculation. Hence, the priority or recent_cpu was not changed during searching for thread_list. But, We did not use timer interrupt when we implanted priority_yield function inside lock_release. (priority_level compares priority of running thread and front element of ready_list). beca
+use it could make every thread to stop.
+  
 ---- RATIONALE ----
 
 >> C5: Briefly critique your design, pointing out advantages and
 >> disadvantages in your design choices.  If you were to have extra
 >> time to work on this part of the project, how might you choose to
 >> refine or improve your design?
-  Advantage: i did not use too much intr_disable() hence our design avoids interrupt disable as much as we could.
-  Disadvanage: We implanted new elem_list elem_ in the struct thread. so that there is ambitigy to make error when we try to use the size of struct thread. And also we did not make check to make thread_list empty when the process ends. So is for load_avg
+  
+  Advantage: we did not use too much intr_disable() hence our design avoids interrupt disable as much as we could so that the priority recalculating apeears so much.
+  Disadvanage: We implanted new elem_list elem_ in the struct thread. so that there is ambitigy to make error when we try to use the size of struct thread next time. And also we did not make check to make thread_list empty when the process ends. Also for load_avg.
+    
   Finally, our fixed-point head file does not care about 64-bit representation system since we only take care of 32-bit system.
-  If i had more timer, i would refine those disadvantages.
+
+
+  If we had more timer, we would refine those disadvantages.
 >> C6: The assignment explains arithmetic for fixed-point math in
 >> detail, but it leaves it open to you to implement it.  Why did you
 >> decide to implement it the way you did?  If you created an
