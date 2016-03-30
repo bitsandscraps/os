@@ -304,11 +304,12 @@ donate_priority (struct thread * donor)
   {
     struct thread * donee = lock->holder;
     ASSERT (is_thread (donor) && is_thread (donee));
-    if (donor->priority > donee->priority)
-    {
-      donee->priority = donor->priority;
+    if (donor->priority > lock->priority)
       lock->priority = donor->priority;
-    }
+    if (donor->priority > donee->priority)
+      donee->priority = donor->priority;
+    else
+      break;
     lock = donee->lock_trying_acquire;
   }
 }

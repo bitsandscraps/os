@@ -16,6 +16,9 @@ Seongsu Cho  <csp00141@kaist.ac.kr>
 >> If you have any preliminary comments on your submission, notes for the
 >> TAs, or extra credit, please give them here.
 
+We have also completed the extra credit assignment on implementing
+nested priority donation.
+
 >> Please cite any offline or online sources you consulted while
 >> preparing your submission, other than the Pintos documentation, course
 >> text, lecture notes, and course staff.
@@ -24,9 +27,16 @@ At first we did not know that even the first assignment will require us
 to make new data structures and functions. We tried to find a way to
 manage it without creating new things, which we failed, and googled for
 a solution. We found the following blog:
-http://maplejune.tistory.com/entry/Pintos-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-1-Alarm-Clock
+http://maplejune.tistory.com/entry/Pintos-프로젝트-1-Alarm-Clock
 After finishing the first part by the help from the blog, we realized
 that we should never be afraid of creating new things.
+    For the second assignment we got some insights for our
+implementation from
+http://maplejune.tistory.com/entry/Pintos-프로젝트-1-Priority-Scheduling
+and
+http://ysocks.egloos.com/m/501047
+We did not read thoroughly throughout the blogs, though. We just skimmed
+their ideas and find out a new(hopefully better) way to implement.
 
 			     ALARM CLOCK
 			     ===========
@@ -50,19 +60,18 @@ Added to struct thread:
 >> A2: Briefly describe what happens in a call to timer_sleep(),
 >> including the effects of the timer interrupt handler.
 
-When timer_sleep is called, the timer tick that it should wake up
-is calculated. Storing that wakeup_tick information, the thread is
-moved to the waiting_list. Then, thread_block() is called.
-
-The timer interrupt handler searches for threads that should be
+When timer_sleep is called, the timer tick that it should wake up is
+calculated. Storing that wakeup_tick information, the thread is moved to
+the waiting_list. Then, thread_block() is called.
+    The timer interrupt handler searches for threads that should be
 awakened and unblocks those threads using thread_unblock().
 
 >> A3: What steps are taken to minimize the amount of time spent in
 >> the timer interrupt handler?
 
-The waiting_list is always sorted in the order of wakeup_tick.
-If the interrupt handler finds out that the current element on the
-list should not yet be awakened, it may just end traversing the list.
+The waiting_list is always sorted in the order of wakeup_tick. If the
+interrupt handler finds out that the current element on the list should
+not yet be awakened, it may just end traversing the list.
 
 ---- SYNCHRONIZATION ----
 
@@ -113,6 +122,133 @@ Added to struct semaphore_elem:
 >> Use ASCII art to diagram a nested donation.  (Alternately, submit a
 >> .png file.)
 
+Nested donation is done by recording the lock that the thread is waiting
+for using the member lock_trying_acquire of struct thread. More detailed
+description of the algorithm will be given as answers of questions B4
+and B5. We attach a simple ASCII art describing the process of nested
+donation. For simplicity, we will not consider multiple donations. For
+the following drawings, L will denote the lock_trying_acquire member and
+P the priority. The arrows starting from the L will be pointing at the
+holder of the lock.
+
+Step 1. Thread 0 of priority 30 is holding lock A. Thread 1 of priority
+        40 is holding lock B.
+
+        +--------------+         +--------------+
+        |   Thread 0   |         |   Thread 1   |
+        |   P = 30     |         |   P = 40     |
+        |   L = NULL   |         |   L = NULL   |
+        |   READY      |         |   RUNNING    |
+        +--------------+         +--------------+
+
+Step 2. Thread 1 tries to acquire Lock A.
+
+        +--------------+         +--------------+
+        |   Thread 0 <-+----+    |   Thread 1   |
+        |   P = 30     |    |    |   P = 40     |
+        |   L = NULL   |    +----+-- L = A      |
+        |   READY      |         |   RUNNING    |
+        +--------------+         +--------------+
+
+Step 3. Finding out that priority of Thread 0 is lower than priority of
+        Thread 1, Thread 1 donates its priority to Thread 0.
+
+        +--------------+         +--------------+
+        |   Thread 0 <-+----+    |   Thread 1   |
+        |   P = 40     |    |    |   P = 40     |
+        |   L = NULL   |    +----+-- L = A      |
+        |   READY      |         |   RUNNING    |
+        +--------------+         +--------------+
+
+Step 4. Finding out that Thread 0 is not waiting for any lock Thread 1
+        stops the donation and goes into blocking state.
+
+        +--------------+         +--------------+
+        |   Thread 0 <-+----+    |   Thread 1   |
+        |   P = 40     |    |    |   P = 40     |
+        |   L = NULL   |    +----+-- L = A      |
+        |   RUNNING    |         |   BLOCKED    |
+        +--------------+         +--------------+
+
+Step 5. Thread 2 of priority 50, is holding lock C.
+
+        +--------------+         +--------------+         +--------------+
+        |   Thread 0 <-+----+    |   Thread 1   |         |   Thread 2   |
+        |   P = 40     |    |    |   P = 40     |         |   P = 50     |
+        |   L = NULL   |    +----+-- L = A      |         |   L = NULL   |
+        |   READY      |         |   BLOCKED    |         |   RUNNING    |
+        +--------------+         +--------------+         +--------------+
+
+Step 6. Thread 2 tries to acquire lock B.
+
+        +--------------+         +--------------+         +--------------+
+        |   Thread 0 <-+----+    |   Thread 1 <-+----+    |   Thread 2   |
+        |   P = 40     |    |    |   P = 40     |    |    |   P = 50     |
+        |   L = NULL   |    +----+-- L = A      |    +----+-- L = B      |
+        |   READY      |         |   BLOCKED    |         |   RUNNING    |
+        +--------------+         +--------------+         +--------------+
+
+Step 7. Finding out that priority of Thread 1 is lower than priority of
+        Thread 2, Thread 2 donates its priority to Thread 1.
+
+        +--------------+         +--------------+         +--------------+
+        |   Thread 0 <-+----+    |   Thread 1 <-+----+    |   Thread 2   |
+        |   P = 40     |    |    |   P = 50     |    |    |   P = 50     |
+        |   L = NULL   |    +----+-- L = A      |    +----+-- L = B      |
+        |   READY      |         |   BLOCKED    |         |   RUNNING    |
+        +--------------+         +--------------+         +--------------+
+
+Step 8. Finding out that Thread 1 is waiting for lock A, which is held
+        by Thread 0. Thread 2 compares its priority with Thread 0. Since
+        Thread 2's priority is higher, it donates its priority to
+        Thread 0.
+
+        +--------------+         +--------------+         +--------------+
+        |   Thread 0 <-+----+    |   Thread 1 <-+----+    |   Thread 2   |
+        |   P = 50     |    |    |   P = 50     |    |    |   P = 50     |
+        |   L = NULL   |    +----+-- L = A      |    +----+-- L = B      |
+        |   READY      |         |   BLOCKED    |         |   RUNNING    |
+        +--------------+         +--------------+         +--------------+
+
+Step 9. Finding out that Thread 0 is not waiting for any lock Thread 2
+        stops the donation and goes into blocking state.
+
+        +--------------+         +--------------+         +--------------+
+        |   Thread 0 <-+----+    |   Thread 1 <-+----+    |   Thread 2   |
+        |   P = 50     |    |    |   P = 50     |    |    |   P = 50     |
+        |   L = NULL   |    +----+-- L = A      |    +----+-- L = B      |
+        |   RUNNING    |         |   BLOCKED    |         |   BLOCKED    |
+        +--------------+         +--------------+         +--------------+
+
+Step 10. Thread 0 is sleeping for a while. Thread 3 is of priority 20.
+
+        +--------------+         +--------------+         +--------------+         +--------------+
+        |   Thread 0 <-+----+    |   Thread 1 <-+----+    |   Thread 2   |         |   Thread 3   |
+        |   P = 50     |    |    |   P = 50     |    |    |   P = 50     |         |   P = 20     |
+        |   L = NULL   |    +----+-- L = A      |    +----+-- L = B      |         |   L = NULL   |
+        |   BLOCKED    |         |   BLOCKED    |         |   BLOCKED    |         |   RUNNING    |
+        +--------------+         +--------------+         +--------------+         +--------------+
+
+Step 11. Thread 3 tries to acquire lock C.
+
+        +--------------+         +--------------+         +--------------+         +--------------+
+        |   Thread 0 <-+----+    |   Thread 1 <-+----+    |   Thread 2 <-+----+    |   Thread 3   |
+        |   P = 50     |    |    |   P = 50     |    |    |   P = 50     |    |    |   P = 20     |
+        |   L = NULL   |    +----+-- L = A      |    +----+-- L = B      |    +----+-- L = C      |
+        |   BLOCKED    |         |   BLOCKED    |         |   BLOCKED    |         |   RUNNING    |
+        +--------------+         +--------------+         +--------------+         +--------------+
+
+Step 12. Finding out that Thread 2 has higher priority than Thread 3
+         Thread 3 just goes into block state without any kind of further
+         action.
+
+        +--------------+         +--------------+         +--------------+         +--------------+
+        |   Thread 0 <-+----+    |   Thread 1 <-+----+    |   Thread 2 <-+----+    |   Thread 3   |
+        |   P = 50     |    |    |   P = 50     |    |    |   P = 50     |    |    |   P = 20     |
+        |   L = NULL   |    +----+-- L = A      |    +----+-- L = B      |    +----+-- L = C      |
+        |   RUNNING    |         |   BLOCKED    |         |   BLOCKED    |         |   BLOCKED    |
+        +--------------+         +--------------+         +--------------+         +--------------+
+
 ---- ALGORITHMS ----
 
 >> B3: How do you ensure that the highest priority thread waiting for
@@ -124,15 +260,13 @@ that the running thread should always be the one with the highest
 priority, the function compares the priority of the current thread
 and the newly unblocked thread. If the new thread has higher priority
 the current thread will yield to the new one.
-
-Since each lock uses a single semaphore, highest priority awakens first
-rule is automatically applied to locks. For conditional variables,
+    Since each lock uses a single semaphore, highest priority awakens
+first rule is automatically applied to locks. For conditional variables,
 though, this is not the case. Conditional variables assign different
 semaphores to different threads. So we added a new element in struct
 semaphore_elem to record the priority of the thread holding the
 semaphore. When the cond_signal () is called, the semaphore with the
 highest priority will be unblocked.
-
 
 >> B4: Describe the sequence of events when a call to lock_acquire()
 >> causes a priority donation.  How is nested donation handled?
@@ -141,28 +275,28 @@ An important point to remember is that a thread will never try to
 acquire more than one lock at a time. This makes things a lot easier.
 We added a new member in struct thread to remember what lock the thread
 is trying to acquire. The actual and detailed processes is as following.
-
-Suppose Thread 0 of priority 20 holds lock A. Thread 1 of priority 30
-holding lock B tries to acquire lock A. It sets the lock_trying_acquire
-to point at lock A. It sees that Thread 0, the holder of lock A has
-lower priority than itself, so it donates its priority to Thread 0, and
-Thread 0 now has priority 30.
-
-Now Thread 2 of priority 40 holding lock C tries to acquire lock B. It
-sets its lock_trying_acquire to point at lock B. It sees that Thread 1,
-the holder of lock B has lower priority than itself, so it donates its
-priority to Thread 1, and Thread 1 now has priority 40. It does not
-stop here, though. It sees if Thread 1 is waiting for any lock, which it
-is. After knowing that Thread 1 is waiting for lock A, held by Thread 0,
-it compares its priority with Thread 0, and finds out that Thread 0 has
-lower priority than itself. So it donates its priority to Thread 0 and
-priority of Thread 0 becomes 40. Seeing that Thread 0 is not waiting for
-any locks, Thread 2 goes into blocked state.
-
-Now Thread 3 of priority 10 tries to acquire lock C. It sets its
-lock_trying_acquire to point at lock C and finds out that it is held by
-Thread 2. But Thread 2 has higher priority than itself, so Thread 3 just
-goes into blocked state without taking any further actions.
+    Suppose Thread 0 of priority 20 holds lock A. Thread 1 of
+priority 30 holding lock B tries to acquire lock A. It sets the
+lock_trying_acquire to point at lock A. It sees that Thread 0, the
+holder of lock A has lower priority than itself, so it donates its
+priority to Thread 0, and Thread 0 now has priority 30.
+    Now Thread 2 of priority 40 holding lock C tries to acquire lock B.
+It sets its lock_trying_acquire to point at lock B. It sees that
+Thread 1, the holder of lock B has lower priority than itself, so it
+donates its priority to Thread 1, and Thread 1 now has priority 40. It
+does not stop here, though. It sees if Thread 1 is waiting for any lock,
+which it is. After knowing that Thread 1 is waiting for lock A, held by
+Thread 0, it compares its priority with Thread 0, and finds out that
+Thread 0 has lower priority than itself. So it donates its priority to
+Thread 0 and priority of Thread 0 becomes 40. Seeing that Thread 0 is
+not waiting for any locks, Thread 2 goes into blocked state.
+    Now Thread 3 of priority 10 tries to acquire lock C(it is usually
+impossible for a thread with lower priority to run, but it can when the
+thread with higher priority is sleeping or waiting for some I/O). It
+sets its lock_trying_acquire to point at lock C and finds out that it is
+held by Thread 2. But Thread 2 has higher priority than itself, so
+Thread 3 just goes into blocked state without taking any further
+actions.
 
 >> B5: Describe the sequence of events when lock_release() is called
 >> on a lock that a higher-priority thread is waiting for.
@@ -179,6 +313,27 @@ release lock B. To resolve this kind of problem we made the lock itself
 to remember what kinds of priority donations have happened through
 itself, and the thread to remember what kinds of locks it is holding.
 We will explain how it works.
+    Suppose Thread 0 of priority 30 is holding locks A, B, and C. As it
+acquired the locks it has recorded its priority in the priority member
+of each locks. Thread 1 of priority 40 tries to acquire lock A. It
+donates its priority to Thread 0 and records it in member priority of
+lock A. Thread 2 of priority 50 tries to acquire lock A. It donates its
+priority to Thread 0 and records it in member priority of lock A.
+Thread 3 of priority 20 tries to acquire lock A. It does not need to
+donate, and the priority of lock A is unchanged. Thread 4 of priority
+40 tries to acquire lock B. It does not need to donate, but since the
+priority of the lock is less than the priority of the thread itself, it
+sets the priority of the lock to be 40 and returns. Thread 5 of priority
+50 tries to acquire lock C. It does not need to donate, but as Thread 4
+did, it modifies the priority of lock C to be 50.
+    Now Thread 0 releases lock A. It first sees if it is holding any
+locks. It finds out that it is holding lock B of priority 40 and lock C
+of priority 50. So it sets(in reality, the thread does not modify its
+priority value) its priority to 50, the maximum value. Thread 0 then
+releases lock C. It knows that it is holding lock B of priority 40, so
+it changes its priority to 40 and yields to another thread. When
+Thread 0 is scheduled again and releases lock B, it will then return to
+its original priority, 30, since it does not hold locks any more.
 
 ---- SYNCHRONIZATION ----
 
@@ -194,9 +349,8 @@ its priority to Thread 0, making it 40. Now Thread 0 is back again in
 charge of the CPU. It sets its priority to 20, which was what it was
 planning to do before Thread 1 came. WHAM! Priority inversion has
 occurred.
-
-To prevent this from happening we turned off the interrupt while during
-thread_set_priority () call. We cannot use locks because, race
+    To prevent this from happening we turned off the interrupt while
+during thread_set_priority () call. We cannot use locks because, race
 conditions happen due to locks. The same scenario mentioned above will
 still happen. What is worse is the fact that now the problem may occur
 even if Thread 0 was not holding any locks before calling the
@@ -316,7 +470,7 @@ them to define the q and f values of the fixed-point calculation
 algorithm to make the code consistent with others). We might have
 defined some kind of struct, may be consisting of two integers, the
 integer part and the fraction part, but we thought this approach
-was an overkill.
+was an overkill and will degrade the computation speed.
 
 			   SURVEY QUESTIONS
 			   ================
@@ -341,3 +495,11 @@ the quarter.
 >> students, either for future quarters or the remaining projects?
 
 >> Any other comments?
+
+We think it would be helpful if there are more test cases. While writing
+the DESIGNDOC, we found out some corner cases that our implementation
+cannot handle. Regarding the fact that the implementation had passed all
+27 tests, we are very sure that the test cases are not enough. Also we
+are worried about the possibility that the bugs we were not able to find
+in this assignment affecting the future assignments.
+

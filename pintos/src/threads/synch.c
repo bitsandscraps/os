@@ -230,7 +230,7 @@ lock_acquire (struct lock *lock)
   sema_down (&lock->semaphore);
   curr->lock_trying_acquire = NULL;
   lock->holder = curr;
-  lock->priority = curr->priority;
+  lock->priority = curr->initial_priority;
   if (!thread_mlfqs)
     list_push_back (&curr->locks_holding, &lock->elem);
   intr_set_level (old_level);
