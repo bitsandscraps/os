@@ -485,14 +485,15 @@ forced us to use thread_yield (), at least after lock_release ().
 >> C4: How is the way you divided the cost of scheduling between code
 >> inside and outside interrupt context likely to affect performance?
 
-When the algorithmic complexity of a function was greater or equal to
-O(n), we used timerer interrupt to prevent other threads from calling
-the same function again. Hence, the priority or recent_cpu is not
-changed, traversing the all_list. But we did not use timer interrupt
-when we implemented priority_yield (), a function that compares the
-priority of the current thread with the first element of the ready_list
-and yields if needed. This is because it might make every thread to
-stop.
+Only when the algorithmic complexity of a function was O(n), we used
+timer interrupt to prevent other threads from calling the same function
+again. Hence, the priority or recent_cpu is not changed, traversing the
+all_list.
+    Longer the interrupt handler becomes, the shorter the time a thread
+can do meaningful jobs will be. So if the handler is too long, the
+thread will soon be preempted after receiving control of the CPU without
+being able to do much. This will lead to higher recent_cpu and lower
+priority, i.e. totally different priority decisions.
 
 ---- RATIONALE ----
 
