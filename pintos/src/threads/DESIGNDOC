@@ -377,21 +377,40 @@ acquire a lock during its call.
 We chose not to implement using dynamic priority calculation because
 it seemed little unintuitive and complicated to us. There are various
 places in the kernel code where we need to access the priority
-information of a thread, and it seemed too expensive to always
-recalculate the priority.
+information of a thread, and it seemed too expensive to recalculate the
+priority every time we need it.
     To implement nested donation, it is necessary to remember what locks
 a thread is waiting for. We first thought about maintaining a list of
 locks that each thread is waiting for, but soon found out that a thread
 can wait for only one lock at a time. So we changed it to a pointer
 variable, which makes things a lot simpler.
     To implement multiple donation, as discussed above, it is important
-to remember what priority to restore after releasing. An option is to
-record the history of priority change in struct thread using an array or
-list. But it makes it hard to distinguish nested donation from multiple
-donations. Since they differ from each other by the fact that one
-happens through one lock but the other by multiple locks, we tried to
-record the donated priority in the lock and remember what locks the
-thread is holding.
+to remember what priority to restore after releasing, since we choose
+not to use dynamic calculation. An option may be to record the history
+of priority change in struct thread using an array or list. But it makes
+it hard to distinguish nested donation from multiple donations. Since
+they differ from each other by the fact that one happens through one
+lock but the other by multiple locks, we tried to record the donated
+priority in the lock and remember what locks the thread is holding.
+    While writing this document, we found out some holes in our
+implementation. First, we are not sure whether our pintos will service
+round robbing for more than three threads. Our current implementation
+uses list_insert_ordered () function in managing the ready threads in
+the order of priority. The list_insert_ordered () function puts a
+thread right before the first thread with priority less or equal to the
+original thread. So if there are three threads with the same priority,
+say Thread 0, 1, and 2, Thread 0 will run and Thread 1 and 2 will be in
+the ready list. When Thread 0 is preempted, Thread 1 will be popped out
+from the list and Thread 0 will be inserted right before Thread 2. When
+Thread 1 is preempted, Thread 0 will pop out and Thread 1 will be
+inserted in front of Thread 2. So Thread 2 will starve. We tried to
+modify the less function of list_inserted_ordered () but it caused
+a lot of bugs we could not fix on time.
+    Second, for conditional variables the priority scheduling does not
+work when the priority is changed while the thread is waiting. We tried
+to record the thread itself in the struct semaphore_elem, but it also,
+for an unidentified reason, caused lots of bugs we did not have enough
+time to handle.
 
 			  ADVANCED SCHEDULER
 			  ==================
@@ -456,16 +475,24 @@ ticks   A   B   C   A   B   C   to run
 There is an ambiguity in choosing which thread to run when
 thread_yield () is called if multiple threads have the same priority.
 Our decision was to use the FIFO principle for threads with same
-priority, i.e. we scheduled them according  in ready_list. And it matched with my scheduler.
-   Moreover, when runing thread and reay thread have same priories, I choosed to run running thread in order to maintain FIFO.
-  Finally, I choosed not to use thread_yield immediately when some thread from THREAD_BLOCK converts to THREAD_READY. However, final test mlfqs-block forced me to use thread_yield immediately especially just after lock_release.
+priority, which matches with our scheduler. Moreover, when running
+thread and ready thread has same priorities, we choose to run running
+thread in order to maintain the FIFO principle. At first, we tried not
+to use thread_yield () immediately after some thread in BLOCKED state
+is converted to READY state. However, the final test case(mlfqs-block)
+forced us to use thread_yield (), at least after lock_release ().
 
 >> C4: How is the way you divided the cost of scheduling between code
 >> inside and outside interrupt context likely to affect performance?
 
 When the algorithmic complexity of a function was greater or equal to
-O(n), we used timerer interrupt. Hence, the priority or recent_cpu
-cannot be changed, for example, while traversing the all_list.
+O(n), we used timerer interrupt to prevent other threads from calling
+the same function again. Hence, the priority or recent_cpu is not
+changed, traversing the all_list. But we did not use timer interrupt
+when we implemented priority_yield (), a function that compares the
+priority of the current thread with the first element of the ready_list
+and yields if needed. This is because it might make every thread to
+stop.
 
 ---- RATIONALE ----
 
@@ -477,13 +504,19 @@ cannot be changed, for example, while traversing the all_list.
 Advantages of our design.
 
 We tried as much as we could to implement the scheduler without turning
-the interrupt off.
+the interrupt off. This is because turning off the interrupt prevents
+the priority from being recalculated, which will lead to wrong scheduler
+behavior.
 
 Disadvantages of our design.
 
-We added a new list_elem in struct thread. so that there is ambitigy to make error when we try to use the size of struct thread. And also we did not make check to make thread_list empty when the process ends. So for load_avg.
-  Finally, our fixed-point head file does not care about 64-bit representation system since we only take care of 32-bit system.
-  If i had more timer, i would refine those disadvantages.
+We added a new list_elem in struct thread. We are slightly worried about
+the size of struct thread. It might be too big and cause some problems
+in the future. Also we did not check whether the all_list is empty
+before exiting the process. So is for load_avg. Finally, our fixed-point
+data structures and algorithms do not care about 64-bit representation
+system. We only handle 32-bit systems. If extra time is given, we will
+try to refine these drawbacks of our pintos.
 
 >> C6: The assignment explains arithmetic for fixed-point math in
 >> detail, but it leaves it open to you to implement it.  Why did you
@@ -515,17 +548,32 @@ the quarter.
 >> In your opinion, was this assignment, or any one of the three problems
 >> in it, too easy or too hard?  Did it take too long or too little time?
 
+We think that the assignment is quite challenging but doable. It took a
+long time for us to finish, but we believe that most of the delays were
+caused by our mistakes.
+
 >> Did you find that working on a particular part of the assignment gave
 >> you greater insight into some aspect of OS design?
+
+Reading the kernel code of pintos allowed us to clarify our vague
+understanding of context switching that happens in the CPU. The
+assignment also allowed us to get a grasp of how scheduler actually
+works.
 
 >> Is there some particular fact or hint we should give students in
 >> future quarters to help them solve the problems?  Conversely, did you
 >> find any of our guidance to be misleading?
 
+We first misunderstood the definition of priority donation. We thought
+that we had to donate the priority to all of the waiters. Suppose
+Thread 0 with priority 30 has lock A, and Thread 1 and 2 both of
+priority 30 is waiting for lock A. Now Thread 3 of priority 40 comes
+and tries to acquire lock A. We originally thought that Thread 3 should
+donate its priority to all of Thread 0, 1, and 2, which turned out to
+be a totally wrong understanding of the specifications.
+
 >> Do you have any suggestions for the TAs to more effectively assist
 >> students, either for future quarters or the remaining projects?
-
->> Any other comments?
 
 We think it would be helpful if there are more test cases. While writing
 the DESIGNDOC, we found out some corner cases that our implementation
@@ -533,4 +581,13 @@ cannot handle. Regarding the fact that the implementation had passed all
 27 tests, we are very sure that the test cases are not enough. Also we
 are worried about the possibility that the bugs we were not able to find
 in this assignment affecting the future assignments.
+
+>> Any other comments?
+
+We think it will be nicer for students, and really helpful to the TAS,
+if we are allowed to write our DESIGNDOCs in WYSIWYG-like editors, such
+as Hancom or Microsoft word. We really love vim and think that it is one
+of the best editors for programming, but for writing reports? Well...
+Readability of non-spacious articles is really poor in vim. We believe
+that visual editors have their strength in those areas.
 

@@ -100,16 +100,14 @@ void
 priority_yield(void)
 {
   enum intr_level old_level = intr_disable ();
-  if (list_empty (&ready_list))
+  if (!list_empty (&ready_list))
   {
-    intr_set_level (old_level);
-    return;
-  }
-  struct thread * thr;
-  thr = list_entry (list_front (&ready_list), struct thread, elem); 
-  ASSERT (is_thread (thr));
-  if (thread_current ()->priority < thr->priority)
-    thread_yield ();
+    struct thread * thr;
+    thr = list_entry (list_front (&ready_list), struct thread, elem); 
+    ASSERT (is_thread (thr));
+    if (thread_current ()->priority < thr->priority)
+      thread_yield ();
+    }
   intr_set_level (old_level);
 }
 
@@ -132,19 +130,17 @@ priority_recalculate (void)
   struct list_elem * e;
   struct thread * thr;
   enum intr_level old_level = intr_disable ();
-  if (list_empty (&all_list))
+  if (!list_empty (&all_list))
   {
-    intr_set_level (old_level);
-    return;
+    for (e = list_begin (&all_list); e != list_end (&all_list);
+         e = list_next (e))
+    {
+      thr = list_entry (e, struct thread, elem_all);
+      ASSERT (is_thread (thr));
+      priority_recalculate_indiv (thr);
+    }
+    list_sort(&ready_list, higher_priority, NULL);
   }
-  for (e = list_begin (&all_list); e != list_end (&all_list);
-       e = list_next (e))
-  {
-    thr = list_entry (e, struct thread, elem_all);
-    ASSERT (is_thread (thr));
-    priority_recalculate_indiv (thr);
-  }
-  list_sort(&ready_list, higher_priority, NULL);
   intr_set_level (old_level);
 }
 
