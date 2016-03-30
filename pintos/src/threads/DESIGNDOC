@@ -249,6 +249,9 @@ use it could make every thread to stop.
 >> abstraction layer for fixed-point math, that is, an abstract data
 >> type and/or a set of functions or macros to manipulate fixed-point
 >> numbers, why did you do so?  If not, why not?
+ First, We made new type 'fixed-point' in order not to make it confusion when we use fixed point operators.
+We implemened add, sub, multiply, divide among two fixed points and among fixed point and integer with 17.14 points. Because the only used fixed-points in our code were recent_cpu and load_avg. but those values were so small that 17.14 points had big enough range.
+add, add_int, sub, sub_int, mult_int, div_int were as same as ordinary operators. but multiply, divide among two fixed-points were different. They first converted fixex-point to 64 bit in order to avoid overflow.
 
 			   SURVEY QUESTIONS
 			   ================
@@ -261,15 +264,24 @@ the quarter.
 
 >> In your opinion, was this assignment, or any one of the three problems
 >> in it, too easy or too hard?  Did it take too long or too little time?
+   
+   1,2 were not so difficult. we used so much time at 3.
 
 >> Did you find that working on a particular part of the assignment gave
 >> you greater insight into some aspect of OS design?
+
+   part 2 made me to understand OS.
 
 >> Is there some particular fact or hint we should give students in
 >> future quarters to help them solve the problems?  Conversely, did you
 >> find any of our guidance to be misleading?
 
+   no.
+
 >> Do you have any suggestions for the TAs to more effectively assist
 >> students, either for future quarters or the remaining projects?
-
+  
+   no
 >> Any other comments?
+
+   no
