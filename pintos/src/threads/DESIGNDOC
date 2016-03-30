@@ -219,7 +219,7 @@ ticks   A   B   C   A   B   C   to run
 >> in the table uncertain?  If so, what rule did you use to resolve
 >> them?  Does this match the behavior of your scheduler?
    
-   It is ambiguity for OS to choose which thread to run at the time of thread_yield when two threads are same. Our decision is to use FIFO for same priorities in ready_list. And it matched with my scheduler.
+   It is ambiguity for OS to choose which thread to run at the time of thread_yield when priorities of two threads are same. Our decision is to use FIFO for same priorities in ready_list. And it matched with my scheduler.
    Moreover, when runing thread and reay thread have same priories, I choosed to run running thread in order to maintain FIFO.
   Finally, I choosed not to use thread_yield immediately when some thread from THREAD_BLOCK converts to THREAD_READY. However, final test mlfqs-block forced me to use thread_yield immediately especially just after lock_release.
 >> C4: How is the way you divided the cost of scheduling between code
@@ -232,7 +232,7 @@ ticks   A   B   C   A   B   C   to run
 >> time to work on this part of the project, how might you choose to
 >> refine or improve your design?
   Advantage: i did not use too much intr_disable() hence our design avoids interrupt disable as much as we could.
-  Disadvanage: We implanted new elem_list elem_ in the struct thread. so that there is ambitigy to make error when we try to use the size of struct thread. And also we did not make check to make thread_list empty when the process ends. So for load_avg.
+  Disadvanage: We implanted new elem_list elem_ in the struct thread. so that there is ambitigy to make error when we try to use the size of struct thread. And also we did not make check to make thread_list empty when the process ends. So is for load_avg
   Finally, our fixed-point head file does not care about 64-bit representation system since we only take care of 32-bit system.
   If i had more timer, i would refine those disadvantages.
 >> C6: The assignment explains arithmetic for fixed-point math in
