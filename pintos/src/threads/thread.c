@@ -105,7 +105,6 @@ priority_yield(void)
   struct thread * thr=list_entry(list_front(&ready_list), struct thread, elem);
   if(thread_current()->priority < thr->priority)
     thread_yield();
-  
 }
 
 
