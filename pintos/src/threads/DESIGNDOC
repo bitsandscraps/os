@@ -23,20 +23,23 @@ nested priority donation.
 >> preparing your submission, other than the Pintos documentation, course
 >> text, lecture notes, and course staff.
 
-At first we did not know that even the first assignment will require us
-to make new data structures and functions. We tried to find a way to
-manage it without creating new things, which we failed, and googled for
-a solution. We found the following blog:
+At first we did not know that even the first part of the first
+assignment will require us to make new data structures and functions. We
+tried to find a way to manage it without creating new things, which we
+failed, and googled for a solution. We found the following blog:
 http://maplejune.tistory.com/entry/Pintos-프로젝트-1-Alarm-Clock
 After finishing the first part by the help from the blog, we realized
 that we should never be afraid of creating new things.
-    For the second assignment we got some insights for our
+    For the second part we got some insights for our
 implementation from
 http://maplejune.tistory.com/entry/Pintos-프로젝트-1-Priority-Scheduling
 and
 http://ysocks.egloos.com/m/501047
 We did not read thoroughly throughout the blogs, though. We just skimmed
 their ideas and find out a new(hopefully better) way to implement.
+    For the third part we referred to the following codes someone
+uploaded on github:
+https://github.com/yuwumichcn223/pintos
 
 			     ALARM CLOCK
 			     ===========
@@ -371,8 +374,13 @@ acquire a lock during its call.
 >> B7: Why did you choose this design?  In what ways is it superior to
 >> another design you considered?
 
-To implement nested donation, it is necessary to remember what locks a
-thread is waiting for. We first thought about maintaining a list of
+We chose not to implement using dynamic priority calculation because
+it seemed little unintuitive and complicated to us. There are various
+places in the kernel code where we need to access the priority
+information of a thread, and it seemed too expensive to always
+recalculate the priority.
+    To implement nested donation, it is necessary to remember what locks
+a thread is waiting for. We first thought about maintaining a list of
 locks that each thread is waiting for, but soon found out that a thread
 can wait for only one lock at a time. So we changed it to a pointer
 variable, which makes things a lot simpler.
