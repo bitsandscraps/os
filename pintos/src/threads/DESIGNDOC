@@ -92,6 +92,15 @@ the call to timer_sleep().
 >> A6: Why did you choose this design?  In what ways is it superior to
 >> another design you considered?
 
+To wake the threads without yielding to another thread, we must maintain
+a list of threads that are sleeping. There are some design choices about
+how to maintain this list. We chose to insert the threads in the
+waiting_list in an ordered manner, so that we can reduce the number of
+threads the kernel should inspect to wake them up. Other choice may be
+to put them in arbitrary order(just push them front) and sort them every
+tick. Since sorting is recursive and needs lot of memory we implemented
+using list_insert_ordered ().
+
 			 PRIORITY SCHEDULING
 			 ===================
 
@@ -361,6 +370,20 @@ acquire a lock during its call.
 
 >> B7: Why did you choose this design?  In what ways is it superior to
 >> another design you considered?
+
+To implement nested donation, it is necessary to remember what locks a
+thread is waiting for. We first thought about maintaining a list of
+locks that each thread is waiting for, but soon found out that a thread
+can wait for only one lock at a time. So we changed it to a pointer
+variable, which makes things a lot simpler.
+    To implement multiple donation, as discussed above, it is important
+to remember what priority to restore after releasing. An option is to
+record the history of priority change in struct thread using an array or
+list. But it makes it hard to distinguish nested donation from multiple
+donations. Since they differ from each other by the fact that one
+happens through one lock but the other by multiple locks, we tried to
+record the donated priority in the lock and remember what locks the
+thread is holding.
 
 			  ADVANCED SCHEDULER
 			  ==================
