@@ -100,26 +100,27 @@ start_process (void *f_name)
   char * token;
   argv[0] = file_name;
   int argc = 1;
-  strtok_r (file_name, delim, &saveptr);
+  //strtok_r (file_name, delim, &saveptr);
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
   success = load (file_name, &if_.eip, &if_.esp);
+  /*
   if (success)
   {
     while ((token = strtok_r (NULL, delim, &saveptr)))
     {
       /* Gobble up multiple whitespaces. */
-      if (!*token) continue;
+/*      if (!*token) continue;
       argv[argc++] = token;
     }
     pass_args (&if_.esp, argv, argc);
     hex_dump (1, if_.esp, 40, true);
-  }
-  /* If load failed, quit. */
+  }*/
   palloc_free_page (file_name);
+  /* If load failed, quit. */
   if (!success) 
     thread_exit ();
   /* Start the user process by simulating a return from an
