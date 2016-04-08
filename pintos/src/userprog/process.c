@@ -18,6 +18,11 @@
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 
+/* The command line argument passed by pintos cannot be longer than
+ * 128 characters. Since there should be at least one space between
+ * the arguments, the argc cannot exceed 128 / 2 = 64. */
+#define MAX_ARGC 64
+
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
 
@@ -45,27 +50,79 @@ process_execute (const char *file_name)
   return tid;
 }
 
+/* Set up the stack following the 80x86 calling convention.
+ * esp is the address of the stack pointer value.
+ * argv is the array of tokens. argc is the number of arguments. */
+static void
+pass_args (void ** esp, char ** argv, int argc)
+{
+  char * cesp = *esp;
+  int i;
+  /* Place the words at the top of the stack. */
+  for (i = argc - 1; i >= 0; --i)
+  {
+    size_t length = strlen (argv[i]) + 1;
+    cesp -= length;
+    strlcpy (cesp, argv[i], length);
+    argv[i] = cesp;
+  }
+  /* Round the stack pointer down to a multiple of 4. */
+  int iesp = (int)cesp;
+  iesp &= ~0x3;
+  char ** pesp = (char **) iesp;
+  /* Null point sentinel. */
+  *pesp = NULL;
+  /* Push address of each string. */
+  for (i = argc - 1; i >= 0; --i)
+    *(--pesp) = argv[i];
+  /* Push argv, i.e. the address of argv[0]. */
+  char ** argv0 = pesp;
+  *(--pesp) = (char *)argv0;
+  /* Push argc. */
+  *(--pesp) = (char *)argc;
+  /* Push a fake return address. */
+  *(--pesp) = NULL;
+  /* Update stack pointer. */
+  *esp = pesp;
+}
+
 /* A thread function that loads a user process and makes it start
    running. */
 static void
 start_process (void *f_name)
 {
+  const char * delim = " ";
   char *file_name = f_name;
   struct intr_frame if_;
   bool success;
-
+  char * argv[MAX_ARGC];
+  char * saveptr;
+  char * token;
+  argv[0] = file_name;
+  int argc = 1;
+  //strtok_r (file_name, delim, &saveptr);
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
   success = load (file_name, &if_.eip, &if_.esp);
-
-  /* If load failed, quit. */
+  /*
+  if (success)
+  {
+    while ((token = strtok_r (NULL, delim, &saveptr)))
+    {
+      /* Gobble up multiple whitespaces. */
+/*      if (!*token) continue;
+      argv[argc++] = token;
+    }
+    pass_args (&if_.esp, argv, argc);
+    hex_dump (1, if_.esp, 40, true);
+  }*/
   palloc_free_page (file_name);
+  /* If load failed, quit. */
   if (!success) 
     thread_exit ();
-
   /* Start the user process by simulating a return from an
      interrupt, implemented by intr_exit (in
      threads/intr-stubs.S).  Because intr_exit takes all of its
