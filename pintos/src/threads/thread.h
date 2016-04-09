@@ -111,6 +111,8 @@ struct thread
     struct list_elem elem_all;          /* List element. */
 
 #ifdef USERPROG
+    /* fd_lock must be acquired before modifying file descriptors. */
+    struct lock fd_lock;
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
 #endif

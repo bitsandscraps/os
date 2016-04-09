@@ -2,14 +2,20 @@
 #include <stdio.h>
 #include <string.h>
 #include <syscall-nr.h>
+#include "filesys/file.h"
+#include "filesys/filesys.h"
 #include "threads/init.h"
 #include "threads/interrupt.h"
+#include "threads/synch.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
+#include "userprog/process.h"
+
+static struct lock filesys_lock;
 
 typedef int pid_t;
 
-static void epilogue(char* name, int status);
+static void epilogue(int status);
 static void syscall_handler (struct intr_frame *);
 static void syscall_halt (void);
 static void syscall_exit (int status);
@@ -29,16 +35,29 @@ void
 syscall_init (void) 
 {
   intr_register_int (0x30, 3, INTR_ON, syscall_handler, "syscall");
+  lock_init (&filesys_lock);
+}
+
+/* Reads 4 bytes from user virtual address uaddr. Returns the int value
+ * if successful, -1 if segfault occurred. */
+static int
+get_long (const int * uaddr)
+{
+  int result;
+  if ((void *)uaddr >= PHYS_BASE) return -1;
+  asm ("movl $1f, %0; movl %1, %0; 1:"
+       : "=&a" (result) : "m" (*uaddr));
+  return result;
 }
 
 /* Reads a byte at user virtual address uaddr. Returns the byte value
  * if successful, -1 if segfault occurred. */
 static int
-get_user (const int * uaddr)
+get_byte (const uint8_t * uaddr)
 {
   int result;
   if ((void *)uaddr >= PHYS_BASE) return -1;
-  asm ("movl $1f, %0; movl %1, %0; 1:"
+  asm ("movl $1f, %0; movzbl %1, %0; 1:"
        : "=&a" (result) : "m" (*uaddr));
   return result;
 }
@@ -59,16 +78,15 @@ static void
 syscall_handler (struct intr_frame *f) 
 {
   int * esp = (int *)f->esp;
-  int syscall_num = get_user(esp++);
+  int syscall_num = get_long(esp++);
   int arg1, arg2, arg3;
-  putbuf("syscall_handler\n", 16);
   if (syscall_num == SYS_HALT)
   {
     syscall_halt ();
   }
   else
   {
-    arg1 = get_user(esp++);
+    arg1 = get_long(esp++);
     switch (syscall_num)
     {
       case SYS_EXIT:
@@ -95,7 +113,7 @@ syscall_handler (struct intr_frame *f)
       case SYS_CLOSE:
         syscall_close (arg1);
       default:
-        arg2 = get_user(esp++);
+        arg2 = get_long(esp++);
         switch (syscall_num)
         {
           case SYS_CREATE:
@@ -105,7 +123,7 @@ syscall_handler (struct intr_frame *f)
             syscall_seek ((int)arg1, (size_t)arg2);
             break;
           default:
-            arg3 = get_user(esp);
+            arg3 = get_long(esp);
             switch (syscall_num)
             {
               case SYS_READ:
@@ -123,9 +141,9 @@ syscall_handler (struct intr_frame *f)
 }
 
 static void
-epilogue(char * name, int status)
+epilogue(int status)
 {
-  printf("%s: exit(%d)\n", name, status);
+  printf("%s: exit(%d)\n", thread_current ()->name, status);
   thread_exit ();
   NOT_REACHED ();
 }
@@ -140,14 +158,20 @@ syscall_halt (void)
 static void
 syscall_exit (int status)
 {
-  epilogue(thread_current ()->name, status);
+  epilogue(status);
   NOT_REACHED ();
 }
 
 static uint32_t
-syscall_exec (const char * cmd_line UNUSED)
+syscall_exec (const char * cmd_line)
 {
-  return -1;
+  int success;
+  if (cmd_line == NULL || !(get_byte((uint8_t *)cmd_line)))
+    epilogue (-1);
+  lock_acquire (&filesys_lock);
+  success = process_execute (cmd_line);
+  lock_release (&filesys_lock);
+  return success;
 }
 
 static uint32_t
@@ -157,15 +181,27 @@ syscall_wait (pid_t pid UNUSED)
 }
 
 static uint32_t
-syscall_create (const char * file UNUSED, size_t intitial_size UNUSED)
+syscall_create (const char * file, size_t initial_size)
 {
-  return true;
+  bool success;
+  if (file == NULL)
+    return false;
+  lock_acquire (&filesys_lock);
+  success = filesys_create (file, initial_size);
+  lock_release (&filesys_lock);
+  return success;
 }
 
 static uint32_t
-syscall_remove (const char * file UNUSED)
+syscall_remove (const char * file)
 {
-  return true;
+  bool success;
+  if (file == NULL)
+    return false;
+  lock_acquire (&filesys_lock);
+  success = filesys_remove (file);
+  lock_release (&filesys_lock);
+  return success;
 }
 
 static uint32_t
