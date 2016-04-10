@@ -31,7 +31,6 @@ static void epilogue (int status);
 static struct fd_elem * find_fd (int fd);
 static void syscall_handler (struct intr_frame *);
 static void syscall_halt (void);
-static void syscall_exit (int status);
 static uint32_t syscall_exec (const char * cmd_line);
 static uint32_t syscall_wait (pid_t pid);
 static uint32_t syscall_create (const char * file, size_t initial_size);
@@ -192,7 +191,7 @@ syscall_halt (void)
   NOT_REACHED ();
 }
 
-static void
+void
 syscall_exit (int status)
 {
   struct thread * curr = thread_current ();
