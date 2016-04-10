@@ -224,9 +224,9 @@ syscall_exec (const char * cmd_line)
 }
 
 static uint32_t
-syscall_wait (pid_t pid UNUSED)
+syscall_wait (pid_t pid)
 {
-  return true;
+  return process_wait (pid);
 }
 
 static uint32_t
