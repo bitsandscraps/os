@@ -129,15 +129,10 @@ sema_up (struct semaphore *sema)
   struct thread * curr = thread_current ();
   if (!list_empty (&sema->waiters))
   {
-    if(!thread_mlfqs) {
-      struct list_elem * max = list_max (&sema->waiters, lesser_priority, NULL);
-      max_thr = list_entry (max, struct thread, elem);
-      list_remove (max);
-      thread_unblock (max_thr);
-    }
-    else 
-      thread_unblock(list_entry(list_pop_front(&sema->waiters),
-                    struct thread, elem));
+    struct list_elem * max = list_max (&sema->waiters, lesser_priority, NULL);
+    max_thr = list_entry (max, struct thread, elem);
+    list_remove (max);
+    thread_unblock (max_thr);
   }
   sema->value++;
   /* The current thread may not be the thread with the highest priority. */
@@ -224,6 +219,7 @@ lock_acquire (struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
+  enum intr_level old_level = intr_disable ();
   struct thread * curr = thread_current ();
   if(!thread_mlfqs) {
     if (lock->holder != NULL) {
@@ -234,8 +230,10 @@ lock_acquire (struct lock *lock)
   sema_down (&lock->semaphore);
   curr->lock_trying_acquire = NULL;
   lock->holder = curr;
-  lock->priority = curr->priority;
-  if(!thread_mlfqs) list_push_back (&curr->locks_holding, &lock->elem);
+  lock->priority = curr->initial_priority;
+  if (!thread_mlfqs)
+    list_push_back (&curr->locks_holding, &lock->elem);
+  intr_set_level (old_level);
 }
 
 /* Tries to acquires LOCK and returns true if successful or false
@@ -269,17 +267,16 @@ lock_release (struct lock *lock)
 {
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
+  enum intr_level old_level = intr_disable ();
   lock->holder = NULL;
   sema_up (&lock->semaphore);
-  if(!thread_mlfqs) list_remove (&lock->elem);
-  struct thread * curr = thread_current ();
-  int orig_pri = curr->priority;
-  priority_yield();
-  if(!thread_mlfqs) {
-    restore_priority (curr);
-    if (orig_pri > curr->priority)
-      thread_yield ();
+  if (!thread_mlfqs)
+  {
+    list_remove (&lock->elem);
+    restore_priority (thread_current ());
   }
+  priority_yield ();
+  intr_set_level (old_level);
 }
 
 /* Returns true if the current thread holds LOCK, false
@@ -308,7 +305,6 @@ void
 cond_init (struct condition *cond)
 {
   ASSERT (cond != NULL);
-
   list_init (&cond->waiters);
 }
 
@@ -317,13 +313,11 @@ cond_init (struct condition *cond)
  * returns true if the original priority of a is less than
  * the original priority of b. */
 static bool
-lesser_priority_sem (const struct list_elem *a,
-                     const struct list_elem *b, void *aux UNUSED)
+lesser_priority_sema (const struct list_elem *a,
+                      const struct list_elem *b, void *aux UNUSED)
 {
-  const struct semaphore_elem *a_sem =
-      list_entry (a, struct semaphore_elem, elem);
-  const struct semaphore_elem *b_sem =
-      list_entry (b, struct semaphore_elem, elem);
+  struct semaphore_elem * a_sem = list_entry (a, struct semaphore_elem, elem);
+  struct semaphore_elem * b_sem = list_entry (b, struct semaphore_elem, elem);
   return a_sem->priority < b_sem->priority;
 }
 
@@ -356,11 +350,10 @@ cond_wait (struct condition *cond, struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (!intr_context ());
   ASSERT (lock_held_by_current_thread (lock));
-  
-  waiter.priority = thread_current ()->priority;
   sema_init (&waiter.semaphore, 0);
+  waiter.priority = thread_current ()->priority;
   list_insert_ordered (&cond->waiters, &waiter.elem,
-                       lesser_priority_sem, NULL);
+                       lesser_priority_sema, NULL);
   lock_release (lock);
   sema_down (&waiter.semaphore);
   lock_acquire (lock);
@@ -380,7 +373,6 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED)
   ASSERT (lock != NULL);
   ASSERT (!intr_context ());
   ASSERT (lock_held_by_current_thread (lock));
-
   if (!list_empty (&cond->waiters)) 
     sema_up (&list_entry (list_pop_back (&cond->waiters),
                           struct semaphore_elem, elem)->semaphore);

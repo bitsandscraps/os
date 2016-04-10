@@ -287,7 +287,7 @@ list_pop_back (struct list *list)
 struct list_elem *
 list_front (struct list *list)
 {
-  //ASSERT (!list_empty (list));
+  ASSERT (!list_empty (list));
   return list->head.next;
 }
 

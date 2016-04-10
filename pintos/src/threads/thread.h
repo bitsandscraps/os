@@ -93,8 +93,11 @@ struct thread
     int priority;                       /* Current priority. */
     int initial_priority;               /* Initial priority. */
 
-    /* parameters for advanced scheduler */
+    /* Parameters for advanced scheduler */
+    /* Integer value that determines how nice the thread should be to
+     * other threads. */
     int nice;
+    /* Metric of how much CPU time the thread has received recently. */
     fixed_point recent_cpu;
 
     /* Lock that the thread is trying to acquire. */
@@ -104,10 +107,14 @@ struct thread
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
-    /* elem for thread_list */
-    struct list_elem elem_;             /* List elemetn. */
+    /* Element in all_list of thread.c. */
+    struct list_elem elem_all;          /* List element. */
 
 #ifdef USERPROG
+    /* fd_lock must be acquired before modifying file descriptors. */
+    struct lock fd_lock;
+    int max_fd;
+    struct list open_fds;
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
 #endif
@@ -148,6 +155,7 @@ void restore_priority (struct thread * thr);
 int thread_get_priority (void);
 void thread_set_priority (int);
 
+void priority_yield(void);
 void recent_cpu_recalculate(void);
 void recent_cpu_incr(void);
 void priority_recalculate(void);
