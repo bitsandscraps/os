@@ -71,7 +71,7 @@ pass_args (void ** esp, char ** argv, int argc)
   iesp &= ~0x3;
   char ** pesp = (char **) iesp;
   /* Null point sentinel. */
-  *pesp = NULL;
+  *(--pesp) = NULL;
   /* Push address of each string. */
   for (i = argc - 1; i >= 0; --i)
     *(--pesp) = argv[i];
@@ -116,7 +116,6 @@ start_process (void *f_name)
       argv[argc++] = token;
     }
     pass_args (&if_.esp, argv, argc);
-    hex_dump (1, if_.esp, 40, true);
   }
   palloc_free_page (file_name);
   /* If load failed, quit. */
@@ -144,6 +143,10 @@ start_process (void *f_name)
 int
 process_wait (tid_t child_tid UNUSED) 
 {
+  int i = 0;
+  int k = 30;
+  for (i = 0; i < 300000000; ++i)
+      k = k * -1;
   return -1;
 }
 
@@ -271,7 +274,9 @@ load (const char *file_name, void (**eip) (void), void **esp)
   bool success = false;
   int i;
 
+  t->max_fd = STDOUT_FILENO;
   lock_init (&t->fd_lock);
+  list_init (&t->open_fds);
 
   /* Allocate and activate page directory. */
   t->pagedir = pagedir_create ();

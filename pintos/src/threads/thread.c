@@ -680,6 +680,7 @@ is_thread (struct thread *t)
 static void
 init_thread (struct thread *t, const char *name, int priority)
 {
+  char * saveptr;
   ASSERT (t != NULL);
   ASSERT (PRI_MIN <= priority && priority <= PRI_MAX);
   ASSERT (name != NULL);
@@ -687,6 +688,7 @@ init_thread (struct thread *t, const char *name, int priority)
   memset (t, 0, sizeof *t);
   t->status = THREAD_BLOCKED;
   strlcpy (t->name, name, sizeof t->name);
+  strtok_r (t->name, " ", &saveptr);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->initial_priority = priority;

@@ -113,6 +113,8 @@ struct thread
 #ifdef USERPROG
     /* fd_lock must be acquired before modifying file descriptors. */
     struct lock fd_lock;
+    int max_fd;
+    struct list open_fds;
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
 #endif
