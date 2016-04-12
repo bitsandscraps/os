@@ -680,6 +680,7 @@ is_thread (struct thread *t)
 static void
 init_thread (struct thread *t, const char *name, int priority)
 {
+  char * saveptr;
   ASSERT (t != NULL);
   ASSERT (PRI_MIN <= priority && priority <= PRI_MAX);
   ASSERT (name != NULL);
@@ -687,6 +688,7 @@ init_thread (struct thread *t, const char *name, int priority)
   memset (t, 0, sizeof *t);
   t->status = THREAD_BLOCKED;
   strlcpy (t->name, name, sizeof t->name);
+  strtok_r (t->name, " ", &saveptr);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->initial_priority = priority;
@@ -709,6 +711,15 @@ init_thread (struct thread *t, const char *name, int priority)
       t->recent_cpu = thread_current ()->recent_cpu;
     }
   }
+#ifdef USERPROG
+  t->max_fd = STDOUT_FILENO;
+  lock_init (&t->fd_lock);
+  list_init (&t->open_fds);
+  list_init (&t->children);
+  sema_init (&t->wait_parent, 0);
+  sema_init (&t->wait_process, 0);
+  sema_init (&t->is_done, 0);
+#endif
   t->magic = THREAD_MAGIC;
   enum intr_level old_level = intr_disable ();
   list_push_back (&all_list, &t->elem_all);

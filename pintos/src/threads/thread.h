@@ -26,6 +26,7 @@ typedef int tid_t;
 #define PRI_DEFAULT 31          /* Default priority. */
 #define PRI_MAX 63              /* Highest priority. */
 
+
 /* A kernel thread or user process.
 
    Each thread structure is stored in its own 4 kB page.  The
@@ -111,8 +112,28 @@ struct thread
     struct list_elem elem_all;          /* List element. */
 
 #ifdef USERPROG
+    struct file * executable;     /* The executable file of itself. */
+
+    /* Data Structures for Managing File Descriptors. */
+    struct list open_fds;         /* List of open files. */
+    /* max_fd is always greater or equal to any files in open_fds.
+     * This value is used to assign fd values to new files. */
+    int max_fd;
+    /* fd_lock must be acquired before modifying file descriptors. */
+    struct lock fd_lock;
+
+    /* Data Structues for Implementing Wait. */
+    int exit_status;              /* Status of exit. */
+    /* The value is 'up'ed when everything is over. */
+    struct semaphore is_done;
+    /* The value is 'up'ed when parent calls wait. */
+    struct semaphore wait_parent;
+    /* The value is 'up'ed when the data is ready for its parent. */
+    struct semaphore wait_process;
+    struct list children;         /* Children of the current process. */
+
     /* Owned by userprog/process.c. */
-    uint32_t *pagedir;                  /* Page directory. */
+    uint32_t *pagedir;            /* Page directory. */
 #endif
 
     /* Owned by thread.c. */
