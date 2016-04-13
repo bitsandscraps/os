@@ -161,6 +161,6 @@ page_fault (struct intr_frame *f)
   f->eip = (void *)f->eax;
   f->eax = 0xffffffff;
   if (user)
-    syscall_exit (EXIT_FAILURE);
+    syscall_exit (KERNEL_TERMINATE);
 }
 
