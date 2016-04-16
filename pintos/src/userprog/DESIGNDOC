@@ -16,9 +16,17 @@ Seongsu Cho  <csp00141@kaist.ac.kr>
 >> If you have any preliminary comments on your submission, notes for the
 >> TAs, or extra credit, please give them here.
 
+Something was wrong with my DESIGNDOC for Assignment 1. I have fixed the
+errors.
+
 >> Please cite any offline or online sources you consulted while
 >> preparing your submission, other than the Pintos documentation, course
 >> text, lecture notes, and course staff.
+
+From
+http://bogus919.tistory.com/entry/pintos-project2
+we got to know that we should change process_wait to infinite loop before
+anything starts to work.
 
 			   ARGUMENT PASSING
 			   ================
@@ -29,7 +37,12 @@ Seongsu Cho  <csp00141@kaist.ac.kr>
 >> `struct' member, global or static variable, `typedef', or
 >> enumeration.  Identify the purpose of each in 25 words or less.
 
+Did not changed any data structured. If you can call macro a data
+structure, we defined one macro.
 
+/* The length of the array to store each argument during tokenizing
+ * the given string. */
+#define MAX_ARGC 64
 
 ---- ALGORITHMS ----
 
@@ -37,16 +50,35 @@ Seongsu Cho  <csp00141@kaist.ac.kr>
 >> you arrange for the elements of argv[] to be in the right order?
 >> How do you avoid overflowing the stack page?
 
+First we strtok_r the given string to tokenize the name of the program,
+and passed it to load. Second we kept strtok_r other parts of the string
+and stored each token in the array of size MAX_ARGC. Then using the
+array, we carefully arranged the arguments on the stack of the new
+process.
+  The string that the kernel passes to a process is maximum 128
+characters long(LOADER_ARGS_LEN defined in threads/init.c). So the
+maximum number of arguments will be 128 / 2 = 64, since there should be
+at least one space between every arguments. So the whole argv array
+cannot exceed (64 + 1) * 4 bytes, where 1 is the null pointer sentinel.
+The left members of argument passing is argv, argc, and return address,
+which is of total 12 bytes. So size of the whole argument passing stack
+cannot exceed 128 + (64 + 1) * 4 + 12 = 784 bytes, which is much smaller
+than the size of a page, 4 KB. The stack page will never overflow.
 
 ---- RATIONALE ----
 
 >> A3: Why does Pintos implement strtok_r() but not strtok()?
 
+strtok uses a static pointer to tokenize string. Since pintos is a
+multi-threaded environment, it is very likely for race conditions to
+occur and corrupt the results.
 
 >> A4: In Pintos, the kernel separates commands into a executable name
 >> and arguments.  In Unix-like systems, the shell does this
 >> separation.  Identify at least two advantages of the Unix approach.
 
+First disadvantage of pintos-like approach is that we may hack the
+kernel through malicious command-line arguments.
 
 
                               SYSTEM CALLS
@@ -58,6 +90,48 @@ Seongsu Cho  <csp00141@kaist.ac.kr>
 >> `struct' member, global or static variable, `typedef', or
 >> enumeration. Identify the purpose of each in 25 words or less.
 
+A "fd_elem" is used to manage the file descriptors opened
+by a particular process.
+
+    struct fd_elem
+    {
+      int fd;                   /* assigned fd number */
+      off_t pos;                /* offset for read and write */
+      struct file * file;       /* struct file for the fd */
+      struct list_elem elem;    /* list element of open_fds in struct thread */
+    };
+
+Lock to avoid race conditions on file system manipulations.
+
+    static struct lock filesys_lock;
+
+typedef of pid_t. In our implementation pid of a process is the
+tid of its thread.
+
+    typedef int pid_t;
+
+Added to struct thread:
+
+    /* For denying writes on executables. */
+    struct file * executable;     /* The executable file of itself. */
+
+    /* Data Structures for Managing File Descriptors. */
+    struct list open_fds;         /* List of open files. */
+    /* max_fd is always greater or equal to any files in open_fds.
+     * This value is used to assign fd values to new files. */
+    int max_fd;
+    /* fd_lock must be acquired before modifying file descriptors. */
+    struct lock fd_lock;
+
+    /* Data Structues for Implementing Wait. */
+    int exit_status;              /* Status of exit. */
+    /* The value is 'up'ed when everything is over. */
+    struct semaphore is_done;
+    /* The value is 'up'ed when parent calls wait. */
+    struct semaphore wait_parent;
+    /* The value is 'up'ed when the data is ready for its parent. */
+    struct semaphore wait_process;
+    struct list children;         /* Children of the current process. */
 
 >> B2: Describe how file descriptors are associated with open files.
 >> Are file descriptors unique within the entire OS or just within a
@@ -127,7 +201,7 @@ Seongsu Cho  <csp00141@kaist.ac.kr>
 >> B11: The default tid_t to pid_t mapping is the identity mapping.
 >> If you changed it, what advantages are there to your approach?
 
-
+Did not change the mapping. It makes implementation much simpler.
 
 
 			SURVEY QUESTIONS
@@ -140,7 +214,7 @@ choose to respond anonymously in the course evaluations at the end of
 the quarter.
 
 >> In your opinion, was this assignment, or any one of the three problems
->> in it, too easy or too hard? ?Did it take too long or too little time?
+>> in it, too easy or too hard? Did it take too long or too little time?
 
 
 >> Did you find that working on a particular part of the assignment gave

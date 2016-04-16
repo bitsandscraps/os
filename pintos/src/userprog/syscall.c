@@ -15,14 +15,16 @@
 
 #define WRITEBATCH 1024
 
+/* List elements used to manage open file descriptors. */
 struct fd_elem
 {
-  int fd;
-  off_t pos;
-  struct file * file;
-  struct list_elem elem;
+  int fd;                   /* assigned fd number */
+  off_t pos;                /* offset for read and write */
+  struct file * file;       /* struct file for the fd */
+  struct list_elem elem;    /* list element of open_fds in struct thread */
 };
 
+/* Lock to avoid race conditions on file system manipulations. */
 static struct lock filesys_lock;
 
 typedef int pid_t;

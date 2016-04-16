@@ -152,9 +152,8 @@ start_process (void *args)
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
   /* Load process and pass arguments. */
-  argv[0] = file_name;
-  strtok_r (file_name, delim, &saveptr);
-  success = load (file_name, &if_.eip, &if_.esp);
+  argv[0] = strtok_r (file_name, delim, &saveptr);
+  success = load (argv[0], &if_.eip, &if_.esp);
   /* Signal parent that it had returned the required information,
    * address to this thread and whether or not it succeeded.*/
   passed_args->child = thread_current ();
@@ -163,11 +162,7 @@ start_process (void *args)
   if (success)
   {
     while ((token = strtok_r (NULL, delim, &saveptr)))
-    {
-      /* Gobble up multiple whitespaces. */
-      if (!*token) continue;
       argv[argc++] = token;
-    }
     pass_args (&if_.esp, argv, argc);
   }
   palloc_free_page (file_name);
