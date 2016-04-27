@@ -101,6 +101,27 @@ by a particular process.
       struct list_elem elem;    /* list element of open_fds in struct thread */
     };
 
+A child is an element of the children list managed by every thread.
+
+    struct child
+    {
+      tid_t tid;
+      struct thread * thr;
+      struct list_elem elem;
+    };
+
+A start_proc_args is the data structure used to exchange data between
+a parent and its child.
+
+  struct start_proc_args
+  {
+    char * file_name;
+    bool success;
+    struct thread * parent;
+    struct thread * child;
+  };
+
+
 Lock to avoid race conditions on file system manipulations.
 
     static struct lock filesys_lock;
@@ -137,12 +158,24 @@ Added to struct thread:
 >> Are file descriptors unique within the entire OS or just within a
 >> single process?
 
+It is unique just within a process. Even the pos value determined by
+seek system call is unique just within a process.
 
 ---- ALGORITHMS ----
 
 >> B3: Describe your code for reading and writing user data from the
 >> kernel.
 
+We used the second method introduced in section 3.1.5 of Pintos manual.
+It uses the MMU of the kernel. We changed the code so that when MMU
+detects a page fault, it does not kill the process immediately but
+store -1 in the eax register, for the kernel to verify whether the given
+address is valid. Every time the kernel reads or writes user data, it
+first check whether the given virtual address is anywhere sensible
+(surely it cannot exceed PHYS_BASE). If it looks okay, it justs reads
+or writes on that address. But before continuing, the kernel checks
+whether or not the MMU has returned -1. If it has returned -1, the
+kernel kills the process.
 
 >> B4: Suppose a system call causes a full page (4,096 bytes) of data
 >> to be copied from user space into the kernel. What is the least
@@ -155,7 +188,20 @@ Added to struct thread:
 >> B5: Briefly describe your implementation of the "wait" system call
 >> and how it interacts with process termination.
 
-
+Every time a process executes a child process, it records the pointer
+to the struct thread of its child and add it to the children list.
+When wait is called it checks whether it has a child of the given pid.
+If it doesn't, exit immediately. If it does, wait for the child to be
+ready for exit, which is possible because the parent knows the pointer
+to the struct thread of its child. When the child signals the parent
+that everything is over, the parent signals the child through the
+semaphore element wait_parent in the child's struct thread that it can
+now safely terminate.
+  Now from the child's perspective. When everything is over, it signals
+the parent through the semaphore element is_done in its struct thread.
+Then it waits for the parent to call wait. When the semaphore element
+wait_parent is 'up'ed by the parent, it completes the termination
+process.
 
 >> B6: Any access to user program memory at a user-specified address
 >> can fail due to a bad pointer value. Such accesses must cause the
@@ -171,7 +217,11 @@ Added to struct thread:
 >> paragraphs, describe the strategy or strategies you adopted for
 >> managing these issues. Give an example.
 
-
+All of the temporarily allocated resources must be freed before exiting.
+So we just put all those code in syscall_exit, and called it before
+returning from an error. One exception is the lock for the file system.
+This one, we released it manually, since the exit system call is totally
+irrelevant to the file system.
 
 ---- SYNCHRONIZATION ----
 
@@ -180,6 +230,19 @@ Added to struct thread:
 >> loading. How does your code ensure this? How is the load
 >> success/failure status passed back to the thread that calls "exec"?
 
+To implement wait system call, we added some code to allow data exchange
+between the parent and child threads. After finding out that our
+implementation cannot catch the load failure, we just added a success
+flag to the set of data exchanged between parent and child.
+  The data exchanged occur by the following procedure. The parent
+parent process allocates a page for struct start_proc_args. It fills the
+struct contents with the pointer to the process name and the pointer to
+its struct thread. And waits on the semaphore element wait_process. The
+child receives this struct though aux of thread_create. After trying to
+load the process, it returns whether it succeeded or not with the
+pointer to its struct thread. And using the pointer to the parent's
+struct thread, it signals the parent that it has finished filling up the
+required struct elements.
 
 >> B8: Consider parent process P with child process C. How do you
 >> ensure proper synchronization and avoid race conditions when P
@@ -188,20 +251,51 @@ Added to struct thread:
 >> terminates without waiting, before C exits? After C exits? Are
 >> there any special cases?
 
+We ensure synchronization through semaphore elements is_done and
+wait_parent.
+  If P calls wait(C) before C exits, C is not done yet, so P will wait
+for C to 'up' its is_done. P reads the exit code and 'up's C's
+wait_parent so that C can terminate.
+  If C exits before P calls wait(C), C will 'up' its is_done and wait
+for its parent to 'up' wait_parent. When P calls wait(C), it will see
+that C is ready for exit, read C's exit code, and signals C to terminate
+via 'up'ing C's wait_parent.
+  The child waits for its parent to call wait after all the resources
+are freed, so we can ensure that no resources are locked forever.
+  If the parent does not call wait(C) but exit, the kernel cannot reap
+those zombie children. It is the user's responsibility to reap the
+zombie processes. We just followed the implementation of unix.
 
 ---- RATIONALE ----
 
 >> B9: Why did you choose to implement access to user memory from the
 >> kernel in the way that you did?
 
+The user manual states that this approach is much faster because it
+takes advantage of the MMU.
+
 >> B10: What advantages or disadvantages can you see to your design
 >> for file descriptors?
 
+It is simple. We recorded the maximum file descriptor value in struct
+thread. Every time we assign a file descriptor, we just increment that
+value and give it to the new file. This value is always manipulated
+after acquiring the fd_lock of the thread. We did not decremented the
+max_fd value when we close a file. Since it has to check whether the
+closing fd is the maximum value or not. If it was not the maximum
+value, the maximum value fd is not closed yet, so we cannot assign that
+number to another file. We can clearly see that it makes things a lot
+complicated.
+  In our implementation, after opening 2147483647 files the file
+descriptor values might malfunction, even when the process only has few
+open file descriptors. But we strongly believe that it will never
+happen.
 
 >> B11: The default tid_t to pid_t mapping is the identity mapping.
 >> If you changed it, what advantages are there to your approach?
 
-Did not change the mapping. It makes implementation much simpler.
+Did not change the mapping. It makes implementation much simpler and
+compatible with the given process-related functions.
 
 
 			SURVEY QUESTIONS

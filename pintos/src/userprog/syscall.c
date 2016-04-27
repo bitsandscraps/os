@@ -254,7 +254,7 @@ static uint32_t
 syscall_remove (const char * file)
 {
   bool success;
-  if (file == NULL)
+  if (file == NULL || !is_valid((uint8_t *)file))
     syscall_exit (KERNEL_TERMINATE);
   lock_acquire (&filesys_lock);
   success = filesys_remove (file);
@@ -271,7 +271,7 @@ syscall_open (const char * file_name)
   struct file * file;
   struct fd_elem * elem;
   int fd = -1;
-  if (file_name == NULL || !is_valid(file_name))
+  if (file_name == NULL || !is_valid((uint8_t *)file_name))
     syscall_exit (KERNEL_TERMINATE);
   lock_acquire (&filesys_lock);
   file = filesys_open (file_name);
@@ -319,10 +319,11 @@ syscall_filesize (int fd)
 static uint32_t
 syscall_read (int fd, void * buffer, size_t size)
 {
-  char * usrbuf = (char *)buffer;
+  uint8_t * usrbyte = buffer;
+  char * usrbuf = buffer;
   int nread = 0;
   struct fd_elem * fd_elem;
-  if (!is_valid(buffer))
+  if (!is_valid(usrbyte) || !is_valid(usrbyte + size))
     syscall_exit (KERNEL_TERMINATE);
   lock_acquire (&filesys_lock);
   if (fd == STDIN_FILENO)
@@ -352,10 +353,11 @@ static uint32_t
 syscall_write (int fd, const void * buffer, size_t size)
 {
   size_t to_write = size;
-  const char * usrbuf = (const char *)buffer;
+  const uint8_t * usrbyte = buffer;
+  const char * usrbuf = buffer;
   struct fd_elem * fd_elem;
   int nwrite = 0;
-  if (!is_valid(buffer))
+  if (!is_valid (usrbyte) || !is_valid (usrbyte + size))
     syscall_exit (KERNEL_TERMINATE);
   lock_acquire (&filesys_lock);
   if (fd == STDIN_FILENO)
