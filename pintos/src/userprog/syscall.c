@@ -75,6 +75,22 @@ is_valid (const uint8_t * uaddr)
   return (result != -1);
 }
 
+/* Determine whether size virtual addresses starting from uaddr are
+ * valid. */
+static bool
+is_valid_range (const uint8_t * uaddr, size_t size)
+{
+  size_t i = 0;
+  /* If we check every uaddr + N * PGSIZE, we can confirm that every
+   * page from uaddr to uaddr + size - 1 is valid. */
+  while (i < size)
+  {
+    if (!is_valid (uaddr + i)) return false;
+    i += PGSIZE;
+  }
+  return is_valid (uaddr + size - 1);
+}
+
 /* Handler of the system call. Find out what system call is called and
  * what the arguments are. Pass those arguments and execute the
  * appropriate system call. */
@@ -217,7 +233,7 @@ static uint32_t
 syscall_exec (const char * cmd_line)
 {
   int success;
-  if (cmd_line == NULL || !(is_valid((uint8_t *)cmd_line)))
+  if (!(is_valid((uint8_t *)cmd_line)))
     syscall_exit (KERNEL_TERMINATE);
   lock_acquire (&filesys_lock);
   success = process_execute (cmd_line);
@@ -241,7 +257,7 @@ static uint32_t
 syscall_create (const char * file, size_t initial_size)
 {
   bool success;
-  if (file == NULL || !is_valid(file))
+  if (!is_valid(file))
     syscall_exit (KERNEL_TERMINATE);
   lock_acquire (&filesys_lock);
   success = filesys_create (file, initial_size);
@@ -254,7 +270,7 @@ static uint32_t
 syscall_remove (const char * file)
 {
   bool success;
-  if (file == NULL || !is_valid((uint8_t *)file))
+  if (!is_valid((uint8_t *)file))
     syscall_exit (KERNEL_TERMINATE);
   lock_acquire (&filesys_lock);
   success = filesys_remove (file);
@@ -271,7 +287,7 @@ syscall_open (const char * file_name)
   struct file * file;
   struct fd_elem * elem;
   int fd = -1;
-  if (file_name == NULL || !is_valid((uint8_t *)file_name))
+  if (!is_valid((uint8_t *)file_name))
     syscall_exit (KERNEL_TERMINATE);
   lock_acquire (&filesys_lock);
   file = filesys_open (file_name);
@@ -323,7 +339,7 @@ syscall_read (int fd, void * buffer, size_t size)
   char * usrbuf = buffer;
   int nread = 0;
   struct fd_elem * fd_elem;
-  if (!is_valid(usrbyte) || !is_valid(usrbyte + size))
+  if (!is_valid_range(usrbyte, size))
     syscall_exit (KERNEL_TERMINATE);
   lock_acquire (&filesys_lock);
   if (fd == STDIN_FILENO)
@@ -357,7 +373,7 @@ syscall_write (int fd, const void * buffer, size_t size)
   const char * usrbuf = buffer;
   struct fd_elem * fd_elem;
   int nwrite = 0;
-  if (!is_valid (usrbyte) || !is_valid (usrbyte + size))
+  if (!is_valid_range (usrbyte, size))
     syscall_exit (KERNEL_TERMINATE);
   lock_acquire (&filesys_lock);
   if (fd == STDIN_FILENO)

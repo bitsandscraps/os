@@ -74,12 +74,18 @@ multi-threaded environment, it is very likely for race conditions to
 occur and corrupt the results.
 
 >> A4: In Pintos, the kernel separates commands into a executable name
->> and arguments.  In Unix-like systems, the shell does this
->> separation.  Identify at least two advantages of the Unix approach.
+>> and arguments. In Unix-like systems, the shell does this
+>> separation. Identify at least two advantages of the Unix approach.
 
-First disadvantage of pintos-like approach is that we may hack the
-kernel through malicious command-line arguments.
-
+First disadvantage of the Pintos approach is that a skilled hacker may
+corrupt the kernel through malicious command-line arguments. Second is
+that kernel can do other jobs while executing a process in the Unix
+approach. In Pintos approach, there is only one thread, the kernel
+thread, that executes processes, so if a user wants to execute many
+processes in a short time, the kernel cannot perform other jobs. But in
+a Unix approach, it is the shell, not the kernel that does the
+execution. We can run many shells to execute many processes at the same
+time, and the scheduler will schedule the jobs in a efficient manner.
 
                               SYSTEM CALLS
                               ============
@@ -184,6 +190,20 @@ kernel kills the process.
 >> for a system call that only copies 2 bytes of data? Is there room
 >> for improvement in these numbers, and how much?
 
+  When the size is exactly one full page, the kernel just check twice,
+the first byte and the last byte. It is same for the latter situation.
+Since the kernel allocates memory in the unit of pages, if the size is
+less or equal to one page, there cannot be a case where the bytes at the
+two ends are valid but a byte in the middle is not.
+  Our implementation checks once every PGSIZE bytes. For example, if the
+size is 10000 and the given virtual address is uaddr, we check whether
+uaddr, uaddr + 4096, uaddr + 8192, and uaddr + 9999 is valid. We do not
+think that we can reduce this number.
+  One may ask about checking just the two ends. But if the size is
+really big, the start address may be in the stack and the end address
+may be in the heap. If we check just the two ends, the kernel cannot
+abort the process in this kind of situation. So we should check the
+validity of at least one byte in each page.
 
 >> B5: Briefly describe your implementation of the "wait" system call
 >> and how it interacts with process termination.
@@ -310,20 +330,36 @@ the quarter.
 >> In your opinion, was this assignment, or any one of the three problems
 >> in it, too easy or too hard? Did it take too long or too little time?
 
+I think this assignment is great. It is easier than the Thread
+assignment, but we needed to make many important design choices
+throughout the assignment. It was quite fun.
 
 >> Did you find that working on a particular part of the assignment gave
 >> you greater insight into some aspect of OS design?
 
-
+Designing the system call handler led me to a thorough understanding on
+how threads work. According to the professor, the pintos thread design
+is very similar to the design of user thread libraries. I think it was
+very helpful. Also designing the system call wait gave me an insight on
+the Unix design. I was always curious about the design philosophy behind
+reaping zombie child processes. This assignment taught me that this way
+of implementing child processes is very simple and reasonable.
 
 >> Is there some particular fact or hint we should give students in
 >> future quarters to help them solve the problems? Conversely, did you
 >> find any of our guidance to be misleading?
 
+I think it would have been super helpful if the TAs had told us about
+inserting an infinite loop in process_wait. I almost panicked when
+Pintos showed no response to any printf calls. I never imagined that
+there would be a world where printf does not work.
 
 >> Do you have any suggestions for the TAs to more effectively assist
 >> students, either for future quarters or the remaining projects?
 
+I cannot think of any.
 
 >> Any other comments?
+
+Nope.
 
