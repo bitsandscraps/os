@@ -393,24 +393,11 @@ they differ from each other by the fact that one happens through one
 lock but the other by multiple locks, we tried to record the donated
 priority in the lock and remember what locks the thread is holding.
     While writing this document, we found out some holes in our
-implementation. First, we are not sure whether our pintos will service
-round robbing for more than three threads. Our current implementation
-uses list_insert_ordered () function in managing the ready threads in
-the order of priority. The list_insert_ordered () function puts a
-thread right before the first thread with priority less or equal to the
-original thread. So if there are three threads with the same priority,
-say Thread 0, 1, and 2, Thread 0 will run and Thread 1 and 2 will be in
-the ready list. When Thread 0 is preempted, Thread 1 will be popped out
-from the list and Thread 0 will be inserted right before Thread 2. When
-Thread 1 is preempted, Thread 0 will pop out and Thread 1 will be
-inserted in front of Thread 2. So Thread 2 will starve. We tried to
-modify the less function of list_inserted_ordered () but it caused
-a lot of bugs we could not fix on time.
-    Second, for conditional variables the priority scheduling does not
-work when the priority is changed while the thread is waiting. We tried
-to record the thread itself in the struct semaphore_elem, but it also,
-for an unidentified reason, caused lots of bugs we did not have enough
-time to handle.
+implementation. For instance, our implementation on conditional
+variables does not work when the priority is changed while the thread is
+waiting. We tried to record the thread itself in the struct
+semaphore_elem, but failed for some reason and caused lots of bugs that
+we did not have enough time to handle.
 
 			  ADVANCED SCHEDULER
 			  ==================

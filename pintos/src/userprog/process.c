@@ -14,6 +14,7 @@
 #include "threads/flags.h"
 #include "threads/init.h"
 #include "threads/interrupt.h"
+#include "threads/malloc.h"
 #include "threads/palloc.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
@@ -26,6 +27,21 @@
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
 
+struct child
+{
+  tid_t tid;
+  struct thread * thr;
+  struct list_elem elem;
+};
+
+struct start_proc_args
+{
+  char * file_name;
+  bool success;
+  struct thread * parent;
+  struct thread * child;
+};
+
 /* Starts a new thread running a user program loaded from
    FILENAME.  The new thread may be scheduled (and may even exit)
    before process_execute() returns.  Returns the new process's
@@ -33,20 +49,50 @@ static bool load (const char *cmdline, void (**eip) (void), void **esp);
 tid_t
 process_execute (const char *file_name) 
 {
+  struct start_proc_args* args;
+  struct thread * curr = thread_current ();
   char *fn_copy;
   tid_t tid;
-
+  struct child * child;
+  child = (struct child *)(malloc (sizeof (struct child)));
+  /* Allocate arguments to pass to start_process. */
+  args = palloc_get_page (0);
+  if (args == NULL)
+    return TID_ERROR;
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
   if (fn_copy == NULL)
+  {
+    palloc_free_page (args);
     return TID_ERROR;
+  }
   strlcpy (fn_copy, file_name, PGSIZE);
-
+  args->file_name = fn_copy;
+  args->parent = curr;
   /* Create a new thread to execute FILE_NAME. */
-  tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
+  tid = thread_create (file_name, PRI_DEFAULT, start_process, args);
   if (tid == TID_ERROR)
-    palloc_free_page (fn_copy); 
+  {
+    palloc_free_page (fn_copy);
+  }
+  else
+  {
+    /* Confirm that child thread have returned the address to its
+     * struct thread. */
+    sema_down (&curr->wait_process);
+    if (args->success)
+    {
+      child->thr = args->child;
+      child->tid = tid;
+      list_push_back (&curr->children, &child->elem);
+    }
+    else
+    {
+      tid = TID_ERROR;
+    }
+  }
+  palloc_free_page (args);
   return tid;
 }
 
@@ -89,32 +135,34 @@ pass_args (void ** esp, char ** argv, int argc)
 /* A thread function that loads a user process and makes it start
    running. */
 static void
-start_process (void *f_name)
+start_process (void *args)
 {
   const char * delim = " ";
-  char *file_name = f_name;
+  struct start_proc_args * passed_args = (struct start_proc_args *)args; 
+  char *file_name = passed_args->file_name;
   struct intr_frame if_;
   bool success;
   char * argv[MAX_ARGC];
   char * saveptr;
   char * token;
-  argv[0] = file_name;
   int argc = 1;
-  strtok_r (file_name, delim, &saveptr);
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
-  success = load (file_name, &if_.eip, &if_.esp);
+  /* Load process and pass arguments. */
+  argv[0] = strtok_r (file_name, delim, &saveptr);
+  success = load (argv[0], &if_.eip, &if_.esp);
+  /* Signal parent that it had returned the required information,
+   * address to this thread and whether or not it succeeded.*/
+  passed_args->child = thread_current ();
+  passed_args->success = success;
+  sema_up (&passed_args->parent->wait_process);
   if (success)
   {
     while ((token = strtok_r (NULL, delim, &saveptr)))
-    {
-      /* Gobble up multiple whitespaces. */
-      if (!*token) continue;
       argv[argc++] = token;
-    }
     pass_args (&if_.esp, argv, argc);
   }
   palloc_free_page (file_name);
@@ -136,18 +184,31 @@ start_process (void *f_name)
    exception), returns -1.  If TID is invalid or if it was not a
    child of the calling process, or if process_wait() has already
    been successfully called for the given TID, returns -1
-   immediately, without waiting.
-
-   This function will be implemented in problem 2-2.  For now, it
-   does nothing. */
+   immediately, without waiting. */
 int
-process_wait (tid_t child_tid UNUSED) 
+process_wait (tid_t child_tid) 
 {
-  int i = 0;
-  int k = 30;
-  for (i = 0; i < 300000000; ++i)
-      k = k * -1;
-  return -1;
+  struct thread * curr = thread_current ();
+  struct list * children = &curr->children;
+  struct list_elem *e;
+  int status = -1;
+  for (e = list_begin (children); e != list_end (children);
+       e = list_next (e))
+    {
+      struct child * child = list_entry (e, struct child, elem);
+      if (child->tid == child_tid)
+      {
+        /* Wait for child to terminate. */
+        sema_down (&child->thr->is_done);
+        status = child->thr->exit_status;
+        list_remove (e);
+        /* Signal the child that it may now exit. */
+        sema_up (&child->thr->wait_parent);
+        file_close(child->thr->executable);
+        break;
+      }
+    }
+  return status;
 }
 
 /* Free the current process's resources. */
@@ -156,6 +217,11 @@ process_exit (void)
 {
   struct thread *curr = thread_current ();
   uint32_t *pd;
+
+  /* Signal parent that it is going to terminate. */
+  sema_up (&curr->is_done);
+  /* Wait for parent to call process_wait. */
+  sema_down (&curr->wait_parent);
 
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
@@ -274,10 +340,6 @@ load (const char *file_name, void (**eip) (void), void **esp)
   bool success = false;
   int i;
 
-  t->max_fd = STDOUT_FILENO;
-  lock_init (&t->fd_lock);
-  list_init (&t->open_fds);
-
   /* Allocate and activate page directory. */
   t->pagedir = pagedir_create ();
   if (t->pagedir == NULL) 
@@ -372,10 +434,13 @@ load (const char *file_name, void (**eip) (void), void **esp)
   *eip = (void (*) (void)) ehdr.e_entry;
 
   success = true;
+  file_deny_write (file);
+  t->executable = file;
 
  done:
   /* We arrive here whether the load is successful or not. */
-  file_close (file);
+  if (!success)
+    file_close (file);
   return success;
 }
 

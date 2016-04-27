@@ -1,0 +1,329 @@
+		     +--------------------------+
+   	     |	      	EE 415      		|
+		     | PROJECT 2: USER PROGRAMS	|
+		     | 	   DESIGN DOCUMENT     	|
+		     +--------------------------+
+
+---- GROUP ----
+
+>> Fill in the names and email addresses of your group members.
+
+Jongeui Park <qkrwhddml@kaist.ac.kr>
+Seongsu Cho  <csp00141@kaist.ac.kr>
+
+---- PRELIMINARIES ----
+
+>> If you have any preliminary comments on your submission, notes for the
+>> TAs, or extra credit, please give them here.
+
+Something was wrong with my DESIGNDOC for Assignment 1. I have fixed the
+errors.
+
+>> Please cite any offline or online sources you consulted while
+>> preparing your submission, other than the Pintos documentation, course
+>> text, lecture notes, and course staff.
+
+From
+http://bogus919.tistory.com/entry/pintos-project2
+we got to know that we should change process_wait to infinite loop before
+anything starts to work.
+
+			   ARGUMENT PASSING
+			   ================
+
+---- DATA STRUCTURES ----
+
+>> A1: Copy here the declaration of each new or changed `struct' or
+>> `struct' member, global or static variable, `typedef', or
+>> enumeration.  Identify the purpose of each in 25 words or less.
+
+Did not changed any data structured. If you can call macro a data
+structure, we defined one macro.
+
+/* The length of the array to store each argument during tokenizing
+ * the given string. */
+#define MAX_ARGC 64
+
+---- ALGORITHMS ----
+
+>> A2: Briefly describe how you implemented argument parsing.  How do
+>> you arrange for the elements of argv[] to be in the right order?
+>> How do you avoid overflowing the stack page?
+
+First we strtok_r the given string to tokenize the name of the program,
+and passed it to load. Second we kept strtok_r other parts of the string
+and stored each token in the array of size MAX_ARGC. Then using the
+array, we carefully arranged the arguments on the stack of the new
+process.
+  The string that the kernel passes to a process is maximum 128
+characters long(LOADER_ARGS_LEN defined in threads/init.c). So the
+maximum number of arguments will be 128 / 2 = 64, since there should be
+at least one space between every arguments. So the whole argv array
+cannot exceed (64 + 1) * 4 bytes, where 1 is the null pointer sentinel.
+The left members of argument passing is argv, argc, and return address,
+which is of total 12 bytes. So size of the whole argument passing stack
+cannot exceed 128 + (64 + 1) * 4 + 12 = 784 bytes, which is much smaller
+than the size of a page, 4 KB. The stack page will never overflow.
+
+---- RATIONALE ----
+
+>> A3: Why does Pintos implement strtok_r() but not strtok()?
+
+strtok uses a static pointer to tokenize string. Since pintos is a
+multi-threaded environment, it is very likely for race conditions to
+occur and corrupt the results.
+
+>> A4: In Pintos, the kernel separates commands into a executable name
+>> and arguments.  In Unix-like systems, the shell does this
+>> separation.  Identify at least two advantages of the Unix approach.
+
+First disadvantage of pintos-like approach is that we may hack the
+kernel through malicious command-line arguments.
+
+
+                              SYSTEM CALLS
+                              ============
+
+---- DATA STRUCTURES ----
+
+>> B1: Copy here the declaration of each new or changed `struct' or
+>> `struct' member, global or static variable, `typedef', or
+>> enumeration. Identify the purpose of each in 25 words or less.
+
+A "fd_elem" is used to manage the file descriptors opened
+by a particular process.
+
+    struct fd_elem
+    {
+      int fd;                   /* assigned fd number */
+      off_t pos;                /* offset for read and write */
+      struct file * file;       /* struct file for the fd */
+      struct list_elem elem;    /* list element of open_fds in struct thread */
+    };
+
+A child is an element of the children list managed by every thread.
+
+    struct child
+    {
+      tid_t tid;
+      struct thread * thr;
+      struct list_elem elem;
+    };
+
+A start_proc_args is the data structure used to exchange data between
+a parent and its child.
+
+  struct start_proc_args
+  {
+    char * file_name;
+    bool success;
+    struct thread * parent;
+    struct thread * child;
+  };
+
+
+Lock to avoid race conditions on file system manipulations.
+
+    static struct lock filesys_lock;
+
+typedef of pid_t. In our implementation pid of a process is the
+tid of its thread.
+
+    typedef int pid_t;
+
+Added to struct thread:
+
+    /* For denying writes on executables. */
+    struct file * executable;     /* The executable file of itself. */
+
+    /* Data Structures for Managing File Descriptors. */
+    struct list open_fds;         /* List of open files. */
+    /* max_fd is always greater or equal to any files in open_fds.
+     * This value is used to assign fd values to new files. */
+    int max_fd;
+    /* fd_lock must be acquired before modifying file descriptors. */
+    struct lock fd_lock;
+
+    /* Data Structues for Implementing Wait. */
+    int exit_status;              /* Status of exit. */
+    /* The value is 'up'ed when everything is over. */
+    struct semaphore is_done;
+    /* The value is 'up'ed when parent calls wait. */
+    struct semaphore wait_parent;
+    /* The value is 'up'ed when the data is ready for its parent. */
+    struct semaphore wait_process;
+    struct list children;         /* Children of the current process. */
+
+>> B2: Describe how file descriptors are associated with open files.
+>> Are file descriptors unique within the entire OS or just within a
+>> single process?
+
+It is unique just within a process. Even the pos value determined by
+seek system call is unique just within a process.
+
+---- ALGORITHMS ----
+
+>> B3: Describe your code for reading and writing user data from the
+>> kernel.
+
+We used the second method introduced in section 3.1.5 of Pintos manual.
+It uses the MMU of the kernel. We changed the code so that when MMU
+detects a page fault, it does not kill the process immediately but
+store -1 in the eax register, for the kernel to verify whether the given
+address is valid. Every time the kernel reads or writes user data, it
+first check whether the given virtual address is anywhere sensible
+(surely it cannot exceed PHYS_BASE). If it looks okay, it justs reads
+or writes on that address. But before continuing, the kernel checks
+whether or not the MMU has returned -1. If it has returned -1, the
+kernel kills the process.
+
+>> B4: Suppose a system call causes a full page (4,096 bytes) of data
+>> to be copied from user space into the kernel. What is the least
+>> and the greatest possible number of inspections of the page table
+>> (e.g. calls to pagedir_get_page()) that might result? What about
+>> for a system call that only copies 2 bytes of data? Is there room
+>> for improvement in these numbers, and how much?
+
+
+>> B5: Briefly describe your implementation of the "wait" system call
+>> and how it interacts with process termination.
+
+Every time a process executes a child process, it records the pointer
+to the struct thread of its child and add it to the children list.
+When wait is called it checks whether it has a child of the given pid.
+If it doesn't, exit immediately. If it does, wait for the child to be
+ready for exit, which is possible because the parent knows the pointer
+to the struct thread of its child. When the child signals the parent
+that everything is over, the parent signals the child through the
+semaphore element wait_parent in the child's struct thread that it can
+now safely terminate.
+  Now from the child's perspective. When everything is over, it signals
+the parent through the semaphore element is_done in its struct thread.
+Then it waits for the parent to call wait. When the semaphore element
+wait_parent is 'up'ed by the parent, it completes the termination
+process.
+
+>> B6: Any access to user program memory at a user-specified address
+>> can fail due to a bad pointer value. Such accesses must cause the
+>> process to be terminated. System calls are fraught with such
+>> accesses, e.g. a "write" system call requires reading the system
+>> call number from the user stack, then each of the call's three
+>> arguments, then an arbitrary amount of user memory, and any of
+>> these can fail at any point. This poses a design and
+>> error-handling problem: how do you best avoid obscuring the primary
+>> function of code in a morass of error-handling? Furthermore, when
+>> an error is detected, how do you ensure that all temporarily
+>> allocated resources (locks, buffers, etc.) are freed? In a few
+>> paragraphs, describe the strategy or strategies you adopted for
+>> managing these issues. Give an example.
+
+All of the temporarily allocated resources must be freed before exiting.
+So we just put all those code in syscall_exit, and called it before
+returning from an error. One exception is the lock for the file system.
+This one, we released it manually, since the exit system call is totally
+irrelevant to the file system.
+
+---- SYNCHRONIZATION ----
+
+>> B7: The "exec" system call returns -1 if loading the new executable
+>> fails, so it cannot return before the new executable has completed
+>> loading. How does your code ensure this? How is the load
+>> success/failure status passed back to the thread that calls "exec"?
+
+To implement wait system call, we added some code to allow data exchange
+between the parent and child threads. After finding out that our
+implementation cannot catch the load failure, we just added a success
+flag to the set of data exchanged between parent and child.
+  The data exchanged occur by the following procedure. The parent
+parent process allocates a page for struct start_proc_args. It fills the
+struct contents with the pointer to the process name and the pointer to
+its struct thread. And waits on the semaphore element wait_process. The
+child receives this struct though aux of thread_create. After trying to
+load the process, it returns whether it succeeded or not with the
+pointer to its struct thread. And using the pointer to the parent's
+struct thread, it signals the parent that it has finished filling up the
+required struct elements.
+
+>> B8: Consider parent process P with child process C. How do you
+>> ensure proper synchronization and avoid race conditions when P
+>> calls wait(C) before C exits? After C exits? How do you ensure
+>> that all resources are freed in each case? How about when P
+>> terminates without waiting, before C exits? After C exits? Are
+>> there any special cases?
+
+We ensure synchronization through semaphore elements is_done and
+wait_parent.
+  If P calls wait(C) before C exits, C is not done yet, so P will wait
+for C to 'up' its is_done. P reads the exit code and 'up's C's
+wait_parent so that C can terminate.
+  If C exits before P calls wait(C), C will 'up' its is_done and wait
+for its parent to 'up' wait_parent. When P calls wait(C), it will see
+that C is ready for exit, read C's exit code, and signals C to terminate
+via 'up'ing C's wait_parent.
+  The child waits for its parent to call wait after all the resources
+are freed, so we can ensure that no resources are locked forever.
+  If the parent does not call wait(C) but exit, the kernel cannot reap
+those zombie children. It is the user's responsibility to reap the
+zombie processes. We just followed the implementation of unix.
+
+---- RATIONALE ----
+
+>> B9: Why did you choose to implement access to user memory from the
+>> kernel in the way that you did?
+
+The user manual states that this approach is much faster because it
+takes advantage of the MMU.
+
+>> B10: What advantages or disadvantages can you see to your design
+>> for file descriptors?
+
+It is simple. We recorded the maximum file descriptor value in struct
+thread. Every time we assign a file descriptor, we just increment that
+value and give it to the new file. This value is always manipulated
+after acquiring the fd_lock of the thread. We did not decremented the
+max_fd value when we close a file. Since it has to check whether the
+closing fd is the maximum value or not. If it was not the maximum
+value, the maximum value fd is not closed yet, so we cannot assign that
+number to another file. We can clearly see that it makes things a lot
+complicated.
+  In our implementation, after opening 2147483647 files the file
+descriptor values might malfunction, even when the process only has few
+open file descriptors. But we strongly believe that it will never
+happen.
+
+>> B11: The default tid_t to pid_t mapping is the identity mapping.
+>> If you changed it, what advantages are there to your approach?
+
+Did not change the mapping. It makes implementation much simpler and
+compatible with the given process-related functions.
+
+
+			SURVEY QUESTIONS
+			================
+
+Answering these questions is optional, but it will help us improve the
+course in future quarters. ?Feel free to tell us anything you
+want--these questions are just to spur your thoughts. You may also
+choose to respond anonymously in the course evaluations at the end of
+the quarter.
+
+>> In your opinion, was this assignment, or any one of the three problems
+>> in it, too easy or too hard? Did it take too long or too little time?
+
+
+>> Did you find that working on a particular part of the assignment gave
+>> you greater insight into some aspect of OS design?
+
+
+
+>> Is there some particular fact or hint we should give students in
+>> future quarters to help them solve the problems? Conversely, did you
+>> find any of our guidance to be misleading?
+
+
+>> Do you have any suggestions for the TAs to more effectively assist
+>> students, either for future quarters or the remaining projects?
+
+
+>> Any other comments?
+
