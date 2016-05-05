@@ -11,6 +11,9 @@
 #include "threads/loader.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
+#ifdef VM
+#include "vm/frame.h"
+#endif
 
 /* Page allocator.  Hands out memory in page-size (or
    page-multiple) chunks.  See malloc.h for an allocator that
@@ -66,6 +69,9 @@ palloc_init (void)
   init_pool (&kernel_pool, free_start, kernel_pages, "kernel pool");
   init_pool (&user_pool, free_start + kernel_pages * PGSIZE,
              user_pages, "user pool");
+#ifdef VM
+  init_frame ();
+#endif
 }
 
 /* Obtains and returns a group of PAGE_CNT contiguous free pages.
@@ -87,7 +93,6 @@ palloc_get_multiple (enum palloc_flags flags, size_t page_cnt)
   lock_acquire (&pool->lock);
   page_idx = bitmap_scan_and_flip (pool->used_map, 0, page_cnt, false);
   lock_release (&pool->lock);
-
   if (page_idx != BITMAP_ERROR)
     pages = pool->base + PGSIZE * page_idx;
   else
@@ -95,6 +100,20 @@ palloc_get_multiple (enum palloc_flags flags, size_t page_cnt)
 
   if (pages != NULL) 
     {
+#ifdef VM
+      if (flags & PAL_USER)
+        {
+          /* If the page added is a user page, add the page to the
+           * frame table. */
+          if (!add_frames (pages, page_cnt))
+            {
+              palloc_free_multiple (pages, page_cnt);
+              if (flags & PAL_ASSERT)
+                PANIC ("add_frames: malloc error");
+              return NULL;
+            }
+        }
+#endif
       if (flags & PAL_ZERO)
         memset (pages, 0, PGSIZE * page_cnt);
     }
@@ -102,6 +121,10 @@ palloc_get_multiple (enum palloc_flags flags, size_t page_cnt)
     {
       if (flags & PAL_ASSERT)
         PANIC ("palloc_get: out of pages");
+#ifdef VM
+      if (flags & PAL_USER)
+        PANIC ("palloc_get: out of pages");
+#endif
     }
 
   return pages;
@@ -126,6 +149,7 @@ palloc_free_multiple (void *pages, size_t page_cnt)
 {
   struct pool *pool;
   size_t page_idx;
+  bool isuser = false;
 
   ASSERT (pg_ofs (pages) == 0);
   if (pages == NULL || page_cnt == 0)
@@ -134,7 +158,10 @@ palloc_free_multiple (void *pages, size_t page_cnt)
   if (page_from_pool (&kernel_pool, pages))
     pool = &kernel_pool;
   else if (page_from_pool (&user_pool, pages))
-    pool = &user_pool;
+    {
+      pool = &user_pool;
+      isuser = true;
+    }
   else
     NOT_REACHED ();
 
@@ -146,6 +173,10 @@ palloc_free_multiple (void *pages, size_t page_cnt)
 
   ASSERT (bitmap_all (pool->used_map, page_idx, page_cnt));
   bitmap_set_multiple (pool->used_map, page_idx, page_cnt, false);
+#ifdef VM
+  if (isuser)
+    delete_frames (pages, page_cnt);
+#endif
 }
 
 /* Frees the page at PAGE. */

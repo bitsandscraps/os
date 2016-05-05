@@ -2,6 +2,7 @@
 #define THREADS_THREAD_H
 
 #include <debug.h>
+#include <hash.h>
 #include <list.h>
 #include <stdint.h>
 #include "threads/synch.h"
@@ -134,6 +135,10 @@ struct thread
 
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;            /* Page directory. */
+#ifdef VM
+    struct lock suppl_page_table_lock;
+    struct hash suppl_page_table;
+#endif
 #endif
 
     /* Owned by thread.c. */
