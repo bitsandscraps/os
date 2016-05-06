@@ -18,6 +18,10 @@
 #include "threads/palloc.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
+#ifdef VM
+#include "vm/frame.h"
+#include "vm/page.h"
+#endif
 
 /* The command line argument passed by pintos cannot be longer than
  * 128 characters. Since there should be at least one space between
@@ -221,7 +225,13 @@ process_exit (void)
   /* Signal parent that it is going to terminate. */
   sema_up (&curr->is_done);
   /* Wait for parent to call process_wait. */
-  sema_down (&curr->wait_parent);
+  sema_down (&curr->wait_parent); 
+
+#ifdef VM
+  /* Delete supplementary page table. */
+  delete_suppl_page_table (&curr->suppl_page_table,
+                           &curr->suppl_page_table_lock);
+#endif
 
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
@@ -345,7 +355,9 @@ load (const char *file_name, void (**eip) (void), void **esp)
   if (t->pagedir == NULL) 
     goto done;
   process_activate ();
-
+#ifdef VM
+  init_suppl_page_table (&t->suppl_page_table);
+#endif
   /* Open executable file. */
   file = filesys_open (file_name);
   if (file == NULL) 
@@ -512,6 +524,8 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
   ASSERT (pg_ofs (upage) == 0);
   ASSERT (ofs % PGSIZE == 0);
 
+  struct thread * cur = thread_current ();
+
   file_seek (file, ofs);
   while (read_bytes > 0 || zero_bytes > 0) 
     {
@@ -540,6 +554,17 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
           palloc_free_page (kpage);
           return false; 
         }
+
+#ifdef VM
+      /* Add the page to the supplementary page table. */
+      if (!add_suppl_page (&cur->suppl_page_table, &cur->suppl_page_table_lock,
+                           kpage, upage, ofs, false))
+        {
+          palloc_free_page (kpage);
+          return false;
+        }
+      ofs += page_read_bytes;
+#endif
 
       /* Advance. */
       read_bytes -= page_read_bytes;
@@ -584,6 +609,14 @@ install_page (void *upage, void *kpage, bool writable)
 
   /* Verify that there's not already a page at that virtual
      address, then map our page there. */
-  return (pagedir_get_page (t->pagedir, upage) == NULL
-          && pagedir_set_page (t->pagedir, upage, kpage, writable));
+  if (pagedir_get_page (t->pagedir, upage) != NULL) return false;
+#ifdef VM
+  if (!add_frame (t, kpage, upage)) return false;
+#endif
+  if (pagedir_set_page (t->pagedir, upage, kpage, writable))
+    return true;
+#ifdef VM
+  delete_frame (kpage);
+#endif
+  return false;
 }

@@ -13,6 +13,7 @@
 #include "threads/vaddr.h"
 #ifdef VM
 #include "vm/frame.h"
+#include "vm/swap.h"
 #endif
 
 /* Page allocator.  Hands out memory in page-size (or
@@ -100,20 +101,6 @@ palloc_get_multiple (enum palloc_flags flags, size_t page_cnt)
 
   if (pages != NULL) 
     {
-#ifdef VM
-      if (flags & PAL_USER)
-        {
-          /* If the page added is a user page, add the page to the
-           * frame table. */
-          if (!add_frames (pages, page_cnt))
-            {
-              palloc_free_multiple (pages, page_cnt);
-              if (flags & PAL_ASSERT)
-                PANIC ("add_frames: malloc error");
-              return NULL;
-            }
-        }
-#endif
       if (flags & PAL_ZERO)
         memset (pages, 0, PGSIZE * page_cnt);
     }
@@ -121,10 +108,6 @@ palloc_get_multiple (enum palloc_flags flags, size_t page_cnt)
     {
       if (flags & PAL_ASSERT)
         PANIC ("palloc_get: out of pages");
-#ifdef VM
-      if (flags & PAL_USER)
-        PANIC ("palloc_get: out of pages");
-#endif
     }
 
   return pages;
@@ -173,10 +156,6 @@ palloc_free_multiple (void *pages, size_t page_cnt)
 
   ASSERT (bitmap_all (pool->used_map, page_idx, page_cnt));
   bitmap_set_multiple (pool->used_map, page_idx, page_cnt, false);
-#ifdef VM
-  if (isuser)
-    delete_frames (pages, page_cnt);
-#endif
 }
 
 /* Frees the page at PAGE. */

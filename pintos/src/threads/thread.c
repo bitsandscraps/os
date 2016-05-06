@@ -15,9 +15,6 @@
 #include "threads/fixed-point.h"
 #ifdef USERPROG
 #include "userprog/process.h"
-#ifdef VM
-#include "vm/page.h"
-#endif
 #endif
 
 /* Random value for struct thread's `magic' member.
@@ -722,12 +719,11 @@ init_thread (struct thread *t, const char *name, int priority)
   sema_init (&t->wait_parent, 0);
   sema_init (&t->wait_process, 0);
   sema_init (&t->is_done, 0);
-#ifdef VM
-  init_suppl_page_table (&t->suppl_page_table);
-  lock_init (&t->suppl_page_table_lock);
-#endif
 #endif
   t->magic = THREAD_MAGIC;
+#ifdef VM
+  lock_init (&t->suppl_page_table_lock);
+#endif
   enum intr_level old_level = intr_disable ();
   list_push_back (&all_list, &t->elem_all);
   intr_set_level (old_level);

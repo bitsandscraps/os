@@ -4,7 +4,8 @@
 struct page
   {
     void * address;       /* user virtual address of the page. */
-    disk_sector_t index;
+    bool isswap;          /* true if it is in swap space. false if code. */
+    uint32_t offset;
     struct hash_elem elem;
   };
 
@@ -25,38 +26,54 @@ page_less (const struct hash_elem * a, const struct hash_elem * b,
   return a_pg->address < b_pg->address;
 }
 
+static void
+page_free (struct hash_elem * elem, void * aux UNUSED)
+{
+  struct page * elem_pg = hash_entry (elem, struct page, elem);
+  free (elem_pg);
+}
+
 bool
 init_suppl_page_table (struct hash * spt)
 {
   return hash_init (spt, page_hash, page_less, NULL);
 }
 
+void
+delete_suppl_page_table (struct hash * spt, struct lock * mutex)
+{
+  lock_acquire (mutex);
+  hash_destroy (spt, page_free);
+  lock_release (mutex);
+}
+
 bool
-add_suppl_page (struct hash * spt, struct lock * mutex,
-                void * uaddr, disk_sector_t index)
+add_suppl_page (struct hash * spt, struct lock * mutex, void * address,
+                uint32_t offset, bool isswap)
 {
   struct page * spg = (struct page *)(malloc (sizeof (struct page)));
   struct hash_elem * elem;
+  bool success;
   if (spg == NULL) return false;
   spg->address = uaddr;
-  spg->index = index;
+  spg->offset = offset;
+  spg->isswap = isswap;
   lock_acquire (mutex);
   elem = hash_insert (spt, &spg->elem);
-  lock_release (mutex);
   ASSERT (elem == NULL);
-  return true;
+  lock_release (mutex);
+  return success;
 }
 
 void
 delete_suppl_page (struct hash * spt, struct lock * mutex, void * uaddr)
 {
-  struct page spg;
+  struct page pg;
   struct hash_elem * elem;
-  spg.address = uaddr;
-  lock_acquire (mutex);
-  elem = hash_delete (spt, &spg.elem);
-  lock_release (mutex);
+  pg.address = address;
+  lock_acquire (&frame_lock);
+  elem = hash_delete (&frame_table, &fr.elem);
   ASSERT (elem != NULL);
-  free (hash_entry (elem, struct page, elem));
+  lock_release (&frame_lock);
+  free (hash_entry (elem, struct frame, elem));
 }
-

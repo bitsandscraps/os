@@ -7,7 +7,7 @@
 
 bool init_suppl_page_table (struct hash * spt);
 bool add_suppl_page (struct hash * spt, struct lock * mutex,
-                     void * uaddr, disk_sector_t index);
-void delete_suppl_page (struct hash * spt, struct lock * mutex, void * uaddr);
+                     void * uaddr, uint32_t offset, bool isswap);
+void delete_suppl_page_table (struct hash * spt, struct lock * mutex);
 
 #endif  /* VM_PAGE_H */

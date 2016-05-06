@@ -5,19 +5,8 @@
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 
-/* Data structure to store information about frames. */
-struct frame
-  {
-    void * address;   /* the kernel virtual address of the frame */
-    struct thread * holder;
-    struct hash_elem elem;
-  };
-
 static struct hash frame_table;
 static struct lock frame_lock;
-
-static bool add_frame (void * address);
-static void delete_frame (void * address);
 
 static unsigned
 frame_hash (const struct hash_elem * elem, void * aux UNUSED)
@@ -38,18 +27,19 @@ frame_less (const struct hash_elem * a, const struct hash_elem * b,
 void
 init_frame (void)
 {
-  ASSERT (hash_init (&frame_table, frame_hash, frame_less, NULL));
+  hash_init (&frame_table, frame_hash, frame_less, NULL);
   lock_init (&frame_lock);
 }
 
-static bool
-add_frame (void * address)
+bool
+add_frame (struct thread * holder, void * address, void * vaddr)
 {
   struct frame * fr = (struct frame *)(malloc (sizeof (struct frame)));
   struct hash_elem * result;
   if (fr == NULL) return false;
   fr->address = address;
-  fr->holder = thread_current ();
+  fr->holder = holder;
+  fr->vaddr = vaddr;
   lock_acquire (&frame_lock);
   result = hash_insert (&frame_table, &fr->elem);
   ASSERT (result == NULL);
@@ -57,7 +47,7 @@ add_frame (void * address)
   return true;
 }
 
-static void
+void
 delete_frame (void * address)
 {
   struct frame fr;
@@ -70,38 +60,14 @@ delete_frame (void * address)
   free (hash_entry (elem, struct frame, elem));
 }
 
-bool
-add_frames (void * address_, size_t cnt)
+struct frame *
+frame_to_evict (void)
 {
-  size_t i;
-  uint8_t * address = address_;
-  bool result;
-  for (i = 0; i < cnt; ++i)
+  struct hash_iterator i;
+  struct frame * victim;
+  hash_first (&i, &frame_table);
+  while (hash_next (&i))
     {
-      result = add_frame (address + i * PGSIZE);
-      if (!result) break;
+      victim = hash_entry (hash_cur (&i), struct frame, elem);
     }
-  if (i < cnt)
-    {
-      /* Error occurred. Delete all the frames we have inserted in the
-      * table. */
-      delete_frame (address + i * PGSIZE);
-      while (i > 0)
-      {
-        --i;
-        delete_frame (address + i * PGSIZE);
-      }
-      return false;
-    }
-  return true;
 }
-
-void
-delete_frames (void * address_, size_t cnt)
-{
-  size_t i;
-  uint8_t * address = address_;
-  for (i = 0; i < cnt; ++i)
-    delete_frame (address + i * PGSIZE);
-}
-
