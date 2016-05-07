@@ -1,13 +1,22 @@
 #ifndef VM_PAGE_H
 #define VM_PAGE_H
 
-#include <hash.h>
-#include "devices/disk.h"
-#include "threads/synch.h"
+#include "threads/thread.h"
 
-bool init_suppl_page_table (struct hash * spt);
-bool add_suppl_page (struct hash * spt, struct lock * mutex,
-                     void * uaddr, uint32_t offset, bool isswap);
-void delete_suppl_page_table (struct hash * spt, struct lock * mutex);
+struct page
+  {
+    void * address;       /* user virtual address of the page. */
+    bool isswap;          /* true if it is in swap space. false if code. */
+    uint32_t offset;
+    size_t read_bytes;
+    struct hash_elem elem;
+  };
+
+bool init_suppl_page_table (struct thread * holder);
+bool add_suppl_page (struct thread * holder, void * uaddr,
+                     uint32_t offset, size_t read_bytes, bool isswap);
+void delete_suppl_page_table (struct thread * holder);
+void delete_suppl_page (struct thread * holder, void * address);
+struct page * search_suppl_page (struct thread * holder, void * address);
 
 #endif  /* VM_PAGE_H */

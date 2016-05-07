@@ -1,9 +1,11 @@
 #include "vm/frame.h"
 #include <hash.h>
+#include <stdio.h>
 #include "threads/malloc.h"
 #include "threads/synch.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
+#include "userprog/pagedir.h"
 
 static struct hash frame_table;
 static struct lock frame_lock;
@@ -47,21 +49,27 @@ add_frame (struct thread * holder, void * address, void * vaddr)
   return true;
 }
 
-void
-delete_frame (void * address)
+static struct frame * 
+remove_frame (void * address)
 {
   struct frame fr;
   struct hash_elem * elem;
   fr.address = address;
-  lock_acquire (&frame_lock);
   elem = hash_delete (&frame_table, &fr.elem);
   ASSERT (elem != NULL);
-  lock_release (&frame_lock);
-  free (hash_entry (elem, struct frame, elem));
+  return hash_entry (elem, struct frame, elem);
 }
 
-struct frame *
-frame_to_evict (void)
+void
+delete_frame (void * address)
+{
+  lock_acquire (&frame_lock);
+  free (remove_frame (address));
+  lock_release (&frame_lock);
+}
+
+static struct frame *
+evict_loop (void)
 {
   struct hash_iterator i;
   struct frame * victim;
@@ -69,5 +77,29 @@ frame_to_evict (void)
   while (hash_next (&i))
     {
       victim = hash_entry (hash_cur (&i), struct frame, elem);
+      lock_acquire (&victim->holder->pagedir_lock);
+      /* Second chance algorithm. */
+      if (pagedir_is_accessed (victim->holder->pagedir, victim->vaddr))
+        pagedir_set_accessed (victim->holder->pagedir, victim->vaddr, false);
+      else
+        {
+          lock_release (&victim->holder->pagedir_lock);
+          return victim;
+        }
+      lock_release (&victim->holder->pagedir_lock);
     }
+  return NULL;
 }
+
+struct frame *
+evict_frame (void)
+{
+  struct frame * victim = NULL;
+  lock_acquire (&frame_lock);
+  while (victim == NULL)
+    victim = evict_loop ();
+  remove_frame (victim->address);
+  lock_release (&frame_lock);
+  return victim;
+}
+

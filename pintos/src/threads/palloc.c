@@ -12,7 +12,6 @@
 #include "threads/synch.h"
 #include "threads/vaddr.h"
 #ifdef VM
-#include "vm/frame.h"
 #include "vm/swap.h"
 #endif
 
@@ -70,9 +69,6 @@ palloc_init (void)
   init_pool (&kernel_pool, free_start, kernel_pages, "kernel pool");
   init_pool (&user_pool, free_start + kernel_pages * PGSIZE,
              user_pages, "user pool");
-#ifdef VM
-  init_frame ();
-#endif
 }
 
 /* Obtains and returns a group of PAGE_CNT contiguous free pages.

@@ -30,6 +30,7 @@
 #include "tests/threads/tests.h"
 #endif
 #ifdef VM
+#include "vm/frame.h"
 #include "vm/swap.h"
 #endif
 #ifdef FILESYS
@@ -119,6 +120,7 @@ main (void)
 #endif
 
 #ifdef VM
+  init_frame ();
   init_swap ();
 #endif
 

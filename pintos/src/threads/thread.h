@@ -92,6 +92,9 @@ struct thread
     enum thread_status status;          /* Thread state. */
     char name[16];                      /* Name (for debugging purposes). */
     uint8_t *stack;                     /* Saved stack pointer. */
+#ifdef VM
+    uint8_t *stack_base;                /* Saved stack base pointer. */
+#endif
     int priority;                       /* Current priority. */
     int initial_priority;               /* Initial priority. */
 
@@ -136,6 +139,7 @@ struct thread
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;            /* Page directory. */
 #ifdef VM
+    struct lock pagedir_lock;
     struct lock suppl_page_table_lock;
     struct hash suppl_page_table;
 #endif

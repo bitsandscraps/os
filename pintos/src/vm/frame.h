@@ -1,6 +1,7 @@
 #ifndef VM_FRAME_H
 #define VM_FRAME_H
 
+#include <hash.h>
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -16,5 +17,6 @@ struct frame
 void init_frame (void);
 bool add_frame (struct thread * holder, void * address, void * vaddr);
 void delete_frame (void * address);
+struct frame * evict_frame (void);
 
 #endif  /* vm/frame.h */

@@ -1,14 +1,6 @@
 #include "vm/page.h"
+#include <stdio.h>
 #include "threads/malloc.h"
-
-struct page
-  {
-    void * address;       /* user virtual address of the page. */
-    bool isswap;          /* true if it is in swap space. false if code. */
-    uint32_t offset;
-    struct hash_elem elem;
-  };
-
 
 static unsigned
 page_hash (const struct hash_elem * elem, void * aux UNUSED)
@@ -34,46 +26,56 @@ page_free (struct hash_elem * elem, void * aux UNUSED)
 }
 
 bool
-init_suppl_page_table (struct hash * spt)
+init_suppl_page_table (struct thread * holder)
 {
-  return hash_init (spt, page_hash, page_less, NULL);
+  return hash_init (&holder->suppl_page_table, page_hash, page_less, NULL);
 }
 
 void
-delete_suppl_page_table (struct hash * spt, struct lock * mutex)
+delete_suppl_page_table (struct thread * holder)
 {
-  lock_acquire (mutex);
-  hash_destroy (spt, page_free);
-  lock_release (mutex);
+  lock_acquire (&holder->suppl_page_table_lock);
+  hash_destroy (&holder->suppl_page_table, page_free);
+  lock_release (&holder->suppl_page_table_lock);
 }
 
 bool
-add_suppl_page (struct hash * spt, struct lock * mutex, void * address,
-                uint32_t offset, bool isswap)
+add_suppl_page (struct thread * holder, void * address,
+                uint32_t offset, size_t read_bytes, bool isswap)
 {
   struct page * spg = (struct page *)(malloc (sizeof (struct page)));
   struct hash_elem * elem;
-  bool success;
   if (spg == NULL) return false;
-  spg->address = uaddr;
+  spg->address = address;
   spg->offset = offset;
+  spg->read_bytes = read_bytes;
   spg->isswap = isswap;
-  lock_acquire (mutex);
-  elem = hash_insert (spt, &spg->elem);
+  lock_acquire (&holder->suppl_page_table_lock);
+  elem = hash_insert (&holder->suppl_page_table, &spg->elem);
   ASSERT (elem == NULL);
-  lock_release (mutex);
-  return success;
+  lock_release (&holder->suppl_page_table_lock);
+  return true;
 }
 
 void
-delete_suppl_page (struct hash * spt, struct lock * mutex, void * uaddr)
+delete_suppl_page (struct thread * holder, void * address)
 {
   struct page pg;
   struct hash_elem * elem;
   pg.address = address;
-  lock_acquire (&frame_lock);
-  elem = hash_delete (&frame_table, &fr.elem);
+  lock_acquire (&holder->suppl_page_table_lock);
+  elem = hash_delete (&holder->suppl_page_table, &pg.elem);
   ASSERT (elem != NULL);
-  lock_release (&frame_lock);
-  free (hash_entry (elem, struct frame, elem));
+  lock_release (&holder->suppl_page_table_lock);
+  free (hash_entry (elem, struct page, elem));
+}
+
+struct page *
+search_suppl_page (struct thread * holder, void * address)
+{
+  struct page spg;
+  spg.address = address;
+  struct hash_elem * elem = hash_find (&holder->suppl_page_table, &spg.elem);
+  if (elem == NULL) return NULL;
+  return hash_entry (elem, struct page, elem);
 }

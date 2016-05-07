@@ -6,6 +6,15 @@
 #include "userprog/syscall.h"
 #include "threads/interrupt.h"
 #include "threads/thread.h"
+#ifdef VM
+#include "threads/palloc.h"
+#include "threads/vaddr.h"
+#include "userprog/pagedir.h"
+#include "vm/frame.h"
+#include "vm/swap.h"
+
+#define STACK_MAX 0x800000  /* Maximum stack size 8 MB */
+#endif
 
 /* Number of page faults processed. */
 static long long page_fault_cnt;
@@ -153,14 +162,84 @@ page_fault (struct intr_frame *f)
   /* To implement virtual memory, delete the rest of the function
      body, and replace it with code that brings in the page to
      which fault_addr refers. */
-  /*printf ("Page fault at %p: %s error %s page in %s context.\n",
-          fault_addr,
-          not_present ? "not present" : "rights violation",
-          write ? "writing" : "reading",
-          user ? "user" : "kernel");*/
-  f->eip = (void *)f->eax;
-  f->eax = 0xffffffff;
-  if (user)
-    syscall_exit (KERNEL_TERMINATE);
+  struct thread * curr = thread_current ();
+  uint8_t * stack;
+  void * fault_page = pg_round_down (fault_addr);
+  if (f->cs == SEL_UCSEG)
+    stack = f->esp;
+  else
+    stack = curr->stack;
+  printf("fault_page: %p\n", fault_page);
+  if ((fault_addr == stack - 4) || (fault_addr == stack - 32))
+    {
+      curr->stack_base -= PGSIZE;
+      ASSERT (curr->stack_base == fault_page);
+      if (curr->stack_base + STACK_MAX < (uint8_t *)PHYS_BASE)
+        {
+          if (user)
+            syscall_exit (KERNEL_TERMINATE);
+          else
+            {
+              f->eip = (void *)f->eax;
+              f->eax = 0xffffffff;
+              return;
+            }
+        }
+      void * new_page = palloc_get_page (PAL_ZERO | PAL_USER);
+      if (new_page == NULL)
+        {
+          new_page = swap_out ();
+          if (new_page != NULL)
+            {
+              lock_acquire (&curr->pagedir_lock);
+              pagedir_set_page (curr->pagedir, curr->stack_base,
+                                new_page, true);
+              lock_release (&curr->pagedir_lock);
+              return;
+            }
+        }
+      else
+        {
+          if (add_frame (curr, new_page, curr->stack_base))
+            {
+              lock_acquire (&curr->pagedir_lock);
+              pagedir_set_page (curr->pagedir, curr->stack_base,
+                                new_page, true);
+              lock_release (&curr->pagedir_lock);
+              return;
+            }
+        }
+    }
+  else 
+    {
+      lock_acquire (&curr->suppl_page_table_lock);
+      struct page * spg = search_suppl_page (curr, fault_page);
+      if (spg != NULL)
+        {
+          if (!write || spg->isswap)
+            {
+              void * new_page = palloc_get_page (PAL_USER);
+              if (new_page == NULL)
+                new_page = swap_out ();
+              if (new_page == NULL)
+                spg = NULL;
+              else
+                swap_in (curr, spg, new_page);
+            }
+          else
+            spg = NULL;
+        }
+      lock_release (&curr->suppl_page_table_lock);
+      if (spg == NULL)
+        {
+          if (user)
+            syscall_exit (KERNEL_TERMINATE);
+          else
+            {
+              f->eip = (void *)f->eax;
+              f->eax = 0xffffffff;
+            }
+        }
+    }
 }
 

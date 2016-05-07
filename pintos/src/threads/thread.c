@@ -723,6 +723,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->magic = THREAD_MAGIC;
 #ifdef VM
   lock_init (&t->suppl_page_table_lock);
+  lock_init (&t->pagedir_lock);
 #endif
   enum intr_level old_level = intr_disable ();
   list_push_back (&all_list, &t->elem_all);
