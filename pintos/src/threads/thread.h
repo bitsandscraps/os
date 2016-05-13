@@ -92,9 +92,6 @@ struct thread
     enum thread_status status;          /* Thread state. */
     char name[16];                      /* Name (for debugging purposes). */
     uint8_t *stack;                     /* Saved stack pointer. */
-#ifdef VM
-    uint8_t *stack_base;                /* Saved stack base pointer. */
-#endif
     int priority;                       /* Current priority. */
     int initial_priority;               /* Initial priority. */
 

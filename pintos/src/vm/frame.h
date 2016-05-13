@@ -1,9 +1,12 @@
 #ifndef VM_FRAME_H
 #define VM_FRAME_H
 
-#include <hash.h>
+#include <list.h>
 #include <stdbool.h>
-#include <stddef.h>
+
+/* If set to true, every time a lock is acquired or release,
+ * the current thread and the name of the lock is printed. */
+#define DEBUG_DEADLOCK (false)
 
 /* Data structure to store information about frames. */
 struct frame
@@ -11,12 +14,12 @@ struct frame
     void * address;           /* the kernel virtual address of the frame */
     struct thread * holder;   /* holder of the frame. */
     void * vaddr;             /* the virtual address of the page. */
-    struct hash_elem elem;
+    struct list_elem elem;
   };
 
 void init_frame (void);
-bool add_frame (struct thread * holder, void * address, void * vaddr);
+bool add_frame (void * address, void * vaddr);
 void delete_frame (void * address);
-struct frame * evict_frame (void);
+void evict_frame (void * vaddr, struct frame * old);
 
 #endif  /* vm/frame.h */

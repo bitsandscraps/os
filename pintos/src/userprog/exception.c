@@ -159,87 +159,82 @@ page_fault (struct intr_frame *f)
   write = (f->error_code & PF_W) != 0;
   user = (f->error_code & PF_U) != 0;
 
-  /* To implement virtual memory, delete the rest of the function
-     body, and replace it with code that brings in the page to
-     which fault_addr refers. */
+  /* If the fault is occured by writing read_only memory, or accessing
+   * kernel memory, just terminate the process. */
+  if (!not_present || (fault_addr >= PHYS_BASE))
+    syscall_exit (KERNEL_TERMINATE);
   struct thread * curr = thread_current ();
-  uint8_t * stack;
+  void * stack;
+  /* Start address of the page where page fault occurred. */
   void * fault_page = pg_round_down (fault_addr);
-  if (f->cs == SEL_UCSEG)
+  /* If a page fault happens during system call, the stack pointer of
+   * the interrupt frame may not be the stack frame of the user
+   * program. */
+  if (user)
     stack = f->esp;
   else
     stack = curr->stack;
-  printf("fault_page: %p\n", fault_page);
-  if ((fault_addr == stack - 4) || (fault_addr == stack - 32))
-    {
-      curr->stack_base -= PGSIZE;
-      ASSERT (curr->stack_base == fault_page);
-      if (curr->stack_base + STACK_MAX < (uint8_t *)PHYS_BASE)
+  /* If stack is too big send en error. */
+  if ((uint8_t *)stack + STACK_MAX < (uint8_t *)PHYS_BASE)
+    syscall_exit (KERNEL_TERMINATE);
+  /* Acquire locks according to the order. */
+  acquire_tloatol ();
+  lock_suppl_page_table (curr);
+  struct page * spg = search_suppl_page (curr, fault_page);
+  if (spg != NULL)
+    { 
+      /* Check whether one is trying to write to a read-only page. */
+      if (!write || spg->writable)
         {
-          if (user)
-            syscall_exit (KERNEL_TERMINATE);
-          else
+          if (load_page (spg))
             {
-              f->eip = (void *)f->eax;
-              f->eax = 0xffffffff;
+              /* TLOATOL is released in load_page. */
+              unlock_suppl_page_table (curr);
               return;
             }
         }
-      void * new_page = palloc_get_page (PAL_ZERO | PAL_USER);
-      if (new_page == NULL)
-        {
-          new_page = swap_out ();
-          if (new_page != NULL)
-            {
-              lock_acquire (&curr->pagedir_lock);
-              pagedir_set_page (curr->pagedir, curr->stack_base,
-                                new_page, true);
-              lock_release (&curr->pagedir_lock);
-              return;
-            }
-        }
+      release_tloatol ();
+      unlock_suppl_page_table (curr);
+      if (user)
+        syscall_exit (KERNEL_TERMINATE);
       else
         {
-          if (add_frame (curr, new_page, curr->stack_base))
-            {
-              lock_acquire (&curr->pagedir_lock);
-              pagedir_set_page (curr->pagedir, curr->stack_base,
-                                new_page, true);
-              lock_release (&curr->pagedir_lock);
-              return;
-            }
+          f->eip = (void *)f->eax;
+          f->eax = 0xffffffff;
+          return;
         }
     }
-  else 
+  /* Check whether the fault happend within stack.
+   * If not, check whether stack needs to grow. */
+  if ((fault_addr >= stack)   /* Stack not loaded yet. */
+        /* Permission check by x86. */
+        || (fault_addr == stack - 4) || (fault_addr == stack - 32))
     {
-      lock_acquire (&curr->suppl_page_table_lock);
-      struct page * spg = search_suppl_page (curr, fault_page);
+      struct page src;
+      src.address = fault_page;
+      src.status = GROWING_STACK;
+      src.writable = true;
+      /* Offset is not needed since it is a not-yet-allocated stack
+       * memory. */
+      spg = add_suppl_page (&src);
       if (spg != NULL)
-        {
-          if (!write || spg->isswap)
-            {
-              void * new_page = palloc_get_page (PAL_USER);
-              if (new_page == NULL)
-                new_page = swap_out ();
-              if (new_page == NULL)
-                spg = NULL;
-              else
-                swap_in (curr, spg, new_page);
-            }
-          else
-            spg = NULL;
-        }
-      lock_release (&curr->suppl_page_table_lock);
-      if (spg == NULL)
-        {
-          if (user)
-            syscall_exit (KERNEL_TERMINATE);
-          else
-            {
-              f->eip = (void *)f->eax;
-              f->eax = 0xffffffff;
-            }
-        }
+        if (load_page (spg))
+          {
+            unlock_suppl_page_table (curr);
+            return;
+          }
+    }
+  release_tloatol ();
+  unlock_suppl_page_table (curr);
+  /* Now only two cases left. It is a malicious attempt of a user, or
+   * the kernel's attempt to check the pointers passed to the system
+   * call handler. */
+  if (user)
+    syscall_exit (KERNEL_TERMINATE);
+  else
+    {
+      f->eip = (void *)f->eax;
+      f->eax = 0xffffffff;
     }
 }
 

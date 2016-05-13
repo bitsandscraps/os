@@ -129,6 +129,8 @@ syscall_handler (struct intr_frame *f)
   int * esp = (int *)f->esp;
   int arg1, arg2, arg3;
   struct thread * curr = thread_current ();
+  /* Save esp to inform the page fault handler about the user esp. */
+  /* Must be done before any operations. */
   curr->stack = f->esp;
   int syscall_num = get_long(esp++);
   /* Stack pointer is invalid. */

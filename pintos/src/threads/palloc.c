@@ -12,6 +12,7 @@
 #include "threads/synch.h"
 #include "threads/vaddr.h"
 #ifdef VM
+#include "vm/frame.h"
 #include "vm/swap.h"
 #endif
 
@@ -128,7 +129,6 @@ palloc_free_multiple (void *pages, size_t page_cnt)
 {
   struct pool *pool;
   size_t page_idx;
-  bool isuser = false;
 
   ASSERT (pg_ofs (pages) == 0);
   if (pages == NULL || page_cnt == 0)
@@ -137,10 +137,7 @@ palloc_free_multiple (void *pages, size_t page_cnt)
   if (page_from_pool (&kernel_pool, pages))
     pool = &kernel_pool;
   else if (page_from_pool (&user_pool, pages))
-    {
-      pool = &user_pool;
-      isuser = true;
-    }
+    pool = &user_pool;
   else
     NOT_REACHED ();
 
