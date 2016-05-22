@@ -71,8 +71,15 @@ page_free (struct hash_elem * elem, void * aux UNUSED)
   if (elem_pg->status == IN_SWAP)
     delete_swap (elem_pg);
   else if (elem_pg->status == IN_MEMORY)
-    delete_frame (pagedir_get_page (thread_current ()->pagedir,
-                                    elem_pg->address));
+    {
+      struct thread * curr = thread_current ();
+      void* kpage = pagedir_get_page (curr->pagedir, elem_pg->address);
+      if (elem_pg->type == TO_FILE
+          && pagedir_is_dirty (curr->pagedir, elem_pg->address))
+        file_write_at (elem_pg->file, kpage, elem_pg->read_bytes,
+                       elem_pg->offset);
+      delete_frame (kpage);
+    }
   free (elem_pg);
 }
 
@@ -89,24 +96,20 @@ init_suppl_page_table (struct thread * holder)
  * of the current thread. Returns the added node. If malloc failed,
  * returns NULL. */
 struct page *
-add_suppl_page (struct page * src)
+add_suppl_page (const struct page * src)
 {
   struct page * spg = (struct page *)(malloc (sizeof (struct page)));
   struct hash_elem * elem;
   if (spg == NULL) return NULL;
   struct thread * curr = thread_current ();
   ASSERT (src->address < PHYS_BASE);
-  spg->address = src->address;
-  spg->offset = src->offset;
-  spg->read_bytes = src->read_bytes;
-  spg->status = src->status;
-  spg->writable = src->writable;
+  *spg = *src;      /* Copy src to spg. */
   elem = hash_insert (&curr->suppl_page_table, &spg->elem);
   ASSERT (elem == NULL);
   return spg;
 }
 
-/* Destroyes the supplementary page table of the thread HOLDER. All
+/* Destroys the supplementary page table of the thread HOLDER. All
  * the dynamically allocated memory are freed, at least we hope so. */
 void
 delete_suppl_page_table (struct thread * holder)
@@ -114,12 +117,28 @@ delete_suppl_page_table (struct thread * holder)
   ASSERT (holder != NULL);
   /* Must acquire TLOATOL before starting anything. */
   acquire_tloatol ();
-  lock_acquire (&holder->suppl_page_table_lock);
-  lock_acquire (&holder->pagedir_lock);
+  lock_suppl_page_table (holder);
+  lock_pagedir (holder);
   hash_destroy (&holder->suppl_page_table, page_free);
   release_tloatol ();
-  lock_release (&holder->suppl_page_table_lock);
-  lock_release (&holder->pagedir_lock);
+  unlock_suppl_page_table (holder);
+  unlock_pagedir (holder);
+}
+
+void
+delete_suppl_page (void * address)
+{
+  struct thread * curr = thread_current ();
+  struct page pg;
+  pg.address = address;
+  acquire_tloatol ();
+  lock_suppl_page_table (curr);
+  lock_pagedir (curr);
+  struct hash_elem * pg_elem = hash_delete (&curr->suppl_page_table, &pg.elem);
+  release_tloatol ();
+  unlock_suppl_page_table (curr);
+  unlock_pagedir (curr);
+  page_free (pg_elem, NULL);
 }
 
 /* Edit the given SPG to be in status STATUS and offset OFFSET. Address,
@@ -194,8 +213,8 @@ load_page (struct page * spg)
         swap_in (spg->offset, pg);
         break;
       case IN_FILE:
-        /* Load this page from exectubale. */
-        if (file_read_at (curr->executable, pg, spg->read_bytes, spg->offset)
+        /* Load this page from file. */
+        if (file_read_at (spg->file, pg, spg->read_bytes, spg->offset)
                != (int) spg->read_bytes)
           {
             if (freepage) palloc_free_page (pg);
@@ -217,7 +236,9 @@ load_page (struct page * spg)
   modify_suppl_page (spg, status, offset);
   /* Add the page to the page directory. */
   lock_pagedir (curr);
-  dir_result = pagedir_set_page (curr->pagedir, address, pg, spg->writable);
+  /* If not read only, it is writable. */
+  dir_result = pagedir_set_page (curr->pagedir, address, pg,
+                                 (spg->type != READ_ONLY));
   unlock_pagedir (curr);
   if (!dir_result)
     {

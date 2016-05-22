@@ -81,7 +81,9 @@ init_swap (void)
   swap_disk = disk_get (1, 1);
   swap_pool = bitmap_create (disk_size (swap_disk) / PAGE_SIZE_IN_SECTORS);
   bitmap_set_all (swap_pool, false);
+  //printf ("swap: %p\n", &swap_lock);
   lock_init (&swap_lock);
+  //printf ("tlo: %p\n", &the_lock_over_all_the_other_locks);
   lock_init (&the_lock_over_all_the_other_locks);
 }
 
@@ -129,30 +131,37 @@ swap_out (void * vaddr)
   evict_frame (vaddr, &old);
   struct page * spg = search_suppl_page (old.holder, old.vaddr);
   ASSERT (spg != NULL);
-  enum page_status status;
-  uint32_t offset;
-  if (spg->writable)
+  enum page_status status = IN_FILE;
+  uint32_t offset = spg->offset;
+  switch (spg->type)
     {
-      /* The victim must be cached in swap space because it is writable. */
-      lock_swap ();
-      release_tloatol ();
-      /* Search for an empty slot. */
-      pg_index = bitmap_scan_and_flip (swap_pool, 0, 1, false);
-      unlock_swap ();
-      if (pg_index == BITMAP_ERROR) return NULL;
-      for (i = 0; i < PAGE_SIZE_IN_SECTORS; ++i)
-        disk_write (swap_disk, pg_index * PAGE_SIZE_IN_SECTORS + i,
-                    old.address + i * DISK_SECTOR_SIZE);
-      status = IN_SWAP;
-      offset = pg_index;
-    }
-  else
-    {
-      /* Victim is not written to swap since it can always be read from
-       * executable. */
-      release_tloatol ();
-      status = IN_FILE;
-      offset = spg->offset;
+      case TO_SWAP:
+        /* The victim must be cached in swap space because it is writable. */
+        lock_swap ();
+        release_tloatol ();
+        /* Search for an empty slot. */
+        pg_index = bitmap_scan_and_flip (swap_pool, 0, 1, false);
+        unlock_swap ();
+        if (pg_index == BITMAP_ERROR) return NULL;
+        for (i = 0; i < PAGE_SIZE_IN_SECTORS; ++i)
+          disk_write (swap_disk, pg_index * PAGE_SIZE_IN_SECTORS + i,
+                      old.address + i * DISK_SECTOR_SIZE);
+        status = IN_SWAP;
+        offset = pg_index;
+        break;
+      case TO_FILE:
+        /* Mmaped file. Write back to the file only if it is dirty. */
+        release_tloatol ();
+        if (pagedir_is_dirty (old.holder->pagedir, old.vaddr))
+          file_write_at (spg->file, old.address, spg->read_bytes, spg->offset);
+        break;
+      case READ_ONLY:
+        /* Victim is not written to swap since it can always be read
+         * from executable. */
+        release_tloatol ();
+        break;
+      default:
+        ASSERT (false);
     }
   modify_suppl_page (spg, status, offset);
   /* Clear the page from pagedir. */

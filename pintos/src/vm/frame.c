@@ -22,6 +22,7 @@ init_frame (void)
 {
   list_init (&frame_table);
   frame_curr = list_end (&frame_table);
+  //printf ("fl: %p\n", &frame_lock);
   lock_init (&frame_lock);
 }
 
@@ -126,12 +127,10 @@ evict_loop (void * vaddr, struct frame * old)
     {
       victim = list_entry (frame_curr, struct frame, elem);
       /* Second chance algorithm. */
-      lock_pagedir (victim->holder);
       if (pagedir_is_accessed (victim->holder->pagedir, victim->vaddr))
         pagedir_set_accessed (victim->holder->pagedir, victim->vaddr, false);
       else
         {
-          unlock_pagedir (victim->holder);
           /* If the holder of the victim is current thread, the caller
            * have already acquired lock of the suppl page table. */
           if (victim->holder != curr)
@@ -141,7 +140,6 @@ evict_loop (void * vaddr, struct frame * old)
           victim->vaddr = vaddr;
           return true;
         }
-      unlock_pagedir (victim->holder);
     }
   return false;
 }

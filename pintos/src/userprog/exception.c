@@ -161,8 +161,17 @@ page_fault (struct intr_frame *f)
 
   /* If the fault is occured by writing read_only memory, or accessing
    * kernel memory, just terminate the process. */
-  if (!not_present || (fault_addr >= PHYS_BASE))
-    syscall_exit (KERNEL_TERMINATE);
+  if (is_kernel_vaddr(fault_addr))
+    {
+      if (user)
+        syscall_exit (KERNEL_TERMINATE);
+      else
+        {
+          f->eip = (void *)f->eax;
+          f->eax = 0xffffffff;
+          return;
+        }
+    }
   struct thread * curr = thread_current ();
   void * stack;
   /* Start address of the page where page fault occurred. */
@@ -184,7 +193,7 @@ page_fault (struct intr_frame *f)
   if (spg != NULL)
     { 
       /* Check whether one is trying to write to a read-only page. */
-      if (!write || spg->writable)
+      if (!(write && spg->type == READ_ONLY))
         {
           if (load_page (spg))
             {
@@ -193,7 +202,8 @@ page_fault (struct intr_frame *f)
               return;
             }
         }
-      release_tloatol ();
+      else
+        release_tloatol ();
       unlock_suppl_page_table (curr);
       if (user)
         syscall_exit (KERNEL_TERMINATE);
@@ -213,7 +223,7 @@ page_fault (struct intr_frame *f)
       struct page src;
       src.address = fault_page;
       src.status = GROWING_STACK;
-      src.writable = true;
+      src.type = TO_SWAP;
       /* Offset is not needed since it is a not-yet-allocated stack
        * memory. */
       spg = add_suppl_page (&src);

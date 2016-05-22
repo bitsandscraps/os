@@ -120,8 +120,6 @@ struct thread
     /* max_fd is always greater or equal to any files in open_fds.
      * This value is used to assign fd values to new files. */
     int max_fd;
-    /* fd_lock must be acquired before modifying file descriptors. */
-    struct lock fd_lock;
 
     /* Data Structues for Implementing Wait. */
     int exit_status;              /* Status of exit. */
@@ -136,8 +134,18 @@ struct thread
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;            /* Page directory. */
 #ifdef VM
+    /* Data Structures for Managing Mmap Descriptors. */
+    struct list open_mapids;         /* List of mapids. */
+    /* max_mapid is always greater or equal to any mmaps in open_mapids.
+     * This value is used to assign mapid values to new mmaps. */
+    int max_mapid;
+    /* pageidr_lock must be acquired before modifying page directory. */
     struct lock pagedir_lock;
+    /* suppl_page_table_lock must be acquired before modifying
+     * supplementary page table. */
     struct lock suppl_page_table_lock;
+    /* Supplementary page table to keep in track the pages in swap space
+     * or executables. */
     struct hash suppl_page_table;
 #endif
 #endif

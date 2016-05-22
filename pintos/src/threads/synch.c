@@ -226,6 +226,13 @@ lock_acquire (struct lock *lock)
       donate_priority (curr);
     }
   }
+  struct lock * test = lock;
+  while (test->holder)
+    {
+      ASSERT (test->holder != curr);
+      test = test->holder->lock_trying_acquire;
+      if (!test) break;
+    }
   sema_down (&lock->semaphore);
   curr->lock_trying_acquire = NULL;
   lock->holder = curr;

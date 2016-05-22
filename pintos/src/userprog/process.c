@@ -515,7 +515,7 @@ validate_segment (const struct Elf32_Phdr *phdr, struct file *file)
    Return true if successful, false if a memory allocation error
    or disk read error occurs. */
 static bool
-load_segment (struct file *file UNUSED, off_t ofs, uint8_t *upage,
+load_segment (struct file *file, off_t ofs, uint8_t *upage,
               uint32_t read_bytes, uint32_t zero_bytes, bool writable) 
 {
   ASSERT ((read_bytes + zero_bytes) % PGSIZE == 0);
@@ -539,7 +539,8 @@ load_segment (struct file *file UNUSED, off_t ofs, uint8_t *upage,
       src.offset = ofs;
       src.read_bytes = page_read_bytes;
       src.status = IN_FILE;
-      src.writable = writable;
+      src.type = writable ? TO_SWAP : READ_ONLY;
+      src.file = file;
       if (!add_suppl_page (&src))
         return false;
       ofs += page_read_bytes;
@@ -565,7 +566,7 @@ setup_stack (void **esp)
   *esp = PHYS_BASE;
   /* No need to set offset and read_bytes. */
   src.address = PHYS_BASE - PGSIZE;
-  src.writable = true;
+  src.type = TO_SWAP;
   src.status = GROWING_STACK;
   /* Acquire lock according to the order. */
   acquire_tloatol ();

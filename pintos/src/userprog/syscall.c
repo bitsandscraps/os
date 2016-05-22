@@ -1,4 +1,5 @@
 #include "userprog/syscall.h"
+#include <round.h>
 #include <stdio.h>
 #include <string.h>
 #include <syscall-nr.h>
@@ -12,8 +13,13 @@
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 #include "userprog/process.h"
+#include "vm/page.h"
 
 #define WRITEBATCH 1024
+
+/* Map region identifier. */
+typedef int mapid_t;
+#define MAP_FAILED ((mapid_t) -1)
 
 /* List elements used to manage open file descriptors. */
 struct fd_elem
@@ -21,34 +27,55 @@ struct fd_elem
   int fd;                   /* assigned fd number */
   off_t pos;                /* offset for read and write */
   struct file * file;       /* struct file for the fd */
+  /* Memory mapped to the file. If not mapped, it is set to NULL.
+   * It is initialized as NULL and set back to NULL at munmap. */
+  struct mapid_elem * mapid;
   struct list_elem elem;    /* list element of open_fds in struct thread */
+};
+
+/* List elements used to manage open mmap descriptors. */
+struct mapid_elem
+{
+  int mapid;                /* assigned mapid number */
+  void * address;
+  size_t pagenum;
+  struct fd_elem * fd;      /* fd for the mapped file. */
+  struct list_elem elem;    /* list element of open_mapids in struct thread */
 };
 
 /* Lock to avoid race conditions on file system manipulations. */
 static struct lock filesys_lock;
+/* Lock to avoid race conditions on writing to stdout. */
+static struct lock console_lock;
 
 typedef int pid_t;
 
 static struct fd_elem * find_fd (int fd);
+static struct mapid_elem * find_mapid (mapid_t mapid);
+static void munmap_loop (struct mapid_elem * elem);
 static void syscall_handler (struct intr_frame *);
-static void syscall_halt (void) NO_RETURN;
-static uint32_t syscall_exec (const char * cmd_line);
-static uint32_t syscall_wait (pid_t pid);
+
+static void syscall_close (int fd);
 static uint32_t syscall_create (const char * file, size_t initial_size);
-static uint32_t syscall_remove (const char * file);
-static uint32_t syscall_open (const char * file);
+static uint32_t syscall_exec (const char * cmd_line);
 static uint32_t syscall_filesize (int fd);
+static void syscall_halt (void) NO_RETURN;
+static mapid_t syscall_mmap (int fd, void * addr);
+static void syscall_munmap (mapid_t mapping);
+static uint32_t syscall_open (const char * file);
 static uint32_t syscall_read (int fd, void * buffer, size_t size);
-static uint32_t syscall_write (int fd, const void * buffer, size_t size);
+static uint32_t syscall_remove (const char * file);
 static void syscall_seek (int fd, size_t position);
 static uint32_t syscall_tell (int fd);
-static void syscall_close (int fd);
+static uint32_t syscall_wait (pid_t pid);
+static uint32_t syscall_write (int fd, const void * buffer, size_t size);
 
 void
 syscall_init (void) 
 {
   intr_register_int (0x30, 3, INTR_ON, syscall_handler, "syscall");
   lock_init (&filesys_lock);
+  lock_init (&console_lock);
 }
 
 /* Reads 4 bytes from user virtual address uaddr. Returns the int value
@@ -102,6 +129,22 @@ is_valid_range (const uint8_t * uaddr, size_t size)
     i += PGSIZE;
   }
   return is_valid (uaddr + size - 1);
+}
+
+/* Determine whether size virtual addresses starting from uaddr are
+ * not valid. */
+static bool
+isnot_valid_range (const uint8_t * uaddr, size_t size)
+{
+  size_t i = 0;
+  /* If we check every uaddr + N * PGSIZE, we can confirm that every
+   * page from uaddr to uaddr + size - 1 is not valid. */
+  while (i < size)
+  {
+    if (is_valid (uaddr + i)) return false;
+    i += PGSIZE;
+  }
+  return !is_valid (uaddr + size - 1);
 }
 
 /* Determine whether size virtual addresses starting from uaddr are
@@ -174,6 +217,9 @@ syscall_handler (struct intr_frame *f)
       case SYS_CLOSE:
         syscall_close (arg1);
         break;
+      case SYS_MUNMAP:
+        syscall_munmap ((mapid_t)arg1);
+        break;
       default:
         /* Check validity of the second argument. */
         if ((arg2 = get_long(esp++)) == -1) syscall_exit (KERNEL_TERMINATE);
@@ -185,7 +231,10 @@ syscall_handler (struct intr_frame *f)
             f->eax = syscall_create ((const char *)arg1, (size_t)arg2);
             break;
           case SYS_SEEK:
-            syscall_seek ((int)arg1, (size_t)arg2);
+            syscall_seek (arg1, (size_t)arg2);
+            break;
+          case SYS_MMAP:
+            f->eax = syscall_mmap (arg1, (void *)arg2);
             break;
           default:
             /* Check validity of third argument. */
@@ -227,36 +276,52 @@ find_fd (int fd)
   return NULL;
 }
 
-/* Terminates Pintos. */
-static void
-syscall_halt (void)
+/* Searches for a mapid_elem with the given mapid in the open_mapids
+ * list of current thread. If there is no mapid_elem with such mapid,
+ * returns NULL. Otherwise, returns the pointer to the mapid_elem of the
+ * mapid. Assumes that the caller had already acquired required locks. */
+static struct mapid_elem *
+find_mapid (mapid_t mapid)
 {
-  power_off ();
-  NOT_REACHED ();
+  struct mapid_elem * elem;
+  struct list_elem * e;
+  struct thread * curr = thread_current ();
+  for (e = list_begin (&curr->open_mapids); e != list_end (&curr->open_mapids);
+       e = list_next (e))
+  {
+    elem = list_entry (e, struct mapid_elem, elem);
+    if (elem->mapid == mapid) return elem;
+  }
+  return NULL;
 }
 
-/* Terminates the current user program. Reports its status to kernel. */
-void
-syscall_exit (int status)
+/* Closes the fd. */
+static void
+syscall_close (int fd)
 {
-  struct thread * curr = thread_current ();
   struct fd_elem * fd_elem;
-  curr->exit_status = status;
-  lock_acquire (&filesys_lock);
-  lock_acquire (&curr->fd_lock);
-  /* Close all the open file descriptors. */
-  while (!list_empty (&curr->open_fds))
+  fd_elem = find_fd (fd);
+  if (fd_elem != NULL)
   {
-    struct list_elem * e = list_pop_back (&curr->open_fds);
-    fd_elem = list_entry (e, struct fd_elem, elem);
-    file_close (fd_elem->file);
-    free (fd_elem);
-  } 
-  lock_release (&curr->fd_lock);
-  lock_release (&filesys_lock);
-  printf("%s: exit(%d)\n", curr->name, status);
-  thread_exit ();
-  NOT_REACHED ();
+    list_remove (&fd_elem->elem);
+    if (fd_elem->mapid == NULL)
+      {
+        file_close (fd_elem->file);
+        free (fd_elem);
+      }
+  }
+}
+
+/* Creates a new file named file with initial size of initial_size
+ * bytes. */
+static uint32_t
+syscall_create (const char * file, size_t initial_size)
+{
+  bool success;
+  if (!is_valid(file))
+    syscall_exit (KERNEL_TERMINATE);
+  success = filesys_create (file, initial_size);
+  return success;
 }
 
 /* Runs the executable with the name given in cmd_line. Returns the pid
@@ -274,41 +339,131 @@ syscall_exec (const char * cmd_line)
   return success;
 }
 
-/* Waits for pid to die and returns its status. Returns -1 if the pid
- * was terminated by the kernel. Returns -1 without waiting if the pid
- * is not a child of the process, or wait has already been successfully
- * called for the pid. */
-static uint32_t
-syscall_wait (pid_t pid)
+/* Terminates the current user program. Reports its status to kernel. */
+void
+syscall_exit (int status)
 {
-  return process_wait (pid);
+  struct thread * curr = thread_current ();
+  struct fd_elem * fd_elem;
+  curr->exit_status = status;
+  /* Close all the open mmap descriptors. */
+  while (!list_empty (&curr->open_mapids))
+    {
+      struct list_elem * e = list_pop_back (&curr->open_mapids);
+      munmap_loop (list_entry (e, struct mapid_elem, elem));
+    }
+  /* Close all the open file descriptors. */
+  while (!list_empty (&curr->open_fds))
+    {
+      struct list_elem * e = list_pop_back (&curr->open_fds);
+      fd_elem = list_entry (e, struct fd_elem, elem);
+      file_close (fd_elem->file);
+      free (fd_elem);
+    } 
+  printf("%s: exit(%d)\n", curr->name, status);
+  thread_exit ();
+  NOT_REACHED ();
 }
 
-/* Creates a new file named file with initial size of initial_size
- * bytes. */
+/* Returns the size of the fd in bytes. */
 static uint32_t
-syscall_create (const char * file, size_t initial_size)
+syscall_filesize (int fd) 
 {
-  bool success;
-  if (!is_valid(file))
-    syscall_exit (KERNEL_TERMINATE);
-  lock_acquire (&filesys_lock);
-  success = filesys_create (file, initial_size);
-  lock_release (&filesys_lock);
-  return success;
+  struct fd_elem * fd_elem;
+  int size = -1;
+  fd_elem = find_fd (fd);
+  if (fd_elem != NULL)
+    size = file_length (fd_elem->file);
+  else
+    size = -1;
+  return size;
 }
 
-/* Deletes the file named file. Returns true if succeeded. */
-static uint32_t
-syscall_remove (const char * file)
+/* Terminates Pintos. */
+static void
+syscall_halt (void)
 {
-  bool success;
-  if (!is_valid((uint8_t *)file))
-    syscall_exit (KERNEL_TERMINATE);
+  power_off ();
+  NOT_REACHED ();
+}
+
+static mapid_t syscall_mmap (int fd, void * addr)
+{
+  /* Check whether fd is mappable. */
+  if (fd == STDIN_FILENO || fd == STDOUT_FILENO)
+    return MAP_FAILED;
+  /* Check whether address is valid. */
+  if (addr == 0)
+    return MAP_FAILED;
+  /* Check whether the address is page-aligned. */
+  if (pg_ofs (addr) != 0)
+    return MAP_FAILED;
+  size_t size = (size_t)syscall_filesize(fd);
+  if (size == 0)
+    return MAP_FAILED;
+  /* Check whether there are any already mapped pages within the range
+   * ADDR to ADDR + filesize(fd). */
+  if (!isnot_valid_range (addr, size))
+    return MAP_FAILED;
+  struct thread * curr = thread_current ();
+  struct fd_elem * felem = find_fd (fd);
+  if (felem == NULL)
+    return MAP_FAILED;
+  struct mapid_elem * melem = malloc (sizeof (struct mapid_elem));
+  felem->mapid = melem;
+  if (melem == NULL)
+    return MAP_FAILED;
+  melem->mapid = ++curr->max_mapid;
+  list_push_back (&curr->open_mapids, &melem->elem);
+  melem->address = addr;
+  melem->pagenum = DIV_ROUND_UP (size, PGSIZE);
+  melem->fd = felem;
+  struct page src;
+  src.status = IN_FILE;
+  src.type = TO_FILE;
+  src.file = felem->file;
+  src.address = addr;
+  src.offset = 0;
+  lock_suppl_page_table (curr);
+  while (size > 0)
+    {
+      src.read_bytes = (size > PGSIZE) ? PGSIZE : size;
+      add_suppl_page (&src);
+      src.address += src.read_bytes;
+      src.offset += src.read_bytes;
+      size -= src.read_bytes;
+    }
+  unlock_suppl_page_table (curr);
+  return melem->mapid;
+}
+
+static void munmap_loop (struct mapid_elem * elem)
+{
+  ASSERT (elem != NULL);
+  list_remove (&elem->elem);
+  size_t i;
+  /* Munmap may write some files. */
   lock_acquire (&filesys_lock);
-  success = filesys_remove (file);
+  for (i = 0; i < elem->pagenum; ++i)
+    delete_suppl_page (elem->address + i * PGSIZE);
   lock_release (&filesys_lock);
-  return success;
+  if (elem->fd->mapid != NULL)
+    elem->fd->mapid = NULL;
+  else
+    {
+      file_close (elem->fd->file);
+      free (elem->fd);
+    }
+  free (elem);
+}
+
+static void syscall_munmap (mapid_t mapping)
+{
+  struct mapid_elem * elem = find_mapid (mapping);
+  if (elem != NULL)
+    munmap_loop (elem);
+  else
+    syscall_exit (KERNEL_TERMINATE);
 }
 
 /* Opens the file named file. Returns the file descriptor of the opened
@@ -322,45 +477,22 @@ syscall_open (const char * file_name)
   int fd = -1;
   if (!is_valid((uint8_t *)file_name))
     syscall_exit (KERNEL_TERMINATE);
-  lock_acquire (&filesys_lock);
   file = filesys_open (file_name);
   if (file != NULL)
   {
     elem = malloc (sizeof (struct fd_elem));
     if (elem == NULL)
     {
-      lock_release (&filesys_lock);
       syscall_exit (KERNEL_TERMINATE);
     }
-    lock_acquire (&curr->fd_lock);
     fd = ++curr->max_fd;
     elem->fd = fd;
     elem->file = file;
     elem->pos = 0;
+    elem->mapid = NULL;
     list_push_back (&curr->open_fds, &elem->elem);
-    lock_release (&curr->fd_lock);
   }
-  lock_release (&filesys_lock);
   return fd;
-}
-
-/* Returns the size of the fd in bytes. */
-static uint32_t
-syscall_filesize (int fd) 
-{
-  struct thread * curr = thread_current ();
-  struct fd_elem * fd_elem;
-  int size = -1;
-  lock_acquire (&filesys_lock);
-  lock_acquire (&curr->fd_lock);
-  fd_elem = find_fd (fd);
-  if (fd_elem != NULL)
-    size = file_length (fd_elem->file);
-  else
-    size = -1;
-  lock_release (&curr->fd_lock);
-  lock_release (&filesys_lock);
-  return size;
 }
 
 /* Reads size bytes from fd to buffer. Returns the number of bytes
@@ -374,7 +506,6 @@ syscall_read (int fd, void * buffer, size_t size)
   struct fd_elem * fd_elem;
   if (!is_valid_range_write (usrbyte, size))
     syscall_exit (KERNEL_TERMINATE);
-  lock_acquire (&filesys_lock);
   if (fd == STDIN_FILENO)
   {
     while (size-- > 0)
@@ -392,8 +523,54 @@ syscall_read (int fd, void * buffer, size_t size)
       fd_elem->pos += nread;
     }
   }
-  lock_release (&filesys_lock);
   return nread;
+}
+
+/* Deletes the file named file. Returns true if succeeded. */
+static uint32_t
+syscall_remove (const char * file)
+{
+  bool success;
+  if (!is_valid((uint8_t *)file))
+    syscall_exit (KERNEL_TERMINATE);
+  lock_acquire (&filesys_lock);
+  success = filesys_remove (file);
+  lock_release (&filesys_lock);
+  return success;
+}
+
+/* Changes the next byte to be read or written in fd to position,
+ * expressed in bytes from the beginning of the file. */
+static void
+syscall_seek (int fd, size_t position)
+{
+  struct fd_elem * fd_elem;
+  fd_elem = find_fd (fd);
+  if (fd_elem != NULL)
+    fd_elem->pos = position;
+}
+
+/* Returns the position of the next byte to read or written in fd,
+ * expressed in bytes from the beginning of the file. */
+static uint32_t
+syscall_tell (int fd)
+{
+  struct fd_elem * fd_elem;
+  int pos = -1;
+  fd_elem = find_fd (fd);
+  if (fd_elem != NULL)
+    pos = fd_elem->pos;
+  return pos;
+}
+
+/* Waits for pid to die and returns its status. Returns -1 if the pid
+ * was terminated by the kernel. Returns -1 without waiting if the pid
+ * is not a child of the process, or wait has already been successfully
+ * called for the pid. */
+static uint32_t
+syscall_wait (pid_t pid)
+{
+  return process_wait (pid);
 }
 
 /* Writes size bytes from buffer to fd. Returns the number of bytes
@@ -408,14 +585,11 @@ syscall_write (int fd, const void * buffer, size_t size)
   int nwrite = 0;
   if (!is_valid_range (usrbyte, size))
     syscall_exit (KERNEL_TERMINATE);
-  lock_acquire (&filesys_lock);
   if (fd == STDIN_FILENO)
-  {
-    lock_release (&filesys_lock);
     return -1;
-  }
   else if (fd == STDOUT_FILENO)
   {
+    lock_acquire (&console_lock);
     while (to_write > 0)
     {
       if (to_write > WRITEBATCH)
@@ -430,6 +604,7 @@ syscall_write (int fd, const void * buffer, size_t size)
         to_write = 0;
       }
     }
+    lock_release (&console_lock);
     nwrite = size;
   }
   else
@@ -439,64 +614,15 @@ syscall_write (int fd, const void * buffer, size_t size)
       nwrite = -1;
     else
     {
+      lock_acquire (&filesys_lock);
       nwrite = file_write_at (fd_elem->file, buffer, size, fd_elem->pos);
+      lock_release (&filesys_lock);
       fd_elem->pos += nwrite;
+      /* If this file is mapped to a certain memory, edit that memory too. */
+      if (fd_elem->mapid != NULL)
+        memcpy (fd_elem->mapid->address, buffer, nwrite);
     }
   }
-  lock_release (&filesys_lock);
   return nwrite;
-}
-
-/* Changes the next byte to be read or written in fd to position,
- * expressed in bytes from the beginning of the file. */
-static void
-syscall_seek (int fd, size_t position)
-{
-  struct thread * curr = thread_current ();
-  struct fd_elem * fd_elem;
-  lock_acquire (&filesys_lock);
-  lock_acquire (&curr->fd_lock);
-  fd_elem = find_fd (fd);
-  if (fd_elem != NULL)
-    fd_elem->pos = position;
-  lock_release (&curr->fd_lock);
-  lock_release (&filesys_lock);
-}
-
-/* Returns the position of the next byte to read or written in fd,
- * expressed in bytes from the beginning of the file. */
-static uint32_t
-syscall_tell (int fd)
-{
-  struct thread * curr = thread_current ();
-  struct fd_elem * fd_elem;
-  int pos = -1;
-  lock_acquire (&filesys_lock);
-  lock_acquire (&curr->fd_lock);
-  fd_elem = find_fd (fd);
-  if (fd_elem != NULL)
-    pos = fd_elem->pos;
-  lock_release (&curr->fd_lock);
-  lock_release (&filesys_lock);
-  return pos;
-}
-
-/* Closes the fd. */
-static void
-syscall_close (int fd)
-{
-  struct thread * curr = thread_current ();
-  struct fd_elem * fd_elem;
-  lock_acquire (&filesys_lock);
-  lock_acquire (&curr->fd_lock);
-  fd_elem = find_fd (fd);
-  if (fd_elem != NULL)
-  {
-    file_close (fd_elem->file);
-    list_remove (&fd_elem->elem);
-    free (fd_elem);
-  }
-  lock_release (&curr->fd_lock);
-  lock_release (&filesys_lock);
 }
 
