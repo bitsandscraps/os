@@ -81,9 +81,7 @@ init_swap (void)
   swap_disk = disk_get (1, 1);
   swap_pool = bitmap_create (disk_size (swap_disk) / PAGE_SIZE_IN_SECTORS);
   bitmap_set_all (swap_pool, false);
-  //printf ("swap: %p\n", &swap_lock);
   lock_init (&swap_lock);
-  //printf ("tlo: %p\n", &the_lock_over_all_the_other_locks);
   lock_init (&the_lock_over_all_the_other_locks);
 }
 

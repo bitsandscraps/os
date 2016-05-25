@@ -12,7 +12,7 @@ static struct list frame_table;
 /* Mutex associated to frame_table. */
 static struct lock frame_lock;
 
-/* Node of frame_table. */
+/* Current node of frame_table. */
 static struct list_elem * frame_curr;
 
 /* Initialize frame_table, frame_lock, and frame_curr. Called in
@@ -22,7 +22,6 @@ init_frame (void)
 {
   list_init (&frame_table);
   frame_curr = list_end (&frame_table);
-  //printf ("fl: %p\n", &frame_lock);
   lock_init (&frame_lock);
 }
 

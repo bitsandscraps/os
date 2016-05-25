@@ -1,16 +1,15 @@
-       	       	    +---------------------------+
-		    |		CS 140		|
+   	    +---------------------------+
+		    |		        EE 415          |
 		    | PROJECT 3: VIRTUAL MEMORY	|
-		    |	   DESIGN DOCUMENT	|
+		    |	     DESIGN DOCUMENT    	|
 		    +---------------------------+
 
 ---- GROUP ----
 
 >> Fill in the names and email addresses of your group members.
 
-FirstName LastName <email@domain.example>
-FirstName LastName <email@domain.example>
-FirstName LastName <email@domain.example>
+PARK Jongeui <qkrwhddml@kaist.ac.kr>
+CHO Seongsu  <csp00141@kaist.ac.kr>
 
 ---- PRELIMINARIES ----
 
@@ -21,6 +20,8 @@ FirstName LastName <email@domain.example>
 >> preparing your submission, other than the Pintos documentation, course
 >> text, lecture notes, and course staff.
 
+We did not consulted any sources except the lecture notes.
+
 			PAGE TABLE MANAGEMENT
 			=====================
 
@@ -30,24 +31,119 @@ FirstName LastName <email@domain.example>
 >> `struct' member, global or static variable, `typedef', or
 >> enumeration.  Identify the purpose of each in 25 words or less.
 
+Data structure to store information about frames.
+
+    struct frame
+      {
+        void * address;           /* the kernel virtual address of the frame */
+        struct thread * holder;   /* holder of the frame. */
+        void * vaddr;             /* the virtual address of the page. */
+        struct list_elem elem;
+      };
+
+Circular list of physical frames in the memory.
+
+    static struct list frame_table;
+
+Mutex associated to frame_table.
+
+    static struct lock frame_lock;
+
+Node of frame_table.
+
+    static struct list_elem * frame_curr;
+
+Status of each page. We believe that what each state means is quite
+clear from the name.
+
+    enum page_status { IN_MEMORY, IN_SWAP, IN_FILE, GROWING_STACK };
+
+Type of each page. Inspected at swap out.
+
+    enum page_type { READ_ONLY, TO_SWAP, TO_FILE };
+
+Supplementary page table element.
+
+    struct page
+      {
+        void * address;             /* user virtual address of the page. */
+        enum page_status status;    /* The status of the page. */
+        enum page_type type;        /* Where to swap out. */
+        struct file * file;         /* file to read from if it is in file. */
+        /* File offset for READ_ONLY or TO_FILE pages. Swap index for
+         * writable pages. It can have any value if the page is in memory,
+         * but it is wise to conserve the offset value. */
+        uint32_t offset;
+        /* Bytes to read from file. It can have any value if the page is in
+         * swap, in memory, or not-yet-allocated stack. */
+        size_t read_bytes;
+        struct hash_elem elem;
+      };
+
+Added to struct thread
+
+    /* pagedir_lock must be acquired before modifying page directory. */
+    struct lock pagedir_lock;
+    /* suppl_page_table_lock must be acquired before modifying
+     * supplementary page table. */
+    struct lock suppl_page_table_lock;
+    /* Supplementary page table to keep in track the pages in swap space
+     * or executables. */
+    struct hash suppl_page_table;
+
 ---- ALGORITHMS ----
 
 >> A2: In a few paragraphs, describe your code for locating the frame,
 >> if any, that contains the data of a given page.
 
+Our implementation does not explicitly locate a frame that contains a
+given page except when the process exits and the frames owned by the
+process should be freed. In that case, we use pagedir_get_page to figure
+out the kernel virtual address of the user page, which is what we used
+to manage frame_table. Otherwise, every address translation is performed
+by the MMU.
+
 >> A3: How does your code coordinate accessed and dirty bits between
 >> kernel and user virtual addresses that alias a single frame, or
 >> alternatively how do you avoid the issue?
+
+We always accessed those information through the page directory of the
+thread that is in charge of the page. The only case where we access a
+page through kernel virtual address is when we want to swap out a page.
+In that case, the accessed and dirty bits will not be altered.
 
 ---- SYNCHRONIZATION ----
 
 >> A4: When two user processes both need a new frame at the same time,
 >> how are races avoided?
 
+We think that the question is bit unclear. If the question is asking
+about the race condition happening in palloc_get_page(PAL_USER), our
+answer will be that synchronization is already implemented in pintos.
+If we read threads/palloc.c, we can see that palloc_get_page is
+performed after acquiring user_pool->lock.
+  If it is asking about swapping, we always performed swapping after
+removing the frame from the frame_table and added it back to
+frame_table after we finished loading the page. If another process
+has to evict a frame, it will search for a frame to evict in the
+frame_table that does not contain the originally evicted frame.
+Because frame_table operations are always performed after acquiring
+frame_lock, race conditions will not occur. If a process is really
+unlucky, a frame might be evicted right after it is loaded. But it
+is really unlikely due to the well-designed frame eviction policy,
+and even if it does happen, additional page faults will load that
+page back in.
+
 ---- RATIONALE ----
 
 >> A5: Why did you choose the data structure(s) that you did for
 >> representing virtual-to-physical mappings?
+
+We did not introduce new tables to hold virtual-to-physical mappings.
+We just used the page directory provided as default by pintos. We did
+manage a physical-to-virtual mapping in the frame_table. struct frame
+records the information about the thread in charge of this frame and
+the virtual address.
 
 		       PAGING TO AND FROM DISK
 		       =======================
@@ -58,18 +154,54 @@ FirstName LastName <email@domain.example>
 >> `struct' member, global or static variable, `typedef', or
 >> enumeration.  Identify the purpose of each in 25 words or less.
 
+Pointer to the swap space.
+
+    static struct disk * swap_disk;
+
+Bitmap to maintain information about empty slots.
+
+    static struct bitmap * swap_pool;
+
+Mutex associated to swap_pool.
+
+    static struct lock swap_lock;
+
+Meta lock to prevent deadlocks. Abbreviated to TLOATOL.
+
+    static struct lock the_lock_over_all_the_other_locks;
+
 ---- ALGORITHMS ----
 
 >> B2: When a frame is required but none is free, some frame must be
 >> evicted.  Describe your code for choosing a frame to evict.
 
+We implemented a simple second chance algorithm. Because in pintos, swap
+slot is cleared as soon as a page is paged in, we concluded that the
+two level second chance algorithm that also considers the dirty bits,
+regarding the fact that it makes implementation of the algorithm a lot
+more complicated, does not bring much enhancements in performance.
+  
 >> B3: When a process P obtains a frame that was previously used by a
 >> process Q, how do you adjust the page table (and any other data
 >> structures) to reflect the frame Q no longer has?
 
+We mark it in the supplementary page table of Q whether it is in swap
+or file and we delete that page from the page directory of Q.
+
 >> B4: Explain your heuristic for deciding whether a page fault for an
 >> invalid virtual address should cause the stack to be extended into
 >> the page that faulted.
+
+We first checked whether the fault happened within stack by comparing
+the esp value and the fault address. Because page faults that happen
+during system call will inform the page fault handler with kernel
+interrupt frame, we recorded the current esp value in STACK of struct
+thread. If it is in stack, i.e. fault address is greater than esp, we
+lazily loaded the stack page.
+  Otherwise, we checked whether the fault address is 4 or 32 bytes
+less compared to esp. This is because 80x86 PUSH instruction first
+checks for permission by accessing (esp - 4) before performing the main
+instruction. For PUSHA it checks by accessing (esp - 32).
 
 ---- SYNCHRONIZATION ----
 
@@ -78,21 +210,57 @@ FirstName LastName <email@domain.example>
 >> textbook for an explanation of the necessary conditions for
 >> deadlock.)
 
+We introduced a meta lock, the_lock_over_all_the_other_locks. Before
+acquiring any locks, we made sure that we have acquired TLOATOL. Also
+we always grabbed the locks in a special order. It is as following.
+  ORDER OF ACQUIRING LOCKS
+  The locks should be acquired according to the following order:
+    the lock over all the other locks(TLOATOL)
+    supplementary page table lock of the current thread
+    frame lock
+    supplementary page table lock of another thread
+    swap lock
+    page directory lock of another thread
+    page directory lock of the current thread
+If acquiring does not follow the order, deadlock may happen.
+
 >> B6: A page fault in process P can cause another process Q's frame
 >> to be evicted.  How do you ensure that Q cannot access or modify
 >> the page during the eviction process?  How do you avoid a race
 >> between P evicting Q's frame and Q faulting the page back in?
+
+Before P tries to evict the frame, it acquires the suppl_page_table_lock
+of the process in charge that frame, which is Q. Because every
+modification of the page table is performed after acquiring the
+suppl_page_table_lock, no other thread will be able to modify the page
+during the eviction process.
 
 >> B7: Suppose a page fault in process P causes a page to be read from
 >> the file system or swap.  How do you ensure that a second process Q
 >> cannot interfere by e.g. attempting to evict the frame while it is
 >> still being read in?
 
+The only way a process can affect the page directory of another process
+is when it wants to evict a frame. Before P starts to page in a page
+from swap space, it acquires its suppl_page_table_lock. Now if Q wants
+to evict the frame being read in by P, it will try to acquire the
+suppl_page_table_lock of the process in charge of that frame, which is P.
+So it will wait until P finishes copying data from swap and the race
+condition will be avoided.
+
 >> B8: Explain how you handle access to paged-out pages that occur
 >> during system calls.  Do you use page faults to bring in pages (as
 >> in user programs), or do you have a mechanism for "locking" frames
 >> into physical memory, or do you use some other design?  How do you
 >> gracefully handle attempted accesses to invalid virtual addresses?
+
+We just use page faults to bring in pages. For handling invalid virtual
+addresses, we continued to use the method introduced in Section 3.1.5
+Accessing User Memory in the pintos document. Before performing any
+instructions, we first check the validity of the addresses using the
+assembly code. After page fault, it will not return to the instruction
+that caused the page fault, but rather the instruction right after it,
+so that we can inspect the result.
 
 ---- RATIONALE ----
 
@@ -103,6 +271,11 @@ FirstName LastName <email@domain.example>
 >> where your design falls along this continuum and why you chose to
 >> design it this way.
 
+We tried our best to allow parallelism, and tried to prevent deadlocks
+using meta locks, which we released as soon as possible, and always
+acquiring locks in a special order. We believe that this will improve
+the performance a lot.
+
 			 MEMORY MAPPED FILES
 			 ===================
 
@@ -112,14 +285,50 @@ FirstName LastName <email@domain.example>
 >> `struct' member, global or static variable, `typedef', or
 >> enumeration.  Identify the purpose of each in 25 words or less.
 
+Map region identifier.
+
+    typedef int mapid_t;
+
+Map region identifier reserved for failure.
+
+    #define MAP_FAILED ((mapid_t) -1)
+
+List elements used to manage open mmap descriptors.
+
+    struct mapid_elem
+    {
+      int mapid;                /* assigned mapid number */
+      void * address;
+      size_t pagenum;
+      struct fd_elem * fd;      /* fd for the mapped file. */
+      /* list element of open_mapids in struct thread */
+      struct list_elem elem;
+    };
+
 ---- ALGORITHMS ----
 
 >> C2: Describe how memory mapped files integrate into your virtual
 >> memory subsystem.  Explain how the page fault and eviction
 >> processes differ between swap pages and other pages.
 
+When a file is memory mapped, we just record the pointer to the file,
+the offset, and size(for cases that file length is not an integer
+multiple of PGSIZE) to the supp_page_table and marks its status as
+IN_FILE. When page fault happens, i.e. a process tries to access the
+memory mapped region, the page fault handler lazily loads it from file
+exactly the same way it loads code segments.
+  When the frame is evicted, it first checks that it is a memory mapped
+page by inspecting page->type. Then it checks whether the page is dirty.
+If it is dirty, it writes the contents back to the file. Otherwise, it
+just evicts the frame without taking any actions.
+
 >> C3: Explain how you determine whether a new file mapping overlaps
 >> any existing segment.
+
+Before assigning a map region identifier, we first check whether we have
+read permission to the given memory space. If one of them succeeds, it
+means that the new file mapping overlaps with an existing segment, so
+mmap returns MAPID_FAILURE.
 
 ---- RATIONALE ----
 
@@ -129,6 +338,16 @@ FirstName LastName <email@domain.example>
 >> that much of their implementation can be shared.  Explain why your
 >> implementation either does or does not share much of the code for
 >> the two situations.
+
+We tried to share as much as we can. This makes our implementation
+simple and easier to debug. Also we can reduce time and space complexity,
+since we do not need additional variables and codes to handle mmap.
+Since code segments will never become dirty, it is possible to apply a
+perfectly same algorithm for both mmap and code, which is first check
+whether it is dirty and write it to file only if it is dirty. But we
+decided to introduce another variable names TYPE, to keep in track
+whether a certain page is code or mmap, since accessing the page
+directory consumes much more CPU cycles compared to reading an int value.
 
 			   SURVEY QUESTIONS
 			   ================
@@ -142,14 +361,26 @@ the quarter.
 >> In your opinion, was this assignment, or any one of the three problems
 >> in it, too easy or too hard?  Did it take too long or too little time?
 
+Debugging deadlocks were the most difficult part of the assignment.
+It took too much time.
+
 >> Did you find that working on a particular part of the assignment gave
 >> you greater insight into some aspect of OS design?
+
+I got to understand the key mechanisms used to avoid deadlocks.
 
 >> Is there some particular fact or hint we should give students in
 >> future quarters to help them solve the problems?  Conversely, did you
 >> find any of our guidance to be misleading?
 
+Nope.
+
 >> Do you have any suggestions for the TAs to more effectively assist
 >> students, either for future quarters or the remaining projects?
 
+Nope.
+
 >> Any other comments?
+
+Nope.
+

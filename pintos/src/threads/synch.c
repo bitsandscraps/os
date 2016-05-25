@@ -227,6 +227,7 @@ lock_acquire (struct lock *lock)
     }
   }
   struct lock * test = lock;
+  /* Test for deadlocks. */
   while (test->holder)
     {
       ASSERT (test->holder != curr);

@@ -721,9 +721,7 @@ init_thread (struct thread *t, const char *name, int priority)
 #endif
   t->magic = THREAD_MAGIC;
 #ifdef VM
-  //printf ("t: %p sptl: %p\n", t, &t->suppl_page_table_lock);
   lock_init (&t->suppl_page_table_lock);
-  //printf ("t: %p pdl: %p\n", t, &t->pagedir_lock);
   lock_init (&t->pagedir_lock);
   t->max_mapid = -1;
   list_init (&t->open_mapids);
