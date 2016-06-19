@@ -11,6 +11,7 @@
 #include "filesys/directory.h"
 #include "filesys/file.h"
 #include "filesys/filesys.h"
+#include "filesys/inode.h"
 #include "threads/flags.h"
 #include "threads/init.h"
 #include "threads/interrupt.h"
@@ -145,12 +146,15 @@ start_process (void *args)
   const char * delim = " ";
   struct start_proc_args * passed_args = (struct start_proc_args *)args; 
   char *file_name = passed_args->file_name;
+  struct thread * curr = thread_current ();
   struct intr_frame if_;
   bool success;
   char * argv[MAX_ARGC];
   char * saveptr;
   char * token;
   int argc = 1;
+  /* Inherit current working directory. */
+  curr->curr_dir_sector = passed_args->parent->curr_dir_sector;
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
@@ -159,10 +163,10 @@ start_process (void *args)
   /* Load process and pass arguments. */
   argv[0] = strtok_r (file_name, delim, &saveptr);
   success = load (argv[0], &if_.eip, &if_.esp);
+  passed_args->child = curr;
+  passed_args->success = success;
   /* Signal parent that it had returned the required information,
    * address to this thread and whether or not it succeeded.*/
-  passed_args->child = thread_current ();
-  passed_args->success = success;
   sema_up (&passed_args->parent->wait_process);
   if (success)
   {
@@ -365,6 +369,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
       printf ("load: %s: open failed\n", file_name);
       goto done; 
     }
+
   /* Read and verify executable header. */
   if (file_read (file, &ehdr, sizeof ehdr) != sizeof ehdr
       || memcmp (ehdr.e_ident, "\177ELF\1\1\1", 7)

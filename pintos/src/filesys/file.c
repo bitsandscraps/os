@@ -1,7 +1,8 @@
 #include "filesys/file.h"
 #include <debug.h>
-#include "filesys/inode.h"
+#include <stdio.h>
 #include "threads/malloc.h"
+#include "threads/synch.h"
 
 /* An open file. */
 struct file 
@@ -140,12 +141,29 @@ file_allow_write (struct file *file)
     }
 }
 
+/* Returns the type of FILE. Possible values are given in
+ * enum inode_type. */
+uint32_t
+file_type (struct file * file)
+{
+  ASSERT (file != NULL);
+  uint32_t type;
+  inode_lock (file->inode);
+  type = inode_get_type (file->inode);
+  inode_unlock (file->inode);
+  return type;
+}
+
 /* Returns the size of FILE in bytes. */
 off_t
 file_length (struct file *file) 
 {
   ASSERT (file != NULL);
-  return inode_length (file->inode);
+  off_t length;
+  inode_lock (file->inode);
+  length = inode_length (file->inode);
+  inode_unlock (file->inode);
+  return length;
 }
 
 /* Sets the current position in FILE to NEW_POS bytes from the

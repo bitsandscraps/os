@@ -182,7 +182,8 @@ page_fault (struct intr_frame *f)
   if (user)
     stack = f->esp;
   else
-    stack = curr->stack;
+    stack = curr->stack_;
+  //printf ("CURR %p PF %p USR %d ESP %p CSTK %p STK %p\n", curr, fault_page, user, f->esp, curr->stack, stack);
   /* If stack is too big send en error. */
   if ((uint8_t *)stack + STACK_MAX < (uint8_t *)PHYS_BASE)
     syscall_exit (KERNEL_TERMINATE);

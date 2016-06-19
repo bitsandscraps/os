@@ -5,6 +5,7 @@
 #include <hash.h>
 #include <list.h>
 #include <stdint.h>
+#include "devices/disk.h"
 #include "threads/synch.h"
 #include "threads/fixed-point.h"
 
@@ -92,6 +93,7 @@ struct thread
     enum thread_status status;          /* Thread state. */
     char name[16];                      /* Name (for debugging purposes). */
     uint8_t *stack;                     /* Saved stack pointer. */
+    uint8_t *stack_;                    /* Saved stack pointer for syscall. */
     int priority;                       /* Current priority. */
     int initial_priority;               /* Initial priority. */
 
@@ -149,6 +151,8 @@ struct thread
     struct hash suppl_page_table;
 #endif
 #endif
+
+    disk_sector_t curr_dir_sector;
 
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */

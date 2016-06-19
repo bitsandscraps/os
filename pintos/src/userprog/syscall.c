@@ -4,6 +4,7 @@
 #include <string.h>
 #include <syscall-nr.h>
 #include "devices/input.h"
+#include "filesys/directory.h"
 #include "filesys/file.h"
 #include "filesys/filesys.h"
 #include "threads/init.h"
@@ -25,8 +26,12 @@ typedef int mapid_t;
 struct fd_elem
 {
   int fd;                   /* assigned fd number */
-  off_t pos;                /* offset for read and write */
-  struct file * file;       /* struct file for the fd */
+  int type;                 /* FILE or DIRECTORY? */
+  union
+    {
+      struct file * file;   /* struct file for the fd */
+      struct dir * dir;     /* struct dir for the directory */
+    } ptr;
   /* Memory mapped to the file. If not mapped, it is set to NULL.
    * It is initialized as NULL and set back to NULL at munmap. */
   struct mapid_elem * mapid;
@@ -43,8 +48,6 @@ struct mapid_elem
   struct list_elem elem;    /* list element of open_mapids in struct thread */
 };
 
-/* Lock to avoid race conditions on file system manipulations. */
-static struct lock filesys_lock;
 /* Lock to avoid race conditions on writing to stdout. */
 static struct lock console_lock;
 
@@ -55,15 +58,20 @@ static struct mapid_elem * find_mapid (mapid_t mapid);
 static void munmap_loop (struct mapid_elem * elem);
 static void syscall_handler (struct intr_frame *);
 
+static uint32_t syscall_chdir (const char * dir);
 static void syscall_close (int fd);
 static uint32_t syscall_create (const char * file, size_t initial_size);
 static uint32_t syscall_exec (const char * cmd_line);
 static uint32_t syscall_filesize (int fd);
 static void syscall_halt (void) NO_RETURN;
-static mapid_t syscall_mmap (int fd, void * addr);
+static uint32_t syscall_inumber (int fd);
+static uint32_t syscall_isdir (int fd);
+static uint32_t syscall_mkdir (const char * dir);
+static uint32_t syscall_mmap (int fd, void * addr);
 static void syscall_munmap (mapid_t mapping);
 static uint32_t syscall_open (const char * file);
 static uint32_t syscall_read (int fd, void * buffer, size_t size);
+static uint32_t syscall_readdir (int fd, char * name);
 static uint32_t syscall_remove (const char * file);
 static void syscall_seek (int fd, size_t position);
 static uint32_t syscall_tell (int fd);
@@ -74,7 +82,6 @@ void
 syscall_init (void) 
 {
   intr_register_int (0x30, 3, INTR_ON, syscall_handler, "syscall");
-  lock_init (&filesys_lock);
   lock_init (&console_lock);
 }
 
@@ -174,7 +181,7 @@ syscall_handler (struct intr_frame *f)
   struct thread * curr = thread_current ();
   /* Save esp to inform the page fault handler about the user esp. */
   /* Must be done before any operations. */
-  curr->stack = f->esp;
+  curr->stack_ = f->esp;
   int syscall_num = get_long(esp++);
   /* Stack pointer is invalid. */
   if (syscall_num == -1)
@@ -220,6 +227,18 @@ syscall_handler (struct intr_frame *f)
       case SYS_MUNMAP:
         syscall_munmap ((mapid_t)arg1);
         break;
+      case SYS_CHDIR:
+        f->eax = syscall_chdir ((const char *)arg1);
+        break;
+      case SYS_MKDIR:
+        f->eax = syscall_mkdir ((const char *)arg1);
+        break;
+      case SYS_ISDIR:
+        f->eax = syscall_isdir (arg1);
+        break;
+      case SYS_INUMBER:
+        f->eax = syscall_inumber (arg1);
+        break;
       default:
         /* Check validity of the second argument. */
         if ((arg2 = get_long(esp++)) == -1) syscall_exit (KERNEL_TERMINATE);
@@ -235,6 +254,9 @@ syscall_handler (struct intr_frame *f)
             break;
           case SYS_MMAP:
             f->eax = syscall_mmap (arg1, (void *)arg2);
+            break;
+          case SYS_READDIR:
+            f->eax = syscall_readdir (arg1, (char *)arg2);
             break;
           default:
             /* Check validity of third argument. */
@@ -295,6 +317,15 @@ find_mapid (mapid_t mapid)
   return NULL;
 }
 
+/* Changes the current working directory. */
+static uint32_t
+syscall_chdir (const char * dir)
+{
+  if (!is_valid ((uint8_t *)dir))
+    syscall_exit (KERNEL_TERMINATE);
+  return filesys_chdir (dir);
+}
+
 /* Closes the fd. */
 static void
 syscall_close (int fd)
@@ -304,9 +335,14 @@ syscall_close (int fd)
   if (fd_elem != NULL)
   {
     list_remove (&fd_elem->elem);
-    if (fd_elem->mapid == NULL)
+    if (fd_elem->type == TYPE_DIR)
       {
-        file_close (fd_elem->file);
+        dir_close (fd_elem->ptr.dir);
+        free (fd_elem);
+      }
+    else if (fd_elem->mapid == NULL)
+      {
+        file_close (fd_elem->ptr.file);
         free (fd_elem);
       }
   }
@@ -333,9 +369,7 @@ syscall_exec (const char * cmd_line)
   int success;
   if (!(is_valid((uint8_t *)cmd_line)))
     syscall_exit (KERNEL_TERMINATE);
-  lock_acquire (&filesys_lock);
   success = process_execute (cmd_line);
-  lock_release (&filesys_lock);
   return success;
 }
 
@@ -357,7 +391,10 @@ syscall_exit (int status)
     {
       struct list_elem * e = list_pop_back (&curr->open_fds);
       fd_elem = list_entry (e, struct fd_elem, elem);
-      file_close (fd_elem->file);
+      if (fd_elem->type == TYPE_DIR)
+        dir_close (fd_elem->ptr.dir);
+      else
+        file_close (fd_elem->ptr.file);
       free (fd_elem);
     } 
   printf("%s: exit(%d)\n", curr->name, status);
@@ -373,9 +410,7 @@ syscall_filesize (int fd)
   int size = -1;
   fd_elem = find_fd (fd);
   if (fd_elem != NULL)
-    size = file_length (fd_elem->file);
-  else
-    size = -1;
+    size = (fd_elem->type == TYPE_FILE) ? file_length (fd_elem->ptr.file) : -1;
   return size;
 }
 
@@ -387,7 +422,45 @@ syscall_halt (void)
   NOT_REACHED ();
 }
 
-static mapid_t syscall_mmap (int fd, void * addr)
+static uint32_t
+syscall_inumber (int fd)
+{
+  if (fd == STDIN_FILENO || fd == STDOUT_FILENO)
+    return -1;
+  struct fd_elem * felem = find_fd (fd);
+  if (felem == NULL)
+    return -1;
+  struct inode * inode;
+  if (felem->type == TYPE_DIR)
+    inode = dir_get_inode (felem->ptr.dir);
+  else
+    inode = file_get_inode (felem->ptr.file);
+  return inode_get_inumber (inode);
+}
+
+/* Returns true if fd represents a directory. */
+static uint32_t
+syscall_isdir (int fd)
+{
+  if (fd == STDIN_FILENO || fd == STDOUT_FILENO)
+    return false;
+  struct fd_elem * felem = find_fd (fd);
+  if (felem == NULL)
+    return false;
+  return (felem->type == TYPE_DIR);
+}
+
+/* Make directory DIR. */
+static uint32_t
+syscall_mkdir (const char * dir)
+{
+  if (!is_valid ((uint8_t *)dir))
+    syscall_exit (KERNEL_TERMINATE);
+  return filesys_mkdir (dir);
+}
+
+/* Map file descriptor FD to address ADDR. */
+static uint32_t syscall_mmap (int fd, void * addr)
 {
   /* Check whether fd is mappable. */
   if (fd == STDIN_FILENO || fd == STDOUT_FILENO)
@@ -398,6 +471,9 @@ static mapid_t syscall_mmap (int fd, void * addr)
   /* Check whether the address is page-aligned. */
   if (pg_ofs (addr) != 0)
     return MAP_FAILED;
+  struct fd_elem * felem = find_fd (fd);
+  if (felem == NULL || felem->type != TYPE_FILE)
+    return MAP_FAILED;
   size_t size = (size_t)syscall_filesize(fd);
   if (size == 0)
     return MAP_FAILED;
@@ -406,9 +482,6 @@ static mapid_t syscall_mmap (int fd, void * addr)
   if (!isnot_valid_range (addr, size))
     return MAP_FAILED;
   struct thread * curr = thread_current ();
-  struct fd_elem * felem = find_fd (fd);
-  if (felem == NULL)
-    return MAP_FAILED;
   struct mapid_elem * melem = malloc (sizeof (struct mapid_elem));
   felem->mapid = melem;
   if (melem == NULL)
@@ -421,7 +494,7 @@ static mapid_t syscall_mmap (int fd, void * addr)
   struct page src;
   src.status = IN_FILE;
   src.type = TO_FILE;
-  src.file = felem->file;
+  src.file = felem->ptr.file;
   src.address = addr;
   src.offset = 0;
   lock_suppl_page_table (curr);
@@ -443,15 +516,13 @@ static void munmap_loop (struct mapid_elem * elem)
   list_remove (&elem->elem);
   size_t i;
   /* Munmap may write some files. */
-  lock_acquire (&filesys_lock);
   for (i = 0; i < elem->pagenum; ++i)
     delete_suppl_page (elem->address + i * PGSIZE);
-  lock_release (&filesys_lock);
   if (elem->fd->mapid != NULL)
     elem->fd->mapid = NULL;
   else
     {
-      file_close (elem->fd->file);
+      file_close (elem->fd->ptr.file);
       free (elem->fd);
     }
   free (elem);
@@ -472,26 +543,39 @@ static uint32_t
 syscall_open (const char * file_name)
 {
   struct thread * curr = thread_current ();
-  struct file * file;
   struct fd_elem * elem;
   int fd = -1;
   if (!is_valid((uint8_t *)file_name))
     syscall_exit (KERNEL_TERMINATE);
-  file = filesys_open (file_name);
-  if (file != NULL)
+  bool is_dir;
+  struct inode * inode = filesys_find (file_name, &is_dir);
+  if (inode == NULL) return -1;
+  elem = malloc (sizeof (struct fd_elem));
+  if (elem == NULL)
+    syscall_exit (KERNEL_TERMINATE);
+  fd = ++curr->max_fd;
+  elem->fd = fd;
+  elem->type = is_dir ? TYPE_DIR : TYPE_FILE;
+  if (is_dir)
   {
-    elem = malloc (sizeof (struct fd_elem));
-    if (elem == NULL)
+    elem->ptr.dir = dir_open (inode);
+    if (elem->ptr.dir == NULL)
     {
-      syscall_exit (KERNEL_TERMINATE);
+      free (elem);
+      return -1;
     }
-    fd = ++curr->max_fd;
-    elem->fd = fd;
-    elem->file = file;
-    elem->pos = 0;
-    elem->mapid = NULL;
-    list_push_back (&curr->open_fds, &elem->elem);
   }
+  else
+  {
+    elem->ptr.file = file_open (inode);
+    if (elem->ptr.file == NULL)
+    {
+      free (elem);
+      return -1;
+    }
+  }
+  elem->mapid = NULL;
+  list_push_back (&curr->open_fds, &elem->elem);
   return fd;
 }
 
@@ -517,13 +601,27 @@ syscall_read (int fd, void * buffer, size_t size)
     fd_elem = find_fd (fd);
     if (fd_elem == NULL)
       nread = -1;
+    else if (fd_elem->type != TYPE_FILE)
+      nread = -1;
     else
-    {
-      nread = file_read_at (fd_elem->file, buffer, size, fd_elem->pos);
-      fd_elem->pos += nread;
-    }
+      nread = file_read (fd_elem->ptr.file, buffer, size);
   }
   return nread;
+}
+
+static uint32_t
+syscall_readdir (int fd, char * name)
+{
+  if (!is_valid_range_write ((uint8_t *) name, NAME_MAX + 1))
+    syscall_exit (KERNEL_TERMINATE);
+  if (fd == STDIN_FILENO || fd == STDOUT_FILENO)
+    return false;
+  struct fd_elem * felem = find_fd (fd);
+  if (felem == NULL)
+    return false;
+  if (felem->type != TYPE_DIR)
+    return false;
+  return dir_readdir(felem->ptr.dir, name);
 }
 
 /* Deletes the file named file. Returns true if succeeded. */
@@ -533,9 +631,7 @@ syscall_remove (const char * file)
   bool success;
   if (!is_valid((uint8_t *)file))
     syscall_exit (KERNEL_TERMINATE);
-  lock_acquire (&filesys_lock);
   success = filesys_remove (file);
-  lock_release (&filesys_lock);
   return success;
 }
 
@@ -547,7 +643,8 @@ syscall_seek (int fd, size_t position)
   struct fd_elem * fd_elem;
   fd_elem = find_fd (fd);
   if (fd_elem != NULL)
-    fd_elem->pos = position;
+    if (fd_elem->type != TYPE_DIR)
+      file_seek (fd_elem->ptr.file, position);
 }
 
 /* Returns the position of the next byte to read or written in fd,
@@ -555,12 +652,11 @@ syscall_seek (int fd, size_t position)
 static uint32_t
 syscall_tell (int fd)
 {
-  struct fd_elem * fd_elem;
-  int pos = -1;
-  fd_elem = find_fd (fd);
+  struct fd_elem * fd_elem = find_fd (fd);
   if (fd_elem != NULL)
-    pos = fd_elem->pos;
-  return pos;
+    if (fd_elem->type != TYPE_DIR)
+      return file_tell (fd_elem->ptr.file);
+  return -1;
 }
 
 /* Waits for pid to die and returns its status. Returns -1 if the pid
@@ -612,15 +708,15 @@ syscall_write (int fd, const void * buffer, size_t size)
     fd_elem = find_fd (fd);
     if (fd_elem == NULL)
       nwrite = -1;
+    else if (fd_elem->type != TYPE_FILE)
+      nwrite = -1;
     else
     {
-      lock_acquire (&filesys_lock);
-      nwrite = file_write_at (fd_elem->file, buffer, size, fd_elem->pos);
-      lock_release (&filesys_lock);
-      fd_elem->pos += nwrite;
+      off_t pos = file_tell (fd_elem->ptr.file);
+      nwrite = file_write (fd_elem->ptr.file, buffer, size);
       /* If this file is mapped to a certain memory, edit that memory too. */
       if (fd_elem->mapid != NULL)
-        memcpy (fd_elem->mapid->address, buffer, nwrite);
+        memcpy (fd_elem->mapid->address + pos, buffer, nwrite);
     }
   }
   return nwrite;

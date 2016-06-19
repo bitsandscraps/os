@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "devices/timer.h"
+#include "filesys/filesys.h"
 #include "threads/flags.h"
 #include "threads/interrupt.h"
 #include "threads/intr-stubs.h"
@@ -694,6 +695,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->initial_priority = priority;
   list_init (&t->locks_holding);
   t->lock_trying_acquire = NULL;
+  t->curr_dir_sector = ROOT_DIR_SECTOR;
   if (thread_mlfqs)
   {
     /* Initial value of nice and recent_cpu are both zero in the first
