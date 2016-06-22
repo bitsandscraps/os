@@ -18,7 +18,8 @@ CHO Seongsu  <csp00141@kaist.ac.kr>
 
 We implemented every extra credit problems. But with some low
 probability, fsutil_put fails. Also the vm-merge tests often fails. We
-were not able to debug the problems.
+were not able to debug the problems. We believe that gcc's optimization
+may be a possible cause of the problem.
 
 >> Please cite any offline or online sources you consulted while
 >> preparing your submission, other than the Pintos documentation, course
