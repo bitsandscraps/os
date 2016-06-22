@@ -54,6 +54,7 @@ struct inode
     bool removed;                       /* True if deleted, false otherwise. */
     int deny_write_cnt;                 /* 0: writes ok, >0: deny writes. */
     struct lock mutex;                  /* Mutex for metadata. */
+    struct lock dir_mutex;              /* Mutex for directories. */
   };
 
 /* Set the length of INODE_ to LENGTH. */
@@ -255,8 +256,10 @@ inode_open (disk_sector_t sector)
       inode = list_entry (e, struct inode, elem);
       if (inode->sector == sector) 
         {
+          inode_lock (inode);
           lock_release (&open_inodes_lock);
           inode_reopen (inode);
+          inode_unlock (inode);
           return inode; 
         }
     }
@@ -271,6 +274,7 @@ inode_open (disk_sector_t sector)
 
   /* Initialize. */
   lock_init (&inode->mutex);
+  lock_init (&inode->dir_mutex);
   inode->sector = sector;
   inode->removed = false;
   inode->open_cnt = 1;
@@ -287,12 +291,10 @@ inode_reopen (struct inode *inode)
   struct inode * result = inode;
   if (inode != NULL)
   {
-    inode_lock (inode);
     if (inode->removed)
       result = NULL;
     else
       result->open_cnt++;
-    inode_unlock (inode);
   }
   return result;
 }
@@ -532,6 +534,18 @@ void
 inode_unlock (struct inode * inode)
 {
   lock_release (&inode->mutex);
+}
+
+void
+inode_dir_lock (struct inode * inode)
+{
+  lock_acquire (&inode->dir_mutex);
+}
+
+void
+inode_dir_unlock (struct inode * inode)
+{
+  lock_release (&inode->dir_mutex);
 }
 
 bool

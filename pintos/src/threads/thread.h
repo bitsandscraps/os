@@ -94,6 +94,8 @@ struct thread
     char name[16];                      /* Name (for debugging purposes). */
     uint8_t *stack;                     /* Saved stack pointer. */
     uint8_t *stack_;                    /* Saved stack pointer for syscall. */
+    /* Set to true while syscall is checking memory validty. */
+    bool mem_check;
     int priority;                       /* Current priority. */
     int initial_priority;               /* Initial priority. */
 
@@ -152,6 +154,7 @@ struct thread
 #endif
 #endif
 
+    /* Sector of the current working directory. */
     disk_sector_t curr_dir_sector;
 
     /* Owned by thread.c. */

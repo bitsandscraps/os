@@ -159,20 +159,20 @@ page_fault (struct intr_frame *f)
   write = (f->error_code & PF_W) != 0;
   user = (f->error_code & PF_U) != 0;
 
+  struct thread * curr = thread_current ();
   /* If the fault is occured by writing read_only memory, or accessing
    * kernel memory, just terminate the process. */
   if (is_kernel_vaddr(fault_addr))
     {
-      if (user)
-        syscall_exit (KERNEL_TERMINATE);
-      else
+      if (curr->mem_check)
         {
           f->eip = (void *)f->eax;
           f->eax = 0xffffffff;
           return;
         }
+      else
+        syscall_exit (KERNEL_TERMINATE);
     }
-  struct thread * curr = thread_current ();
   void * stack;
   /* Start address of the page where page fault occurred. */
   void * fault_page = pg_round_down (fault_addr);
@@ -183,7 +183,6 @@ page_fault (struct intr_frame *f)
     stack = f->esp;
   else
     stack = curr->stack_;
-  //printf ("CURR %p PF %p USR %d ESP %p CSTK %p STK %p\n", curr, fault_page, user, f->esp, curr->stack, stack);
   /* If stack is too big send en error. */
   if ((uint8_t *)stack + STACK_MAX < (uint8_t *)PHYS_BASE)
     syscall_exit (KERNEL_TERMINATE);
@@ -206,14 +205,14 @@ page_fault (struct intr_frame *f)
       else
         release_tloatol ();
       unlock_suppl_page_table (curr);
-      if (user)
-        syscall_exit (KERNEL_TERMINATE);
-      else
+      if (curr->mem_check)
         {
           f->eip = (void *)f->eax;
           f->eax = 0xffffffff;
           return;
         }
+      else
+        syscall_exit (KERNEL_TERMINATE);
     }
   /* Check whether the fault happend within stack.
    * If not, check whether stack needs to grow. */
@@ -240,12 +239,12 @@ page_fault (struct intr_frame *f)
   /* Now only two cases left. It is a malicious attempt of a user, or
    * the kernel's attempt to check the pointers passed to the system
    * call handler. */
-  if (user)
-    syscall_exit (KERNEL_TERMINATE);
-  else
+  if (curr->mem_check)
     {
       f->eip = (void *)f->eax;
       f->eax = 0xffffffff;
     }
+  else
+    syscall_exit (KERNEL_TERMINATE);
 }
 

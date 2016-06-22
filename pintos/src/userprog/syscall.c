@@ -91,9 +91,12 @@ static int
 get_long (const int * uaddr)
 {
   int result;
+  struct thread * curr = thread_current ();
   if ((void *)uaddr >= PHYS_BASE) return -1;
+  curr->mem_check = true;
   asm ("movl $1f, %0; movl %1, %0; 1:"
        : "=&a" (result) : "m" (*uaddr));
+  curr->mem_check = false;
   return result;
 }
 
@@ -103,9 +106,12 @@ static bool
 is_valid (const uint8_t * uaddr)
 {
   int result;
+  struct thread * curr = thread_current ();
   if ((void *)uaddr >= PHYS_BASE) return false;
+  curr->mem_check = true;
   asm ("movl $1f, %0; movzbl %1, %0; 1:"
        : "=&a" (result) : "m" (*uaddr));
+  curr->mem_check = false;
   return (result != -1);
 }
 
@@ -116,9 +122,12 @@ is_valid_write (uint8_t * udst)
 {
   int error_code;
   uint8_t byte = 0;
+  struct thread * curr = thread_current ();
   if ((void *)udst >= PHYS_BASE) return false;
+  curr->mem_check = true;
   asm ("movl $1f, %0; movb %b2, %1; 1:"
        : "=&a" (error_code), "=m" (*udst) : "r" (byte));
+  curr->mem_check = false;
   return error_code != -1;
 }
 

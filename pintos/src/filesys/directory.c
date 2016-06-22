@@ -79,7 +79,11 @@ dir_open_root (void)
 struct dir *
 dir_reopen (struct dir *dir) 
 {
-  return dir_open (inode_reopen (dir->inode));
+  struct dir * result;
+  inode_lock (dir->inode);
+  result = dir_open (inode_reopen (dir->inode));
+  inode_unlock (dir->inode);
+  return result;
 }
 
 /* Destroys DIR and frees associated resources. */
@@ -142,10 +146,12 @@ dir_lookup (const struct dir *dir, const char *name,
   ASSERT (dir != NULL);
   ASSERT (name != NULL);
 
+  inode_dir_lock (dir->inode);
   if (lookup (dir, name, &e, NULL, is_dir))
     *inode = inode_open (e.inode_sector);
   else
     *inode = NULL;
+  inode_dir_unlock (dir->inode);
 
   return *inode != NULL;
 }
@@ -172,6 +178,7 @@ dir_add (struct dir *dir, const char *name, bool is_dir,
   if (*name == '\0' || strlen (name) > NAME_MAX)
     return false;
 
+  inode_dir_lock (dir->inode);
   /* Check that NAME is not in use. */
   if (lookup (dir, name, NULL, NULL, &temp))
     goto done;
@@ -196,6 +203,7 @@ dir_add (struct dir *dir, const char *name, bool is_dir,
   success = inode_write_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
 
  done:
+  inode_dir_unlock (dir->inode);
   return success;
 }
 
@@ -214,10 +222,12 @@ dir_remove (struct dir *dir, const char *name)
   ASSERT (dir != NULL);
   ASSERT (name != NULL);
   
-  /* Never delete . */
+  /* Never delete . .. will not be deleted since it has this directory
+   * as its child. */
   if (strcmp (name, ".") == 0)
-    goto done;
+    return false;
 
+  inode_dir_lock (dir->inode);
   /* Find directory entry. */
   if (!lookup (dir, name, &e, &ofs, &is_dir))
     goto done;
@@ -259,6 +269,7 @@ dir_remove (struct dir *dir, const char *name)
   success = true;
 
  done:
+  inode_dir_unlock (dir->inode);
   inode_close (inode);
   return success;
 }
@@ -271,6 +282,7 @@ dir_readdir (struct dir *dir, char name[NAME_MAX + 1])
 {
   struct dir_entry e;
 
+  inode_dir_lock (dir->inode);
   while (inode_read_at (dir->inode, &e, sizeof e, dir->pos) == sizeof e) 
     {
       dir->pos += sizeof e;
@@ -280,9 +292,11 @@ dir_readdir (struct dir *dir, char name[NAME_MAX + 1])
       if (e.in_use)
         {
           strlcpy (name, e.name, NAME_MAX + 1);
+          inode_dir_unlock (dir->inode);
           return true;
         } 
     }
+  inode_dir_unlock (dir->inode);
   return false;
 }
 
@@ -292,6 +306,7 @@ dir_is_empty (struct dir *dir)
 {
   struct dir_entry e;
 
+  inode_dir_lock (dir->inode);
   while (inode_read_at (dir->inode, &e, sizeof e, dir->pos) == sizeof e) 
     {
       dir->pos += sizeof e;
@@ -299,7 +314,12 @@ dir_is_empty (struct dir *dir)
       if (strcmp (e.name, ".") == 0 || strcmp (e.name, "..") == 0)
         continue;
       if (e.in_use)
+      {
+        inode_dir_unlock (dir->inode);
         return false;
+      }
     }
+  inode_dir_unlock (dir->inode);
   return true;
 }
+

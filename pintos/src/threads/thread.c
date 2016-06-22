@@ -483,16 +483,17 @@ thread_exit (void)
 {
   ASSERT (!intr_context ());
 
+  struct thread * curr = thread_current ();
+
 #ifdef USERPROG
   process_exit ();
 #endif
-  struct thread * curr = thread_current ();
   if (!list_empty (&all_list))
     list_remove (&curr->elem_all);
   /* Just set our status to dying and schedule another process.
      We will be destroyed during the call to schedule_tail(). */
-  thread_current ()->status = THREAD_DYING;
   intr_disable ();
+  curr->status = THREAD_DYING;
   schedule ();
   NOT_REACHED ();
 }
@@ -695,6 +696,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->initial_priority = priority;
   list_init (&t->locks_holding);
   t->lock_trying_acquire = NULL;
+  t->mem_check = false;
   t->curr_dir_sector = ROOT_DIR_SECTOR;
   if (thread_mlfqs)
   {

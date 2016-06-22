@@ -16,6 +16,8 @@ disk_sector_t inode_get_inumber (const struct inode *);
 void inode_close (struct inode *);
 void inode_lock (struct inode *);
 void inode_unlock (struct inode *);
+void inode_dir_lock (struct inode *);
+void inode_dir_unlock (struct inode *);
 void inode_remove (struct inode *);
 off_t inode_read_at (struct inode *, void *, off_t size, off_t offset);
 off_t inode_write_at (struct inode *, const void *, off_t size, off_t offset);
